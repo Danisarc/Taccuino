@@ -179,6 +179,23 @@ ul { margin:6px 0; padding-left:20px; } li { margin:4px 0; }
 .vuoto { text-align:center; padding:34px 16px; color:var(--muto); }
 .vuoto b { display:block; color:var(--testo); font-size:17px; margin-bottom:4px; }
 
+/* home: blocchi del piano e numeri */
+.blocco { display:flex; align-items:center; gap:14px; width:100%; text-align:left; padding:14px; margin:10px 0; border-radius:22px; background:var(--card); min-height:76px; }
+.blocco i { flex:none; width:46px; height:46px; border-radius:15px; background:var(--verde3); color:var(--verde); display:flex; align-items:center; justify-content:center; }
+.blocco svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.blocco span { flex:1; min-width:0; } .blocco b { display:block; font-size:17px; } .blocco small { color:var(--muto); font-size:13px; }
+.blocco em { flex:none; font-style:normal; font-size:28px; color:var(--muto); line-height:1; padding-bottom:4px; }
+.tile { text-align:left; padding:14px; border-radius:20px; background:var(--card); display:flex; flex-direction:column; gap:2px; min-height:96px; }
+.tile small { color:var(--muto); font-size:12px; } .tile b { font-size:20px; line-height:1.2; } .tile span { color:var(--muto); font-size:12px; }
+.testata { margin-bottom:14px; } .testata h1 { margin:0; }
+/* piano alimentare */
+.pasto h3 { font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:var(--muto); margin:14px 0 2px; }
+.pasto ul { list-style:none; margin:8px 0 0; padding:0; }
+.pasto li { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin:0; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); font-size:14px; }
+.pasto li:last-child { border-bottom:0; padding-bottom:0; }
+.pasto li b { flex:none; font-variant-numeric:tabular-nums; white-space:nowrap; }
+details.primo { margin-top:0; border-top:0; } details.primo summary { padding-top:0; }
+
 /* obiettivo della serie e riscaldamento, nel pannello */
 .obi { display:flex; align-items:baseline; gap:8px; margin:0 4px 8px; font-size:13px; white-space:nowrap; overflow:hidden; }
 .obi span { flex:none; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--verde); }
@@ -369,7 +386,7 @@ function daSalire(e, u) {
 
 /* ============ NAVIGAZIONE ============ */
 let tab = "allena";
-function vai(t) { chiudi(); tab = t; disegna(); window.scrollTo(0, 0); }
+function vai(t) { chiudi(); tab = t; sub = null; schedaSel = null; giornoSel = null; disegna(); window.scrollTo(0, 0); }
 
 /* ============ GRAFICI ============
    Una sola serie verde per grafico; nel peso le pesate sono punti grigi e la media a 7 giorni è la linea.
@@ -430,47 +447,146 @@ function apri(html, pagina) { const f = $("foglio"); f.innerHTML = html; f.class
 function chiudi() { $("foglio").style.display = "none"; $("velo").style.display = "none"; }
 
 /* ============ HOME ============ */
-function vAllena() {
-  if (S.corso) return vSeduta();
+/* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
+   sub: schermata aperta dalla home · schedaSel: seduta scelta a mano nella scheda */
+let sub = null, schedaSel = null;
+function apriSub(s) { sub = s; schedaSel = null; if (!s) giornoSel = null; disegna(); window.scrollTo(0, 0); }
+function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : vHome(); }
+function quadro() {
   const d = oggi(), f = fase(d), dow = (new Date(d + "T12:00").getDay() + 6) % 7;
   const lun = meno(d, dow), domenica = meno(lun, -6);
   const sett = S.sedute.filter((s) => s.data >= lun && s.data <= domenica && "ABC".includes(s.tipo)).length;
   const bFatta = S.sedute.find((s) => s.tipo === "B" && s.data >= lun && s.data <= domenica);
   // la B si fa mercoledì oppure giovedì: se è già stata fatta nell'altro giorno, oggi è riposo
   const tipoDel = (g, i) => { const k = PER_GIORNO[(i + 1) % 7]; return k === "B" && bFatta && bFatta.data !== g ? null : k; };
+  return { d, f, dow, lun, domenica, sett, tipoDel };
+}
+function striscia(q, v) {
+  const sigla = { A: "A", B: "B", C: "C", M: "mini", F: "corsa" }; let h = `<div class="sett">`;
+  for (let i = 0; i < 7; i++) {
+    const g = meno(q.lun, -i), k = q.tipoDel(g, i), fatta = S.sedute.some((s) => s.data === g), t = fatta ? "✓" : k ? sigla[k] : "–";
+    h += `<div class="${g === q.d ? "oggi" : ""} ${g === v ? "sel" : ""} ${fatta ? "ok" : g < q.d ? "pass" : ""}" onclick="vediGiorno('${g}')"><small>${"LMMGVSD"[i]}</small><b class="${t.length > 1 ? "p" : ""}">${t}</b></div>`;
+  }
+  return h + `</div>`;
+}
+const freccia = (dove) => `<button class="ico dietro" aria-label="Indietro" onclick="apriSub(${dove})">‹</button>`;
+const ICO_SCHEDA = '<svg viewBox="0 0 24 24"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>';
+const ICO_CIBO = '<svg viewBox="0 0 24 24"><path d="M7 3v8M4 3v5a3 3 0 006 0V3M7 11v10M17 3c-2 2-3 5-3 8h3zM17 11v10"/></svg>';
+function vHome() {
+  const q = quadro(), { d, f, dow, sett, tipoDel } = q, k = tipoDel(d, dow);
+  const giornoLungo = new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+  let h = `<div class="sopra">${esc(giornoLungo)}</div><h1>Oggi</h1>` + striscia(q, d);
+  if (k) {
+    const se = SEDUTE[k], nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), fatta = S.sedute.some((s) => s.data === d && s.tipo === k);
+    h += `<div class="card eroe"><div class="riga tra"><span class="eti">La seduta di oggi${fatta ? " · fatta ✓" : ""}</span><span class="pillola">${esc(f.nome)}</span></div>
+      <div class="grande">${esc(se.nome)}</div><div class="muto">${se.es.length} esercizi · ${nSerie} serie · RIR ${esc(f.rir({ t: "m" }))}</div>
+      <button class="${fatta ? "" : "pri"} largo grosso" onclick="inizia('${k}')">${fatta ? "Rifai la seduta" : "Inizia la seduta"}</button></div>`;
+  } else h += `<div class="card eroe"><span class="eti">Oggi</span><div class="grande">Riposo</div><div class="muto">La seduta B di questa settimana è già fatta. Solo 8000-10.000 passi.</div></div>`;
+  const on = giornoOn(d), N = CIBO[on ? "on" : "off"];
+  h += `<h2>Il tuo piano</h2>
+    <button class="blocco" onclick="apriSub('scheda')"><i>${ICO_SCHEDA}</i><span><b>Scheda di allenamento</b><small>Versione 2.0 · ${esc(f.nome.split(" · ")[0])} · ${sett} di 3 sedute questa settimana</small></span><em>›</em></button>
+    <button class="blocco" onclick="apriSub('cibo')"><i>${ICO_CIBO}</i><span><b>Piano alimentare</b><small>Oggi giorno ${on ? "ON" : "OFF"} · ${N.kcal} kcal · ${N.p} g di proteine</small></span><em>›</em></button>`;
+  const m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7)), u = S.sedute[S.sedute.length - 1];
+  h += `<h2>I tuoi numeri</h2><div class="g2">
+    <button class="tile" onclick="vai('diario')"><small>Peso · media 7 giorni</small><b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "–"}</b><span>${m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : m1 ? m1.n + (m1.n === 1 ? " pesata" : " pesate") : "segna la prima pesata"}</span></button>
+    <button class="tile" onclick="vai('storico')"><small>Ultima seduta</small><b>${u ? esc(u.corto || u.nome) : "–"}</b><span>${u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie" : "nessuna ancora"}</span></button></div>`;
+  return h;
+}
+function vScheda() {
+  const q = quadro(), { d, f, lun, domenica, sett, tipoDel } = q;
   // v è il giorno che si sta guardando: oggi, oppure quello toccato nella striscia della settimana
   const v = giornoSel && giornoSel >= lun && giornoSel <= domenica ? giornoSel : d, eOggi = v === d;
   const iv = Math.round((new Date(v + "T12:00") - new Date(lun + "T12:00")) / 864e5);
-  const sugg = tipoDel(v, iv), sigla = { A: "A", B: "B", C: "C", M: "mini", F: "corsa" };
+  const scelta = !!schedaSel, sugg = schedaSel || tipoDel(v, iv);
   const nomeV = new Date(v + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric" }).replace(/^./, (c) => c.toUpperCase());
-  const torna = eOggi ? "" : `<button class="largo" onclick="vediGiorno('${d}')">‹ Torna a oggi</button>`;
-  const giornoLungo = new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
-  let h = `<div class="sopra">${esc(giornoLungo)}</div><h1>Oggi</h1><div class="sett">`;
-  for (let i = 0; i < 7; i++) {
-    const g = meno(lun, -i), k = tipoDel(g, i), fatta = S.sedute.some((s) => s.data === g), t = fatta ? "✓" : k ? sigla[k] : "–";
-    h += `<div class="${g === d ? "oggi" : ""} ${g === v ? "sel" : ""} ${fatta ? "ok" : g < d ? "pass" : ""}" onclick="vediGiorno('${g}')"><small>${"LMMGVSD"[i]}</small><b class="${t.length > 1 ? "p" : ""}">${t}</b></div>`;
-  }
-  h += `</div><p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 3</b></p>`;
+  const torna = scelta ? `<button class="largo" onclick="schedaSel=null;disegna()">‹ Torna alla seduta del giorno</button>` : eOggi ? "" : `<button class="largo" onclick="vediGiorno('${d}')">‹ Torna a oggi</button>`;
+  let h = `<div class="riga testata">${freccia("null")}<div><div class="sopra">Versione 2.0 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q, scelta ? null : v) +
+    `<p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 3</b></p>`;
   if (sugg) {
-    const se = SEDUTE[sugg], nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), fattaOggi = S.sedute.some((s) => s.data === v && s.tipo === sugg);
-    h += `<div class="card eroe"><div class="riga tra"><span class="eti">${(eOggi ? "La seduta di oggi" : esc(nomeV)) + (fattaOggi ? " · fatta ✓" : "")}</span><span class="pillola">${esc(f.nome)}</span></div>
+    const se = SEDUTE[sugg], nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), fattaOggi = !scelta && S.sedute.some((s) => s.data === v && s.tipo === sugg);
+    h += `<div class="card eroe"><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : (eOggi ? "La seduta di oggi" : esc(nomeV)) + (fattaOggi ? " · fatta ✓" : "")}</span><span class="pillola">${esc(f.nome)}</span></div>
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div></div>
       <div class="muto">${esc(f.testo)}</div>
-      <details><summary>${eOggi ? "Cosa fai oggi" : "Cosa si fa"}</summary><ol class="piano">`;
+      <details ${scelta ? "open" : ""}><summary>${eOggi && !scelta ? "Cosa fai oggi" : "Cosa si fa"}</summary><ol class="piano">`;
     for (const e of se.es) h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
-    h += `</ol></details><button class="${fattaOggi || !eOggi ? "" : "pri"} largo grosso" onclick="inizia('${sugg}')">${fattaOggi ? "Rifai la seduta" : eOggi ? "Inizia la seduta" : "Falla oggi"}</button>${torna}</div>`;
+    h += `</ol></details><button class="${scelta || (eOggi && !fattaOggi) ? "pri" : ""} largo grosso" onclick="inizia('${sugg}')">${fattaOggi ? "Rifai la seduta" : eOggi || scelta ? "Inizia la seduta" : "Falla oggi"}</button>${torna}</div>`;
   } else {
     h += `<div class="card eroe"><span class="eti">${eOggi ? "Oggi" : esc(nomeV)}</span><div class="grande">Riposo</div>
       <div class="muto">La seduta B di questa settimana è già fatta. Solo 8000-10.000 passi.</div>${torna}</div>`;
   }
-  h += `<h2>Un'altra seduta</h2><div class="altre">`;
-  for (const k in SEDUTE) if (k !== sugg) h += `<button onclick="inizia('${k}')"><i>${k === "L" ? "+" : k}</i><span><b>${esc(SEDUTE[k].corto)}</b><small>${SEDUTE[k].es.length ? SEDUTE[k].es.length + " esercizi" : "scegli tu"}</small></span></button>`;
-  return h + `</div>`;
+  h += `<h2>Tutte le sedute della scheda</h2><div class="altre">`;
+  for (const k in SEDUTE) if (k !== sugg) h += `<button onclick="${k === "L" ? "inizia('L')" : "vediSeduta('" + k + "')"}"><i>${k === "L" ? "+" : k}</i><span><b>${esc(SEDUTE[k].corto)}</b><small>${SEDUTE[k].es.length ? SEDUTE[k].es.length + " esercizi" : "scegli tu"}</small></span></button>`;
+  h += `</div><p class="muto conta">Tocca una seduta per vedere gli esercizi; da lì la puoi iniziare.</p>
+    <h2>Come funziona la scheda</h2>
+    <div class="card"><details class="primo"><summary>Il percorso</summary><table>
+      <tr><td><b>Rientro</b><br><span class="muto">12/11 → 22/11</span></td><td>2 serie dove ne sono scritte 3, tutto a RIR 3</td></tr>
+      <tr><td><b>Blocco 1</b><br><span class="muto">23/11 → 20/12</span></td><td>tutte le serie, RIR 2 sui multiarticolari, RIR 1-2 sugli isolamenti</td></tr>
+      <tr><td><b>Deload</b><br><span class="muto">21/12 → 03/01</span></td><td>le sedute che riesci, metà serie, RIR 4</td></tr>
+      <tr><td><b>Blocco 2</b><br><span class="muto">dal 04/01</span></td><td>lo scrive il coach a fine dicembre sui tuoi numeri</td></tr></table></details>
+    <details><summary>Le regole</summary><ul>
+      <li><b>RIR</b>: ripetizioni che ti restano nel serbatoio a fine serie.</li>
+      <li><b>Doppia progressione</b>: quando chiudi il massimo delle ripetizioni in tutte le serie, la volta dopo sali di carico e riparti dal minimo.</li>
+      <li><b>Recuperi</b>: 2' sui multiarticolari, 60-90" sugli isolamenti.</li>
+      <li><b>Superserie</b>: due esercizi alternati, poi 60" di pausa.</li>
+      <li><b>Discesa controllata</b> in 2-3", movimento completo, nessun rimbalzo.</li>
+      <li><b>Riscaldamento</b>: 5' di movimento, poi 2 serie di avvicinamento solo sul primo esercizio.</li>
+      <li><b>Seduta minima</b> per i giorni no: i primi 3 esercizi. Conta come fatta.</li>
+      <li><b>Seduta saltata</b>: non si recupera e non si raddoppia, riparti dalla successiva.</li></ul></details>
+    <details><summary>La settimana</summary><ul>
+      <li><b>Lunedì</b> A a casa · <b>mercoledì o giovedì</b> B in palestra · <b>sabato</b> C a casa.</li>
+      <li><b>Martedì e venerdì</b>: mini routine a corpo libero, 8 minuti.</li>
+      <li><b>Domenica</b>: fiato, corsa facile.</li>
+      <li><b>Ogni giorno</b> 8000-10.000 passi.</li></ul></details></div>`;
+  return h;
 }
 
 let giornoSel = null;
-function vediGiorno(g) { giornoSel = g === oggi() ? null : g; tieni(disegna); }
+// tocco su un giorno della striscia: dalla home apre la scheda su quel giorno
+function vediGiorno(g) {
+  giornoSel = g === oggi() ? null : g; schedaSel = null;
+  if (sub !== "scheda") { sub = "scheda"; disegna(); window.scrollTo(0, 0); } else tieni(disegna);
+}
+function vediSeduta(k) { schedaSel = k; disegna(); window.scrollTo(0, 0); }
+
+/* ============ PIANO ALIMENTARE v2.2 (2026-11-05) ============
+   Copia di piano/alimentazione.md: se cambia il file, va aggiornata anche questa. Solo consultazione. */
+const CIBO = { on: { kcal: 2330, p: 185, c: 270, g: 50 }, off: { kcal: 2050, p: 180, c: 210, g: 50 } };
+const PROTEINE = ["Petto di pollo o tacchino|200 g", "Manzo magro (fesa, girello, macinato 5%)|200 g", "Pesce bianco (merluzzo, nasello, platessa, branzino)|250 g", "Tonno al naturale sgocciolato|180 g", "Salmone, e niente olio in quel pasto|150 g"];
+const CARBO = [["Pasta, anche integrale", 120, 70], ["Riso basmati o parboiled", 110, 65], ["Cous cous", 120, 70], ["Gnocchi di patate", 270, 160], ["Patate", 450, 270], ["Pane", 150, 90]];
+let ciboOn = null;                                  // null: lo decide il giorno
+function giornoOn(d) {
+  const q = quadro(), k = q.tipoDel(d, q.dow);
+  return (k && "ABC".includes(k)) || S.sedute.some((s) => s.data === d && "ABC".includes(s.tipo));
+}
+function vCibo() {
+  const d = oggi(), auto = giornoOn(d), on = ciboOn == null ? auto : ciboOn, N = CIBO[on ? "on" : "off"];
+  const riga = (x) => { const [a, b] = x.split("|"); return `<li><span>${a}</span><b>${b || ""}</b></li>`; };
+  const pasto = (ora, nome, kcal, corpo) => `<div class="card pasto"><div class="riga tra"><div><div class="sopra">${ora}</div><div class="nome">${nome}</div></div><span class="pillola">${kcal}</span></div>${corpo}</div>`;
+  const lista = (t, v) => `${t ? `<h3>${t}</h3>` : ""}<ul>${v.map(riga).join("")}</ul>`;
+  let h = `<div class="riga testata">${freccia("null")}<div><div class="sopra">Versione 2.2 · definizione lenta</div><h1>Alimentazione</h1></div></div>
+    <div class="g2"><button class="${on ? "pri" : ""}" onclick="ciboOn=true;tieni(disegna)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="ciboOn=false;tieni(disegna)">Giorno OFF · riposo</button></div>
+    <p class="muto conta">Oggi è un giorno <b>${auto ? "ON" : "OFF"}</b>${auto ? ": hai i pesi" : ": riposo, mini routine o corsa"}. Tra ON e OFF cambiano solo la banana e il carboidrato del pranzo.</p>
+    <div class="tess"><div><b>${N.kcal}</b>kcal</div><div><b>${N.p} g</b>proteine</div><div><b>${N.c} g</b>carboidrati</div><div><b>${N.g} g</b>grassi</div></div>
+    <p class="muto conta">Pesi a crudo, frutta senza buccia. Olio sempre pesato.</p>`;
+  h += pasto("8:00", "Colazione", "~440 kcal · P 38", lista("", ["Latte parzialmente scremato o delattosato|250 ml", "Orzo solubile|5 g", "Whey isolate, sciolte nel latte|25 g"]) +
+    lista("Più una delle due", ["Pancake Milk Pro (scelta abituale), senza aggiunte|2 = 80 g", "Pan bauletto 2 fette + crema Novi pesata|50 g + 15 g"]));
+  h += pasto("11:00-11:30", "Spuntino", on ? "~205 kcal · P 11" : "~100 kcal · P 10", lista("", on ? ["Yogurt Trueblend|1 vasetto", "Banana, 60-90' prima dei pesi|120 g"] : ["Yogurt Trueblend|1 vasetto"]));
+  h += pasto("~14:40", "Pranzo", on ? "~820 kcal · P 65" : "~645 kcal · P 59", lista("Carboidrato, uno a scelta", CARBO.map((x) => `${x[0]}|${on ? x[1] : x[2]} g`)) + lista("Proteina, una a scelta", PROTEINE) +
+    lista("Sempre", ["Verdura, meglio cotta|250 g", "Passata di pomodoro|100 g", "Olio extravergine|10 g", "Creatina|5 g"]));
+  h += pasto("~17:30", "Merenda", "~285 kcal · P 19", lista("", ["Skyr bianco|150 g", "Mela, o pera, o 2 kiwi|200 g", "Mandorle o noci|15 g"]) + lista("Oppure", ["Panino: pane + bresaola, più un frutto piccolo|50 g + 60 g"]));
+  h += pasto("~20:30", "Cena", "~570 kcal · P 54", lista("Carboidrato, uno a scelta", ["Patate|250 g", "Pane di segale o bianco|70 g", "Riso o pasta|60 g"]) +
+    lista("Proteina, una a scelta", PROTEINE.concat(["Solo a cena: 2 uova intere + albume|2 + 300 g"])) + lista("Sempre", ["Verdura|250 g", "Olio extravergine|10 g"]));
+  h += `<h2>Da ricordare</h2><div class="card"><ul>
+      <li><b>Acqua</b> 2,2-2,5 litri, per lo più entro le 20:30.</li>
+      <li><b>Pasto libero</b>: uno a settimana, in un giorno OFF, al posto della cena. Una pizza e una bibita light; nessuna compensazione il giorno dopo.</li>
+      <li><b>Sedute a casa in un altro orario</b>: sposta la banana 60-90' prima dei pesi, e almeno 2 ore dopo un pasto principale.</li>
+      <li><b>Zuccheri liquidi</b> (succhi, bibite, ginseng zuccherato): zero.</li>
+      <li><b>Ultima caffeina</b> alle 14:00.</li></ul></div>
+    <h2>Integratori</h2><div class="card pasto">${lista("", ["Creatina monoidrato, ogni giorno a pranzo|5 g", "Whey isolate, a colazione|25 g", "Omega-3, a pranzo|3 capsule", "Magnesio, la sera|come ora"])}</div>
+    <p class="muto conta">Tolti: vitamina C, zinco, melatonina.</p>`;
+  return h;
+}
 // freccia indietro nella seduta: se non hai ancora segnato nulla torna subito alla home, altrimenti chiede conferma
 function indietro() {
   const c = S.corso; if (!c) return;
@@ -940,7 +1056,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 del 05/11/2026 · app v7</p>`;
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.2 del 05/11/2026 · app v8</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
 async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Taccuino palestra", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
@@ -964,7 +1080,7 @@ function ripristina(inp) {
    Tre strati: sfocatura CSS della barra, pillola CSS che schiarisce, tela WebGL con riflessi e bordi.
    La pillola si muove con una molla; tenendo premuto si gonfia e si può trascinare su un'altra voce. */
 const TABS = [
-  { id: "allena", nome: "Seduta", ico: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>' },
+  { id: "allena", nome: "Home", ico: '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>' },
   { id: "diario", nome: "Peso", ico: '<path d="M3 17l5-5 4 3 8-8M15 7h5v5"/>' },
   { id: "storico", nome: "Storico", ico: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
   { id: "tecnica", nome: "Trazioni", ico: '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>' },
@@ -1175,7 +1291,7 @@ const navVetro = (() => {
     if (tr.mosso) { const c = nav.getBoundingClientRect(); let best = 1e9; btn.forEach((b, i) => { const r = b.getBoundingClientRect(), d = Math.abs(tr.x - (r.left - c.left + r.width / 2)); if (d < best) { best = d; fin = TABS[i].id; } }); }
     rettNav = null; sveglia();
     if (e.type === "pointercancel") { punta(attivo); return; }
-    if (fin) { if (fin === tab) punta(fin); else vai(fin); }
+    if (fin) { if (fin !== tab) vai(fin); else { punta(fin); if (fin === "allena" && sub && !S.corso) apriSub(null); } }   // toccare Home dalla scheda riporta alla home
   }
   nav.addEventListener("pointerup", su); nav.addEventListener("pointercancel", su);
   btn.forEach((b, i) => {
@@ -1328,7 +1444,7 @@ function passoIndietro() {
   if ($("foglio").style.display === "block") { chiudi(); return true; }
   if (tab === "allena" && S.corso) { indietro(); return true; }
   if (tab !== "allena") { vai("allena"); return true; }
-  if (giornoSel) { vediGiorno(oggi()); return true; }
+  if (sub) { apriSub(null); return true; }
   return false;
 }
 try {
