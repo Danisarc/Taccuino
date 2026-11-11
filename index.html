@@ -204,7 +204,17 @@ ol.piano small.muto { font-size:12px; }
 .tile { text-align:left; padding:14px; border-radius:20px; background:var(--card); display:flex; flex-direction:column; gap:2px; min-height:96px; }
 .tile small { color:var(--muto); font-size:12px; } .tile b { font-size:20px; line-height:1.2; } .tile span { color:var(--muto); font-size:12px; }
 .testata { margin-bottom:14px; } .testata h1 { margin:0; }
-/* piano alimentare */
+/* piano alimentare: conto della giornata, caselle da spuntare, acqua */
+.kc { font-size:15px; color:var(--muto); } .kc b { font-size:28px; color:var(--testo); font-variant-numeric:tabular-nums; letter-spacing:-.5px; }
+.mt { margin-top:12px; font-size:14px; } .mt b { font-variant-numeric:tabular-nums; } .mt small { color:var(--muto); font-weight:400; font-size:12px; } .mt .barra { margin-top:5px; height:5px; }
+.conto details .mt:first-of-type { margin-top:4px; }
+.pasto li.sp { cursor:pointer; align-items:center; gap:10px; justify-content:flex-start; } .pasto li.sp span { flex:1; min-width:0; }
+.chk { flex:none; width:24px; height:24px; border-radius:8px; border:2px solid rgba(255,255,255,.28); display:flex; align-items:center; justify-content:center; font-style:normal; }
+.chk.tondo1 { border-radius:50%; }
+.sp.on .chk { background:var(--verde); border-color:var(--verde); } .sp.on .chk::after { content:"✓"; color:#04130a; font-size:15px; font-weight:800; line-height:1; }
+.sp.on span { color:var(--testo); } .pasto li.sp:not(.on) span { color:#c4d2c9; }
+.tondo { width:46px; min-height:46px; padding:0; border-radius:50%; font-size:24px; line-height:1; } .tondo.piu { background:#3aa0e6; border-color:transparent; color:#04121c; font-weight:700; }
+.barra.blu i { background:linear-gradient(90deg,#2b86c9,#7cc4f5); } .acqua .sopra { color:#7cc4f5; } .acqua .muto { margin-top:8px; }
 .pasto h3 { font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:var(--muto); margin:14px 0 2px; }
 .pasto ul { list-style:none; margin:8px 0 0; padding:0; }
 .pasto li { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin:0; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); font-size:14px; }
@@ -357,7 +367,7 @@ function fase(d) {
 
 /* ============ ARCHIVIO (solo su questo telefono) ============ */
 const CHIAVE = "taccuino-palestra-v1";
-let S = { sedute: [], diario: {}, corso: null, inviatoFino: "" };
+let S = { sedute: [], diario: {}, cibo: {}, corso: null, inviatoFino: "" };
 try { const x = JSON.parse(localStorage.getItem(CHIAVE)); if (x && Array.isArray(x.sedute)) S = Object.assign(S, x); } catch (e) {}
 if (S.corso && !Array.isArray(S.corso.es)) S.corso = null;
 function salva() { try { localStorage.setItem(CHIAVE, JSON.stringify(S)); } catch (e) { avvisa("Non riesco a salvare sul telefono"); } }
@@ -499,7 +509,7 @@ function vHome() {
   const q = quadro(), { d, f, sett } = q, P = prof();
   const giornoLungo = new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
   const m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7)), u = S.sedute[S.sedute.length - 1];
-  const on = giornoOn(d), N = CIBO[on ? "on" : "off"];
+  const on = modoOn(d), N = CIBO[on ? "on" : "off"];
   let h = `<div class="sopra">${esc(giornoLungo)}</div><h1>Oggi</h1>
     <div class="card profilo" onclick="profilo()"><div class="riga"><i class="avatar">${esc((P.nome || "?").trim().charAt(0).toUpperCase())}</i>
       <span class="chi"><b>${esc(P.nome || "Il mio profilo")}</b><small>Definizione lenta · ${esc(f.nome.split(" · ")[0])}</small></span><em>›</em></div>
@@ -507,7 +517,8 @@ function vHome() {
     striscia(q) + `<p class="muto conta">La settimana mostra gli allenamenti che hai segnato. I giorni li scegli tu.</p>
     <h2>Il tuo piano</h2><div class="g2">
       <button class="foto" style="background-image:url(img/allenamento.jpg)" onclick="apriSub('scheda')"><span><b>Allenamento</b><small>Scheda 2.0 · prossima: ${prossima()}</small></span></button>
-      <button class="foto" style="background-image:url(img/alimentazione.jpg)" onclick="apriSub('cibo')"><span><b>Alimentazione</b><small>Oggi ${on ? "ON" : "OFF"} · ${N.kcal} kcal</small></span></button></div>
+      <button class="foto" style="background-image:url(img/alimentazione.jpg)" onclick="apriSub('cibo')"><span><b>Alimentazione</b><small>Oggi ${on ? "ON" : "OFF"} · ${Math.round(totali(d)[0])} di ${N.kcal} kcal</small></span></button></div>
+    <h2>Acqua di oggi</h2>${boxAcqua()}
     <h2>I tuoi numeri</h2><div class="g2">
     <button class="tile" onclick="vai('diario')"><small>Peso · media 7 giorni</small><b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "–"}</b><span>${m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : m1 ? m1.n + (m1.n === 1 ? " pesata" : " pesate") : "segna la prima pesata"}</span></button>
     <button class="tile" onclick="vai('storico')"><small>Ultima seduta</small><b>${u ? esc(u.corto || u.nome) : "–"}</b><span>${u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie" : "nessuna ancora"}</span></button></div>`;
@@ -574,42 +585,139 @@ function vScheda() {
 function vediSeduta(k) { schedaSel = k; disegna(); window.scrollTo(0, 0); }
 
 /* ============ PIANO ALIMENTARE v2.2 (2026-11-05) ============
-   Copia di piano/alimentazione.md: se cambia il file, va aggiornata anche questa. Solo consultazione. */
+   Copia di piano/alimentazione.md: se cambia il file, va aggiornata anche questa.
+   Ogni alimento si spunta quando è stato mangiato; l'app somma la giornata.
+   Valori per voce, nell'ordine di NUTR: kcal, proteine, carboidrati, grassi (dal piano), poi fibra, calcio, ferro,
+   magnesio, potassio, vitamina C (stime da tabelle di composizione medie: servono a dare un ordine di grandezza).
+   Voce: [id, nome, quantità, valori, opzioni]. opzioni.off = [quantità nei giorni OFF, fattore]; opzioni.on = solo nei giorni ON. */
 const CIBO = { on: { kcal: 2330, p: 185, c: 270, g: 50 }, off: { kcal: 2050, p: 180, c: 210, g: 50 } };
-const PROTEINE = ["Petto di pollo o tacchino|200 g", "Manzo magro (fesa, girello, macinato 5%)|200 g", "Pesce bianco (merluzzo, nasello, platessa, branzino)|250 g", "Tonno al naturale sgocciolato|180 g", "Salmone, e niente olio in quel pasto|150 g"];
-const CARBO = [["Pasta, anche integrale", 120, 70], ["Riso basmati o parboiled", 110, 65], ["Cous cous", 120, 70], ["Gnocchi di patate", 270, 160], ["Patate", 450, 270], ["Pane", 150, 90]];
-let ciboOn = null;                                  // null: lo decide il giorno
+const MICRO = [["Fibra", "g", 30, 4], ["Calcio", "mg", 1000, 5], ["Ferro", "mg", 10, 6], ["Magnesio", "mg", 240, 7], ["Potassio", "mg", 3900, 8], ["Vitamina C", "mg", 105, 9]];
+const ACQUA_ML = 2500, BICCHIERE = 250;
+const proteineDi = (p, cena) => [
+  [p + "-pollo", "Petto di pollo o tacchino", "200 g", [220, 46, 0, 3, 0, 20, 0.8, 56, 740, 0]],
+  [p + "-manzo", "Manzo magro (fesa, girello, macinato 5%)", "200 g", [240, 43, 0, 7, 0, 10, 3.6, 44, 660, 0]],
+  [p + "-pesce", "Pesce bianco (merluzzo, nasello, platessa, branzino)", "250 g", [200, 44, 0, 2, 0, 60, 0.8, 65, 850, 0]],
+  [p + "-tonno", "Tonno al naturale sgocciolato", "180 g", [200, 45, 0, 2, 0, 10, 1.8, 50, 430, 0]],
+  [p + "-salmone", "Salmone, e niente olio in quel pasto", "150 g", [300, 30, 0, 20, 0, 20, 0.5, 42, 540, 0]],
+].concat(cena ? [[p + "-uova", "2 uova intere + albume", "2 + 300 g", [275, 44, 2, 10, 0, 75, 2.2, 45, 630, 0]]] : []);
+const PASTI = [
+  { id: "col", ora: "8:00", nome: "Colazione", g: [
+    { v: [["latte", "Latte parzialmente scremato o delattosato", "250 ml", [115, 8, 12, 4, 0, 300, 0.1, 28, 375, 2]],
+          ["orzo", "Orzo solubile", "5 g", [18, 0, 4, 0, 0.3, 2, 0.1, 4, 50, 0]],
+          ["whey", "Whey isolate, sciolte nel latte", "25 g", [95, 22, 1, 0.5, 0, 120, 0.2, 20, 120, 0]]] },
+    { t: "Più una delle due", uno: 1, v: [["pancake", "Pancake Milk Pro, senza aggiunte", "2 = 80 g", [208, 10.4, 22.4, 7.6, 2.5, 60, 0.8, 15, 120, 0]],
+          ["bauletto", "Pan bauletto 2 fette + crema Novi pesata", "50 g + 15 g", [220, 5.5, 33, 7.5, 2, 30, 1, 25, 110, 0]]] }] },
+  { id: "spu", ora: "11:00-11:30", nome: "Spuntino", g: [
+    { v: [["yogurt", "Yogurt Trueblend", "1 vasetto", [100, 10, 10, 2, 0, 150, 0.1, 15, 200, 1]],
+          ["banana", "Banana, 60-90' prima dei pesi", "120 g", [105, 1, 27, 0, 3, 6, 0.3, 32, 430, 10], { on: 1 }]] }] },
+  { id: "pra", ora: "~14:40", nome: "Pranzo", g: [
+    { t: "Carboidrato, uno a scelta", uno: 1, v: [
+          ["pra-pasta", "Pasta, anche integrale", "120 g", [425, 14.5, 87, 1.8, 3.2, 26, 1.6, 61, 230, 0], { off: ["70 g", 70 / 120] }],
+          ["pra-riso", "Riso basmati o parboiled", "110 g", [395, 8, 87, 0.7, 1.2, 26, 0.9, 28, 105, 0], { off: ["65 g", 65 / 110] }],
+          ["pra-cous", "Cous cous", "120 g", [430, 15, 87, 1, 6, 29, 1.3, 53, 200, 0], { off: ["70 g", 70 / 120] }],
+          ["pra-gnocchi", "Gnocchi di patate", "270 g", [405, 10, 88, 1, 4, 30, 1.5, 40, 500, 5], { off: ["160 g", 160 / 270] }],
+          ["pra-patate", "Patate", "450 g", [380, 9, 82, 0.5, 7, 45, 2.7, 100, 2500, 40], { off: ["270 g", 270 / 450] }],
+          ["pra-pane", "Pane", "150 g", [410, 13, 84, 1, 5, 30, 1.5, 40, 180, 0], { off: ["90 g", 90 / 150] }]] },
+    { t: "Proteina, una a scelta", uno: 1, v: proteineDi("pra") },
+    { t: "Sempre", v: [["pra-verdura", "Verdura, meglio cotta", "250 g", [60, 5, 8, 0.5, 7, 100, 2, 50, 650, 50]],
+          ["pra-passata", "Passata di pomodoro", "100 g", [30, 1.5, 5, 0.2, 1.5, 15, 0.4, 15, 290, 9]],
+          ["pra-olio", "Olio extravergine", "10 g", [90, 0, 0, 10, 0, 0, 0, 0, 0, 0]]] }] },
+  { id: "mer", ora: "~17:30", nome: "Merenda", g: [
+    { v: [["skyr", "Skyr bianco", "150 g", [95, 16, 6, 0, 0, 225, 0, 17, 230, 0]],
+          ["mela", "Mela, o pera, o 2 kiwi", "200 g", [100, 0, 25, 0, 4, 12, 0.2, 10, 220, 10]],
+          ["mandorle", "Mandorle o noci", "15 g", [90, 3, 1, 8, 1.9, 40, 0.6, 40, 110, 0]]] },
+    { t: "Oppure, al posto dei tre sopra", uno: 1, v: [["panino", "Panino: pane + bresaola, più un frutto piccolo", "50 g + 60 g", [275, 23, 38, 3, 3, 20, 2, 30, 500, 5]]] }] },
+  { id: "cen", ora: "~20:30", nome: "Cena", g: [
+    { t: "Carboidrato, uno a scelta", uno: 1, v: [
+          ["cen-patate", "Patate", "250 g", [200, 5, 45, 0.3, 4, 25, 1.5, 55, 1400, 22]],
+          ["cen-pane", "Pane di segale o bianco", "70 g", [190, 6, 39, 0.5, 2.3, 14, 0.7, 19, 85, 0]],
+          ["cen-riso", "Riso o pasta", "60 g", [213, 6, 45, 0.6, 1.2, 13, 0.7, 25, 90, 0]]] },
+    { t: "Proteina, una a scelta", uno: 1, v: proteineDi("cen", true) },
+    { t: "Sempre", v: [["cen-verdura", "Verdura", "250 g", [60, 5, 8, 0.5, 7, 100, 2, 50, 650, 50]],
+          ["cen-olio", "Olio extravergine", "10 g", [90, 0, 0, 10, 0, 0, 0, 0, 0, 0]]] }] },
+  { id: "int", ora: "Ogni giorno", nome: "Integratori", g: [
+    { v: [["creatina", "Creatina monoidrato, a pranzo · 0 kcal", "5 g", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+          ["omega3", "Omega-3, a pranzo · ~27 kcal di grassi", "3 capsule", [27, 0, 0, 3, 0, 0, 0, 0, 0, 0]],
+          ["magnesio", "Magnesio, la sera · 0 kcal", "come ora", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]] }] },
+];
 function giornoOn(d) {
-  // ON se quel giorno c'è una seduta di pesi, salvata o in corso: i giorni non sono più fissi
+  // ON se quel giorno c'è una seduta di pesi, salvata o in corso: i giorni non sono fissi
   const pesi = (s) => ["A", "B", "C"].includes(s.tipo);
   return S.sedute.some((s) => s.data === d && pesi(s)) || !!(S.corso && S.corso.data === d && pesi(S.corso));
 }
+// registro del giorno: x = voci spuntate, acqua in ml, on = scelta a mano di ON/OFF (null: lo decide la seduta)
+function recCibo(d, crea) {
+  if (!S.cibo) S.cibo = {};
+  if (!S.cibo[d] && crea) S.cibo[d] = { on: null, x: {}, acqua: 0 };
+  return S.cibo[d] || { on: null, x: {}, acqua: 0 };
+}
+const modoOn = (d) => { const r = recCibo(d); return r.on == null ? giornoOn(d) : r.on; };
+const visibile = (it, on) => !(it[4] && it[4].on && !on);
+function totali(d) {
+  const r = recCibo(d), on = modoOn(d), t = new Array(10).fill(0);
+  for (const p of PASTI) for (const g of p.g) for (const it of g.v) {
+    if (!r.x[it[0]] || !visibile(it, on)) continue;
+    const f = !on && it[4] && it[4].off ? it[4].off[1] : 1; it[3].forEach((v, i) => (t[i] += v * f));
+  }
+  return t;
+}
+function spunta(id) {
+  const r = recCibo(oggi(), true);
+  for (const p of PASTI) for (const g of p.g) if (g.v.some((it) => it[0] === id)) {
+    if (r.x[id]) delete r.x[id];
+    else { if (g.uno) for (const o of g.v) delete r.x[o[0]]; r.x[id] = 1; }     // nei gruppi "uno a scelta" ne resta spuntato uno solo
+  }
+  salva(); tieni(disegna);
+}
+function tuttoPasto(pid) {      // spunta in un colpo le voci fisse del pasto; le scelte vanno toccate a mano
+  const r = recCibo(oggi(), true), on = modoOn(oggi()), p = PASTI.find((x) => x.id === pid);
+  const fisse = p.g.filter((g) => !g.uno).flatMap((g) => g.v).filter((it) => visibile(it, on)), tutte = fisse.every((it) => r.x[it[0]]);
+  for (const it of fisse) { if (tutte) delete r.x[it[0]]; else r.x[it[0]] = 1; }
+  salva(); tieni(disegna);
+}
+function mettiOn(v) { recCibo(oggi(), true).on = v; salva(); tieni(disegna); }
+function acqua(ml) { const r = recCibo(oggi(), true); r.acqua = Math.max(0, (r.acqua || 0) + ml); salva(); tieni(disegna); }
+const litri = (ml) => it(parseFloat((ml / 1000).toFixed(2)));
+function boxAcqua() {
+  const a = recCibo(oggi()).acqua || 0, ok = a >= ACQUA_ML;
+  return `<div class="card acqua"><div class="riga tra"><div><div class="sopra">Acqua · traguardo ${litri(ACQUA_ML)} L</div>
+      <div class="kc"><b>${litri(a)}</b> di ${litri(ACQUA_ML)} L${ok ? ' <span class="pillola">raggiunto ✓</span>' : ""}</div></div>
+      <div class="riga"><button class="tondo" aria-label="Togli un bicchiere" onclick="acqua(${-BICCHIERE})">−</button><button class="tondo piu" aria-label="Aggiungi un bicchiere da ${BICCHIERE} ml" onclick="acqua(${BICCHIERE})">+</button></div></div>
+    <div class="barra blu"><i style="width:${Math.min(100, Math.round((a / ACQUA_ML) * 100))}%"></i></div>
+    <div class="muto">Ogni tocco su + è un bicchiere da ${BICCHIERE} ml. Meglio berla per lo più entro le 20:30.</div></div>`;
+}
+const misura = (nome, val, tgt, un, dec) => `<div class="mt"><div class="riga tra"><span>${nome}</span><b>${it(val.toFixed(dec || 0))} <small>/ ${it(tgt)} ${un}</small></b></div>
+  <div class="barra"><i style="width:${Math.min(100, Math.round((val / tgt) * 100))}%"></i></div></div>`;
 function vCibo() {
-  const d = oggi(), auto = giornoOn(d), on = ciboOn == null ? auto : ciboOn, N = CIBO[on ? "on" : "off"];
-  const riga = (x) => { const [a, b] = x.split("|"); return `<li><span>${a}</span><b>${b || ""}</b></li>`; };
-  const pasto = (ora, nome, kcal, corpo) => `<div class="card pasto"><div class="riga tra"><div><div class="sopra">${ora}</div><div class="nome">${nome}</div></div><span class="pillola">${kcal}</span></div>${corpo}</div>`;
-  const lista = (t, v) => `${t ? `<h3>${t}</h3>` : ""}<ul>${v.map(riga).join("")}</ul>`;
+  const d = oggi(), auto = giornoOn(d), on = modoOn(d), N = CIBO[on ? "on" : "off"], r = recCibo(d), T = totali(d), resta = Math.round(N.kcal - T[0]);
   let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.2 · definizione lenta</div><h1>Alimentazione</h1></div></div>
-    <div class="g2"><button class="${on ? "pri" : ""}" onclick="ciboOn=true;tieni(disegna)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="ciboOn=false;tieni(disegna)">Giorno OFF · riposo</button></div>
+    <div class="g2"><button class="${on ? "pri" : ""}" onclick="mettiOn(true)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="mettiOn(false)">Giorno OFF · riposo</button></div>
     <p class="muto conta">${auto ? "Oggi hai segnato una seduta di pesi: <b>giorno ON</b>." : "Oggi non risultano pesi: <b>giorno OFF</b>. Se ti alleni più tardi, tocca Giorno ON."} Tra ON e OFF cambiano solo la banana e il carboidrato del pranzo.</p>
-    <div class="tess"><div><b>${N.kcal}</b>kcal</div><div><b>${N.p} g</b>proteine</div><div><b>${N.c} g</b>carboidrati</div><div><b>${N.g} g</b>grassi</div></div>
-    <p class="muto conta">Pesi a crudo, frutta senza buccia. Olio sempre pesato.</p>`;
-  h += pasto("8:00", "Colazione", "~440 kcal · P 38", lista("", ["Latte parzialmente scremato o delattosato|250 ml", "Orzo solubile|5 g", "Whey isolate, sciolte nel latte|25 g"]) +
-    lista("Più una delle due", ["Pancake Milk Pro (scelta abituale), senza aggiunte|2 = 80 g", "Pan bauletto 2 fette + crema Novi pesata|50 g + 15 g"]));
-  h += pasto("11:00-11:30", "Spuntino", on ? "~205 kcal · P 11" : "~100 kcal · P 10", lista("", on ? ["Yogurt Trueblend|1 vasetto", "Banana, 60-90' prima dei pesi|120 g"] : ["Yogurt Trueblend|1 vasetto"]));
-  h += pasto("~14:40", "Pranzo", on ? "~820 kcal · P 65" : "~645 kcal · P 59", lista("Carboidrato, uno a scelta", CARBO.map((x) => `${x[0]}|${on ? x[1] : x[2]} g`)) + lista("Proteina, una a scelta", PROTEINE) +
-    lista("Sempre", ["Verdura, meglio cotta|250 g", "Passata di pomodoro|100 g", "Olio extravergine|10 g", "Creatina|5 g"]));
-  h += pasto("~17:30", "Merenda", "~285 kcal · P 19", lista("", ["Skyr bianco|150 g", "Mela, o pera, o 2 kiwi|200 g", "Mandorle o noci|15 g"]) + lista("Oppure", ["Panino: pane + bresaola, più un frutto piccolo|50 g + 60 g"]));
-  h += pasto("~20:30", "Cena", "~570 kcal · P 54", lista("Carboidrato, uno a scelta", ["Patate|250 g", "Pane di segale o bianco|70 g", "Riso o pasta|60 g"]) +
-    lista("Proteina, una a scelta", PROTEINE.concat(["Solo a cena: 2 uova intere + albume|2 + 300 g"])) + lista("Sempre", ["Verdura|250 g", "Olio extravergine|10 g"]));
-  h += `<h2>Da ricordare</h2><div class="card"><ul>
-      <li><b>Acqua</b> 2,2-2,5 litri, per lo più entro le 20:30.</li>
-      <li><b>Pasto libero</b>: uno a settimana, in un giorno OFF, al posto della cena. Una pizza e una bibita light; nessuna compensazione il giorno dopo.</li>
+    <div class="card conto"><div class="riga tra"><div><div class="sopra">Mangiato oggi</div><div class="kc"><b>${Math.round(T[0])}</b> di ${N.kcal} kcal</div></div>
+        <span class="pillola">${resta >= 0 ? "restano " + resta : "oltre di " + -resta}</span></div>
+      <div class="barra"><i style="width:${Math.min(100, Math.round((T[0] / N.kcal) * 100))}%"></i></div>
+      ${misura("Proteine", T[1], N.p, "g")}${misura("Carboidrati", T[2], N.c, "g")}${misura("Grassi", T[3], N.g, "g")}
+      <details><summary>Fibra, vitamine e minerali</summary>${MICRO.map((m) => misura(m[0], T[m[3]], m[0] === "Fibra" && !on ? 28 : m[2], m[1], m[1] === "g" || m[0] === "Ferro" ? 1 : 0)).join("")}
+        <p class="muto">Sono stime da tabelle medie: marca, cottura e tipo di frutta e verdura spostano i valori. Il traguardo è il fabbisogno giornaliero di un uomo adulto. Il magnesio dell'integratore non è contato, perché dipende dal prodotto.</p></details></div>
+    <p class="muto conta">Spunta quello che hai mangiato: il conto si aggiorna da solo. Pesi a crudo, frutta senza buccia, olio sempre pesato.</p>`;
+  for (const p of PASTI) {
+    const voci = p.g.flatMap((g) => g.v).filter((v) => visibile(v, on)), k = voci.reduce((n, v) => n + (r.x[v[0]] ? v[3][0] * (!on && v[4] && v[4].off ? v[4].off[1] : 1) : 0), 0);
+    if (p.id === "int") h += `<h2>Integratori</h2>`;
+    h += `<div class="card pasto"><div class="riga tra"><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div>
+      <div class="riga"><span class="pillola">${Math.round(k)} kcal</span><button class="pic" onclick="tuttoPasto('${p.id}')">Tutto</button></div></div>`;
+    for (const g of p.g) {
+      const vv = g.v.filter((v) => visibile(v, on)); if (!vv.length) continue;
+      h += `${g.t ? `<h3>${g.t}</h3>` : ""}<ul>` + vv.map((v) => `<li class="sp ${r.x[v[0]] ? "on" : ""}" role="checkbox" aria-checked="${!!r.x[v[0]]}" onclick="spunta('${v[0]}')"><i class="chk ${g.uno ? "tondo1" : ""}"></i><span>${v[1]}</span><b>${!on && v[4] && v[4].off ? v[4].off[0] : v[2]}</b></li>`).join("") + `</ul>`;
+    }
+    h += `</div>`;
+  }
+  h += `<p class="muto conta">Le whey sono già contate nella colazione. Creatina e magnesio non hanno calorie; gli omega-3 sì, circa 9 kcal a capsula. Tolti: vitamina C, zinco, melatonina.</p>
+    <h2>Acqua</h2>${boxAcqua()}
+    <h2>Da ricordare</h2><div class="card"><ul>
+      <li><b>Pasto libero</b>: uno a settimana, in un giorno OFF, al posto della cena. Una pizza e una bibita light; nessuna compensazione il giorno dopo. Quel giorno il conto non torna, ed è previsto.</li>
       <li><b>Sedute a casa in un altro orario</b>: sposta la banana 60-90' prima dei pesi, e almeno 2 ore dopo un pasto principale.</li>
       <li><b>Zuccheri liquidi</b> (succhi, bibite, ginseng zuccherato): zero.</li>
-      <li><b>Ultima caffeina</b> alle 14:00.</li></ul></div>
-    <h2>Integratori</h2><div class="card pasto">${lista("", ["Creatina monoidrato, ogni giorno a pranzo|5 g", "Whey isolate, a colazione|25 g", "Omega-3, a pranzo|3 capsule", "Magnesio, la sera|come ora"])}</div>
-    <p class="muto conta">Tolti: vitamina C, zinco, melatonina.</p>`;
+      <li><b>Ultima caffeina</b> alle 14:00.</li></ul></div>`;
   return h;
 }
 // freccia indietro nella seduta: se non hai ancora segnato nulla torna subito alla home, altrimenti chiede conferma
@@ -1099,6 +1207,11 @@ function testoCoach(da) {
     t += "Diario (data | peso kg | passi | sonno 1-5 | note)\n";
     for (const d of dd) { const x = S.diario[d]; t += `${d} | ${it(x.peso)} | ${it(x.passi)} | ${it(x.sonno)} | ${x.note || ""}\n`; }
   }
+  const cc = Object.keys(S.cibo || {}).filter((d) => d > da).sort().filter((d) => totali(d)[0] > 0 || S.cibo[d].acqua);
+  if (cc.length) {
+    t += "\nAlimentazione spuntata nell'app (data | giorno | kcal | proteine g | carboidrati g | grassi g | fibra g | acqua L)\n";
+    for (const d of cc) { const x = totali(d); t += `${d} | ${modoOn(d) ? "ON" : "OFF"} | ${Math.round(x[0])} | ${Math.round(x[1])} | ${Math.round(x[2])} | ${Math.round(x[3])} | ${Math.round(x[4])} | ${litri(S.cibo[d].acqua || 0)}\n`; }
+  }
   return t.trim();
 }
 let periodo = "nuovi";
@@ -1119,7 +1232,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.2 del 05/11/2026 · app v9</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.2 del 05/11/2026 · app v10</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
