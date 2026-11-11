@@ -179,6 +179,22 @@ ul { margin:6px 0; padding-left:20px; } li { margin:4px 0; }
 .vuoto { text-align:center; padding:34px 16px; color:var(--muto); }
 .vuoto b { display:block; color:var(--testo); font-size:17px; margin-bottom:4px; }
 
+/* home: profilo e i due blocchi con la foto */
+.profilo { cursor:pointer; padding:14px 16px; margin-top:0; }
+.avatar { flex:none; width:52px; height:52px; border-radius:50%; background:linear-gradient(140deg,#52e696,#1f8f55); color:#04130a; font-style:normal; font-weight:800; font-size:24px;
+          display:flex; align-items:center; justify-content:center; }
+.profilo .chi { flex:1; min-width:0; margin-left:6px; } .profilo .chi b { display:block; font-size:19px; line-height:1.2; } .profilo .chi small { color:var(--muto); font-size:13px; }
+.profilo em { font-style:normal; font-size:28px; color:var(--muto); line-height:1; padding-bottom:4px; }
+.tre { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px; padding-top:12px; border-top:1px solid var(--linea); font-size:11px; color:var(--muto); line-height:1.25; }
+.tre b { display:block; font-size:19px; color:var(--testo); font-variant-numeric:tabular-nums; margin-bottom:2px; }
+.foto { position:relative; height:190px; padding:0; border-radius:24px; overflow:hidden; border-color:var(--linea); background:#141b18 center/cover no-repeat; text-align:left; }
+.foto::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(7,11,9,.10) 25%,rgba(7,11,9,.92)); }
+.foto span { position:absolute; left:14px; right:12px; bottom:12px; }
+.foto b { display:block; font-size:18px; line-height:1.2; } .foto small { color:#cfdad3; font-size:12px; }
+.altre.tre3 { grid-template-columns:repeat(3,1fr); gap:8px; }
+.altre.tre3 button { flex-direction:column; align-items:flex-start; gap:8px; padding:12px 10px; min-height:104px; }
+.altre button.qui { border-color:var(--verde); box-shadow:0 0 0 1px var(--verde) inset; } .altre button.qui i { background:var(--verde); color:#04130a; }
+ol.piano small.muto { font-size:12px; }
 /* home: blocchi del piano e numeri */
 .blocco { display:flex; align-items:center; gap:14px; width:100%; text-align:left; padding:14px; margin:10px 0; border-radius:22px; background:var(--card); min-height:76px; }
 .blocco i { flex:none; width:46px; height:46px; border-radius:15px; background:var(--verde3); color:var(--verde); display:flex; align-items:center; justify-content:center; }
@@ -288,10 +304,10 @@ svg text { font:700 11px system-ui,sans-serif; fill:#f7a94f; }
 const SBARRA = [
   { id:"appesa", nome:"Appesa passiva alla sbarra", serie:2, rip:"20-40", u:"sec", t:"b", nokg:1, norir:1, nota:"Braccia tese, spalle rilassate verso le orecchie." },
   { id:"scapolari", nome:"Trazioni scapolari", serie:2, rip:"8", t:"b", nokg:1, norir:1, nota:"Gomiti sempre tesi, spalle giù, tieni 1\"." },
-  { id:"negative", nome:"Negative alla sbarra", serie:2, rip:"3", t:"b", nokg:1, fisse:1, nota:"Discesa in 5\", mai a cedimento. Vedi la sezione Trazioni." },
+  { id:"negative", nome:"Negative alla sbarra", serie:2, rip:"3", t:"b", nokg:1, fisse:1, nota:"Discesa in 5\", mai a cedimento. Vedi la guida Trazioni." },
 ];
 const SEDUTE = {
-  A: { nome:"A · Lunedì — casa", corto:"A · casa", es: [...SBARRA,
+  A: { nome:"A · casa", corto:"A · casa", es: [...SBARRA,
     { id:"bulgaro", nome:"Squat bulgaro con manubri", serie:3, rip:"8-12", t:"m", p:1, nota:"Per gamba. Piede dietro sulla panca, busto leggermente avanti." },
     { id:"panca-piana-man", nome:"Panca piana con manubri", serie:3, rip:"8-12", t:"m", p:1, nota:"Manubri fino all'altezza del petto, scapole strette." },
     { id:"rematore-man", nome:"Rematore con manubrio alla panca", serie:3, rip:"8-12", t:"m", p:1, nota:"Scapola giù in basso, gomito verso l'anca." },
@@ -301,7 +317,7 @@ const SEDUTE = {
     { id:"posteriori-panca", nome:"Alzate posteriori a pancia in giù", serie:2, rip:"15-20", t:"sa", ss:"estensioni-man", p:1, nota:"Superserie con le estensioni. Braccia quasi tese." },
     { id:"estensioni-man", nome:"Estensioni sopra la testa con manubrio", serie:2, rip:"10-15", t:"sb", ss:"posteriori-panca", p:1, nota:"Gomiti stretti, scendi fino in fondo." },
   ]},
-  B: { nome:"B · Mercoledì o giovedì — palestra", corto:"B · palestra", es: [...SBARRA,
+  B: { nome:"B · palestra", corto:"B · palestra", es: [...SBARRA,
     { id:"hack", nome:"Hack squat (o leg press)", serie:3, rip:"8-12", t:"m", p:5, nota:"Profondità piena, talloni ben appoggiati." },
     { id:"lat", nome:"Lat machine, presa prona media", serie:3, rip:"8-12", t:"m", p:2.5, nota:"Parti a braccio disteso; chiudi con scapole indietro e in basso." },
     { id:"panca-incl-bil", nome:"Panca inclinata 30° bilanciere / multipower", serie:3, rip:"6-10", t:"m", p:2.5, nota:"Petto alto." },
@@ -311,8 +327,8 @@ const SEDUTE = {
     { id:"leg-ext", nome:"Leg extension", serie:3, rip:"12-15", t:"sa", ss:"crunch-cavo", p:2.5, nota:"Superserie con il crunch." },
     { id:"crunch-cavo", nome:"Crunch al cavo", serie:3, rip:"10-15", t:"sb", ss:"leg-ext", p:2.5, nota:"Arrotola il bacino verso il petto, non tirare con le braccia." },
   ]},
-  C: { nome:"C · Sabato — casa", corto:"C · casa", es: [
-    { id:"negative", nome:"Negative alla sbarra", serie:4, rip:"3", t:"m", nokg:1, fisse:1, nota:"Discesa in 5\", da fresco. Vedi la sezione Trazioni." },
+  C: { nome:"C · casa", corto:"C · casa", es: [
+    { id:"negative", nome:"Negative alla sbarra", serie:4, rip:"3", t:"m", nokg:1, fisse:1, nota:"Discesa in 5\", da fresco. Vedi la guida Trazioni." },
     { id:"affondi", nome:"Affondi indietro con manubri", serie:3, rip:"10-12", t:"m", p:1, nota:"Per gamba. Passo lungo, ginocchio dietro che sfiora terra." },
     { id:"panca-incl-man", nome:"Panca inclinata 30° con manubri", serie:3, rip:"8-12", t:"m", p:1, nota:"" },
     { id:"rematore-bil", nome:"Rematore con bilanciere, presa supina", serie:3, rip:"10-12", t:"m", p:2.5, nota:"Busto a ~45°, tira verso l'ombelico." },
@@ -326,13 +342,12 @@ const SEDUTE = {
     { id:"calf-libero", nome:"Calf su una gamba, su un gradino", serie:3, rip:"12-20", t:"sb", nokg:1, fisse:1, nota:"Per gamba. Pausa di 1\" in basso, una mano al muro." },
     { id:"crunch-inverso", nome:"Crunch inverso a terra", serie:3, rip:"10-15", t:"sb", nokg:1, fisse:1, nota:"Porta su il bacino, discesa in 3\"." },
   ]},
-  F: { nome:"Fiato · domenica", corto:"Fiato", es: [
+  F: { nome:"Fiato · corsa facile", corto:"Fiato", es: [
     { id:"corsa", nome:"Corsa facile (4' corsa + 1' camminata)", serie:1, rip:"30", u:"min", t:"x", nokg:1, norir:1, fisse:1, nota:"Ritmo a cui riesci a parlare a frasi intere." },
   ]},
   L: { nome:"Seduta libera", corto:"Seduta libera", es: [] },
 };
 const REC = { m:120, i:75, sa:0, sb:60, b:60, x:0 };
-const PER_GIORNO = { 0:"F", 1:"A", 2:"M", 3:"B", 4:"B", 5:"M", 6:"C" };
 
 function fase(d) {
   if (d < "2026-11-23") return { nome:"Rientro · fino al 22/11", testo:"2 serie dove ne sono previste 3, tutto a RIR 3. Cerca i tuoi carichi e annotali.", rir:() => "3", serie:(e) => (!e.fisse && e.serie === 3 ? 2 : e.serie) };
@@ -386,7 +401,7 @@ function daSalire(e, u) {
 
 /* ============ NAVIGAZIONE ============ */
 let tab = "allena";
-function vai(t) { chiudi(); tab = t; sub = null; schedaSel = null; giornoSel = null; disegna(); window.scrollTo(0, 0); }
+function vai(t) { chiudi(); tab = t; sub = null; schedaSel = null; guida = null; disegna(); window.scrollTo(0, 0); }
 
 /* ============ GRAFICI ============
    Una sola serie verde per grafico; nel peso le pesate sono punti grigi e la media a 7 giorni è la linea.
@@ -450,76 +465,97 @@ function chiudi() { $("foglio").style.display = "none"; $("velo").style.display 
 /* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
    sub: schermata aperta dalla home · schedaSel: seduta scelta a mano nella scheda */
 let sub = null, schedaSel = null;
-function apriSub(s) { sub = s; schedaSel = null; if (!s) giornoSel = null; disegna(); window.scrollTo(0, 0); }
+function apriSub(s) { sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
 function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : vHome(); }
 function quadro() {
-  const d = oggi(), f = fase(d), dow = (new Date(d + "T12:00").getDay() + 6) % 7;
-  const lun = meno(d, dow), domenica = meno(lun, -6);
-  const sett = S.sedute.filter((s) => s.data >= lun && s.data <= domenica && "ABC".includes(s.tipo)).length;
-  const bFatta = S.sedute.find((s) => s.tipo === "B" && s.data >= lun && s.data <= domenica);
-  // la B si fa mercoledì oppure giovedì: se è già stata fatta nell'altro giorno, oggi è riposo
-  const tipoDel = (g, i) => { const k = PER_GIORNO[(i + 1) % 7]; return k === "B" && bFatta && bFatta.data !== g ? null : k; };
-  return { d, f, dow, lun, domenica, sett, tipoDel };
+  const d = oggi(), f = fase(d), dow = (new Date(d + "T12:00").getDay() + 6) % 7, lun = meno(d, dow), domenica = meno(lun, -6);
+  const fatte = {}; let sett = 0;       // sedute di pesi salvate questa settimana: è così che l'app sa se ti sei allenato
+  for (const s of S.sedute) if (s.data >= lun && s.data <= domenica && ["A", "B", "C"].includes(s.tipo)) { fatte[s.tipo] = s; sett++; }
+  return { d, f, lun, domenica, sett, fatte };
 }
-function striscia(q, v) {
-  const sigla = { A: "A", B: "B", C: "C", M: "mini", F: "corsa" }; let h = `<div class="sett">`;
+// I giorni li sceglie l'atleta: l'app propone solo la seduta che viene dopo l'ultima fatta, nell'ordine A → B → C
+function prossima() {
+  for (let i = S.sedute.length - 1; i >= 0; i--) { const k = "ABC".indexOf(S.sedute[i].tipo); if (S.sedute[i].tipo && k >= 0) return "ABC"[(k + 1) % 3]; }
+  return "B";
+}
+// la striscia della settimana mostra solo quello che è stato fatto davvero
+function striscia(q) {
+  const sigla = { A: "A", B: "B", C: "C", M: "mini", F: "corsa", L: "libera" }; let h = `<div class="sett">`;
   for (let i = 0; i < 7; i++) {
-    const g = meno(q.lun, -i), k = q.tipoDel(g, i), fatta = S.sedute.some((s) => s.data === g), t = fatta ? "✓" : k ? sigla[k] : "–";
-    h += `<div class="${g === q.d ? "oggi" : ""} ${g === v ? "sel" : ""} ${fatta ? "ok" : g < q.d ? "pass" : ""}" onclick="vediGiorno('${g}')"><small>${"LMMGVSD"[i]}</small><b class="${t.length > 1 ? "p" : ""}">${t}</b></div>`;
+    const g = meno(q.lun, -i), ss = S.sedute.filter((s) => s.data === g), s = ss.find((x) => ["A", "B", "C"].includes(x.tipo)) || ss[0], t = s ? sigla[s.tipo] || "✓" : "·";
+    h += `<div class="${g === q.d ? "oggi sel" : ""} ${s ? "ok" : g < q.d ? "pass" : ""}" onclick="toccaGiorno('${g}')"><small>${"LMMGVSD"[i]}</small><b class="${t.length > 1 ? "p" : ""}">${t}</b></div>`;
   }
   return h + `</div>`;
 }
-const freccia = (dove) => `<button class="ico dietro" aria-label="Indietro" onclick="apriSub(${dove})">‹</button>`;
-const ICO_SCHEDA = '<svg viewBox="0 0 24 24"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>';
-const ICO_CIBO = '<svg viewBox="0 0 24 24"><path d="M7 3v8M4 3v5a3 3 0 006 0V3M7 11v10M17 3c-2 2-3 5-3 8h3zM17 11v10"/></svg>';
+function toccaGiorno(g) {
+  const ss = S.sedute.filter((s) => s.data === g);
+  if (ss.length) riepilogo(ss[ss.length - 1].id);
+  else if (g === oggi()) apriSub("scheda");
+  else avvisa(g > oggi() ? "Giorno ancora da venire" : "Nessun allenamento segnato quel giorno");
+}
+const freccia = (js) => `<button class="ico dietro" aria-label="Indietro" onclick="${js}">‹</button>`;
+const prof = () => Object.assign({ nome: "Daniele", altezza: null }, S.profilo || {});
 function vHome() {
-  const q = quadro(), { d, f, dow, sett, tipoDel } = q, k = tipoDel(d, dow);
+  const q = quadro(), { d, f, sett } = q, P = prof();
   const giornoLungo = new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
-  let h = `<div class="sopra">${esc(giornoLungo)}</div><h1>Oggi</h1>` + striscia(q, d);
-  if (k) {
-    const se = SEDUTE[k], nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), fatta = S.sedute.some((s) => s.data === d && s.tipo === k);
-    h += `<div class="card eroe"><div class="riga tra"><span class="eti">La seduta di oggi${fatta ? " · fatta ✓" : ""}</span><span class="pillola">${esc(f.nome)}</span></div>
-      <div class="grande">${esc(se.nome)}</div><div class="muto">${se.es.length} esercizi · ${nSerie} serie · RIR ${esc(f.rir({ t: "m" }))}</div>
-      <button class="${fatta ? "" : "pri"} largo grosso" onclick="inizia('${k}')">${fatta ? "Rifai la seduta" : "Inizia la seduta"}</button></div>`;
-  } else h += `<div class="card eroe"><span class="eti">Oggi</span><div class="grande">Riposo</div><div class="muto">La seduta B di questa settimana è già fatta. Solo 8000-10.000 passi.</div></div>`;
-  const on = giornoOn(d), N = CIBO[on ? "on" : "off"];
-  h += `<h2>Il tuo piano</h2>
-    <button class="blocco" onclick="apriSub('scheda')"><i>${ICO_SCHEDA}</i><span><b>Scheda di allenamento</b><small>Versione 2.0 · ${esc(f.nome.split(" · ")[0])} · ${sett} di 3 sedute questa settimana</small></span><em>›</em></button>
-    <button class="blocco" onclick="apriSub('cibo')"><i>${ICO_CIBO}</i><span><b>Piano alimentare</b><small>Oggi giorno ${on ? "ON" : "OFF"} · ${N.kcal} kcal · ${N.p} g di proteine</small></span><em>›</em></button>`;
   const m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7)), u = S.sedute[S.sedute.length - 1];
-  h += `<h2>I tuoi numeri</h2><div class="g2">
+  const on = giornoOn(d), N = CIBO[on ? "on" : "off"];
+  let h = `<div class="sopra">${esc(giornoLungo)}</div><h1>Oggi</h1>
+    <div class="card profilo" onclick="profilo()"><div class="riga"><i class="avatar">${esc((P.nome || "?").trim().charAt(0).toUpperCase())}</i>
+      <span class="chi"><b>${esc(P.nome || "Il mio profilo")}</b><small>Definizione lenta · ${esc(f.nome.split(" · ")[0])}</small></span><em>›</em></div>
+      <div class="tre"><div><b>${m1 ? it(m1.m.toFixed(1)) : "–"}</b>kg, media 7 giorni</div><div><b>${sett} di 3</b>sedute questa settimana</div><div><b>${S.sedute.length}</b>sedute in tutto</div></div></div>` +
+    striscia(q) + `<p class="muto conta">La settimana mostra gli allenamenti che hai segnato. I giorni li scegli tu.</p>
+    <h2>Il tuo piano</h2><div class="g2">
+      <button class="foto" style="background-image:url(img/allenamento.jpg)" onclick="apriSub('scheda')"><span><b>Allenamento</b><small>Scheda 2.0 · prossima: ${prossima()}</small></span></button>
+      <button class="foto" style="background-image:url(img/alimentazione.jpg)" onclick="apriSub('cibo')"><span><b>Alimentazione</b><small>Oggi ${on ? "ON" : "OFF"} · ${N.kcal} kcal</small></span></button></div>
+    <h2>I tuoi numeri</h2><div class="g2">
     <button class="tile" onclick="vai('diario')"><small>Peso · media 7 giorni</small><b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "–"}</b><span>${m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : m1 ? m1.n + (m1.n === 1 ? " pesata" : " pesate") : "segna la prima pesata"}</span></button>
     <button class="tile" onclick="vai('storico')"><small>Ultima seduta</small><b>${u ? esc(u.corto || u.nome) : "–"}</b><span>${u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie" : "nessuna ancora"}</span></button></div>`;
   return h;
 }
+/* Profilo: nome e altezza si scrivono qui e restano sul telefono; il resto si ricava da pesate e sedute */
+function profilo() {
+  const P = prof(), d = oggi(), f = fase(d), m1 = media(meno(d, 7), d), pes = Object.keys(S.diario).filter((x) => S.diario[x].peso != null).sort();
+  const p0 = pes.length ? S.diario[pes[0]].peso : null, r = [];
+  r.push(["Obiettivo", "Asciugare l'addome tenendo il muscolo, poi massa pulita."], ["Traguardo", "La prima trazione da solo."], ["Fase", f.nome + ". " + f.testo]);
+  r.push(["Peso", p0 == null ? "Nessuna pesata ancora." : `Partenza ${it(p0)} kg (${dataIt(pes[0])})` + (m1 ? ` · ora ${it(m1.m.toFixed(1))} kg di media · ${(m1.m - p0 >= 0 ? "+" : "") + it((m1.m - p0).toFixed(1))} kg` : "")]);
+  if (P.altezza && m1) r.push(["BMI", it((m1.m / Math.pow(P.altezza / 100, 2)).toFixed(1))]);
+  r.push(["Sedute", S.sedute.length ? `${S.sedute.length} in tutto, la prima il ${dataIt(S.sedute[0].data)}.` : "Nessuna ancora."]);
+  apri(`<div class="riga tra"><div class="nome" style="font-size:21px">Il mio profilo</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>
+    <div class="g2"><div><label>Nome</label><input id="pNome" value="${esc(P.nome)}" autocomplete="off"></div><div><label>Altezza (cm)</label><input id="pAlt" inputmode="numeric" value="${esc(it(P.altezza))}" placeholder="177"></div></div>
+    <button class="pri largo" onclick="salvaProfilo()">Salva</button>
+    <h2>Il percorso</h2><div class="card spi">${r.map((x) => `<div><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join("")}</div>
+    <p class="muto">Nome, altezza e pesate restano su questo telefono.</p><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+function salvaProfilo() { S.profilo = { nome: $("pNome").value.trim() || "Daniele", altezza: num($("pAlt").value) }; salva(); chiudi(); disegna(); avvisa("Profilo salvato"); }
 function vScheda() {
-  const q = quadro(), { d, f, lun, domenica, sett, tipoDel } = q;
-  // v è il giorno che si sta guardando: oggi, oppure quello toccato nella striscia della settimana
-  const v = giornoSel && giornoSel >= lun && giornoSel <= domenica ? giornoSel : d, eOggi = v === d;
-  const iv = Math.round((new Date(v + "T12:00") - new Date(lun + "T12:00")) / 864e5);
-  const scelta = !!schedaSel, sugg = schedaSel || tipoDel(v, iv);
-  const nomeV = new Date(v + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric" }).replace(/^./, (c) => c.toUpperCase());
-  const torna = scelta ? `<button class="largo" onclick="schedaSel=null;disegna()">‹ Torna alla seduta del giorno</button>` : eOggi ? "" : `<button class="largo" onclick="vediGiorno('${d}')">‹ Torna a oggi</button>`;
-  let h = `<div class="riga testata">${freccia("null")}<div><div class="sopra">Versione 2.0 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q, scelta ? null : v) +
-    `<p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 3</b></p>`;
-  if (sugg) {
-    const se = SEDUTE[sugg], nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), fattaOggi = !scelta && S.sedute.some((s) => s.data === v && s.tipo === sugg);
-    h += `<div class="card eroe"><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : (eOggi ? "La seduta di oggi" : esc(nomeV)) + (fattaOggi ? " · fatta ✓" : "")}</span><span class="pillola">${esc(f.nome)}</span></div>
+  const q = quadro(), { f, sett, fatte } = q, pross = prossima(), scelta = !!schedaSel, k = schedaSel || pross, se = SEDUTE[k];
+  const nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), gia = fatte[k];
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.0 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q) +
+    `<p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 3</b>. I giorni li scegli tu.</p>
+    <div class="card eroe"><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : "Prossima consigliata"}${gia ? " · già fatta " + nomeGiorno(gia.data) : ""}</span><span class="pillola">${esc(f.nome.split(" · ")[0])}</span></div>
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div></div>
       <div class="muto">${esc(f.testo)}</div>
-      <details ${scelta ? "open" : ""}><summary>${eOggi && !scelta ? "Cosa fai oggi" : "Cosa si fa"}</summary><ol class="piano">`;
-    for (const e of se.es) h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
-    h += `</ol></details><button class="${scelta || (eOggi && !fattaOggi) ? "pri" : ""} largo grosso" onclick="inizia('${sugg}')">${fattaOggi ? "Rifai la seduta" : eOggi || scelta ? "Inizia la seduta" : "Falla oggi"}</button>${torna}</div>`;
-  } else {
-    h += `<div class="card eroe"><span class="eti">${eOggi ? "Oggi" : esc(nomeV)}</span><div class="grande">Riposo</div>
-      <div class="muto">La seduta B di questa settimana è già fatta. Solo 8000-10.000 passi.</div>${torna}</div>`;
-  }
-  h += `<h2>Tutte le sedute della scheda</h2><div class="altre">`;
-  for (const k in SEDUTE) if (k !== sugg) h += `<button onclick="${k === "L" ? "inizia('L')" : "vediSeduta('" + k + "')"}"><i>${k === "L" ? "+" : k}</i><span><b>${esc(SEDUTE[k].corto)}</b><small>${SEDUTE[k].es.length ? SEDUTE[k].es.length + " esercizi" : "scegli tu"}</small></span></button>`;
-  h += `</div><p class="muto conta">Tocca una seduta per vedere gli esercizi; da lì la puoi iniziare.</p>
+      <details ${scelta ? "open" : ""}><summary>Cosa si fa</summary><ol class="piano">`;
+  for (const e of se.es) h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
+  h += `</ol></details><button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta</button>
+      ${scelta ? `<button class="largo" onclick="schedaSel=null;disegna()">‹ Torna alla consigliata</button>` : ""}</div>
+    <h2>Le sedute di pesi</h2><div class="altre tre3">`;
+  for (const x of ["A", "B", "C"]) h += `<button class="${x === k ? "qui" : ""}" onclick="vediSeduta('${x}')"><i>${x}</i><span><b>${esc(SEDUTE[x].corto.split(" · ")[1])}</b><small>${fatte[x] ? "fatta " + nomeGiorno(fatte[x].data) + " ✓" : x === pross ? "consigliata" : "da fare"}</small></span></button>`;
+  h += `</div><h2>In più</h2><div class="altre tre3">`;
+  for (const x of ["M", "F"]) h += `<button class="${x === k ? "qui" : ""}" onclick="vediSeduta('${x}')"><i>${x}</i><span><b>${esc(SEDUTE[x].corto)}</b><small>${SEDUTE[x].es.length} ${SEDUTE[x].es.length === 1 ? "esercizio" : "esercizi"}</small></span></button>`;
+  h += `<button onclick="inizia('L')"><i>+</i><span><b>Libera</b><small>scegli tu</small></span></button></div>
+    <p class="muto conta">Tocca una seduta per vedere gli esercizi; da lì la puoi iniziare.</p>
     <h2>Come funziona la scheda</h2>
-    <div class="card"><details class="primo"><summary>Il percorso</summary><table>
+    <div class="card"><details class="primo"><summary>La settimana</summary><ul>
+      <li><b>3 sedute di pesi</b> a settimana, nei giorni che scegli tu.</li>
+      <li>Meglio <b>un giorno di pausa</b> tra due sedute di pesi.</li>
+      <li>Ordine consigliato <b>A → B → C</b>. A e C sono pensate per casa, B per la palestra.</li>
+      <li><b>Mini routine</b> a corpo libero (8 minuti) nei giorni senza pesi, due volte a settimana.</li>
+      <li><b>Fiato</b>: una corsa facile a settimana.</li>
+      <li><b>Ogni giorno</b> 8000-10.000 passi.</li></ul></details>
+    <details><summary>Il percorso</summary><table>
       <tr><td><b>Rientro</b><br><span class="muto">12/11 → 22/11</span></td><td>2 serie dove ne sono scritte 3, tutto a RIR 3</td></tr>
       <tr><td><b>Blocco 1</b><br><span class="muto">23/11 → 20/12</span></td><td>tutte le serie, RIR 2 sui multiarticolari, RIR 1-2 sugli isolamenti</td></tr>
       <tr><td><b>Deload</b><br><span class="muto">21/12 → 03/01</span></td><td>le sedute che riesci, metà serie, RIR 4</td></tr>
@@ -532,20 +568,8 @@ function vScheda() {
       <li><b>Discesa controllata</b> in 2-3", movimento completo, nessun rimbalzo.</li>
       <li><b>Riscaldamento</b>: 5' di movimento, poi 2 serie di avvicinamento solo sul primo esercizio.</li>
       <li><b>Seduta minima</b> per i giorni no: i primi 3 esercizi. Conta come fatta.</li>
-      <li><b>Seduta saltata</b>: non si recupera e non si raddoppia, riparti dalla successiva.</li></ul></details>
-    <details><summary>La settimana</summary><ul>
-      <li><b>Lunedì</b> A a casa · <b>mercoledì o giovedì</b> B in palestra · <b>sabato</b> C a casa.</li>
-      <li><b>Martedì e venerdì</b>: mini routine a corpo libero, 8 minuti.</li>
-      <li><b>Domenica</b>: fiato, corsa facile.</li>
-      <li><b>Ogni giorno</b> 8000-10.000 passi.</li></ul></details></div>`;
+      <li><b>Seduta saltata</b>: non si recupera e non si raddoppia, riparti dalla successiva.</li></ul></details></div>`;
   return h;
-}
-
-let giornoSel = null;
-// tocco su un giorno della striscia: dalla home apre la scheda su quel giorno
-function vediGiorno(g) {
-  giornoSel = g === oggi() ? null : g; schedaSel = null;
-  if (sub !== "scheda") { sub = "scheda"; disegna(); window.scrollTo(0, 0); } else tieni(disegna);
 }
 function vediSeduta(k) { schedaSel = k; disegna(); window.scrollTo(0, 0); }
 
@@ -556,17 +580,18 @@ const PROTEINE = ["Petto di pollo o tacchino|200 g", "Manzo magro (fesa, girello
 const CARBO = [["Pasta, anche integrale", 120, 70], ["Riso basmati o parboiled", 110, 65], ["Cous cous", 120, 70], ["Gnocchi di patate", 270, 160], ["Patate", 450, 270], ["Pane", 150, 90]];
 let ciboOn = null;                                  // null: lo decide il giorno
 function giornoOn(d) {
-  const q = quadro(), k = q.tipoDel(d, q.dow);
-  return (k && "ABC".includes(k)) || S.sedute.some((s) => s.data === d && "ABC".includes(s.tipo));
+  // ON se quel giorno c'è una seduta di pesi, salvata o in corso: i giorni non sono più fissi
+  const pesi = (s) => ["A", "B", "C"].includes(s.tipo);
+  return S.sedute.some((s) => s.data === d && pesi(s)) || !!(S.corso && S.corso.data === d && pesi(S.corso));
 }
 function vCibo() {
   const d = oggi(), auto = giornoOn(d), on = ciboOn == null ? auto : ciboOn, N = CIBO[on ? "on" : "off"];
   const riga = (x) => { const [a, b] = x.split("|"); return `<li><span>${a}</span><b>${b || ""}</b></li>`; };
   const pasto = (ora, nome, kcal, corpo) => `<div class="card pasto"><div class="riga tra"><div><div class="sopra">${ora}</div><div class="nome">${nome}</div></div><span class="pillola">${kcal}</span></div>${corpo}</div>`;
   const lista = (t, v) => `${t ? `<h3>${t}</h3>` : ""}<ul>${v.map(riga).join("")}</ul>`;
-  let h = `<div class="riga testata">${freccia("null")}<div><div class="sopra">Versione 2.2 · definizione lenta</div><h1>Alimentazione</h1></div></div>
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.2 · definizione lenta</div><h1>Alimentazione</h1></div></div>
     <div class="g2"><button class="${on ? "pri" : ""}" onclick="ciboOn=true;tieni(disegna)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="ciboOn=false;tieni(disegna)">Giorno OFF · riposo</button></div>
-    <p class="muto conta">Oggi è un giorno <b>${auto ? "ON" : "OFF"}</b>${auto ? ": hai i pesi" : ": riposo, mini routine o corsa"}. Tra ON e OFF cambiano solo la banana e il carboidrato del pranzo.</p>
+    <p class="muto conta">${auto ? "Oggi hai segnato una seduta di pesi: <b>giorno ON</b>." : "Oggi non risultano pesi: <b>giorno OFF</b>. Se ti alleni più tardi, tocca Giorno ON."} Tra ON e OFF cambiano solo la banana e il carboidrato del pranzo.</p>
     <div class="tess"><div><b>${N.kcal}</b>kcal</div><div><b>${N.p} g</b>proteine</div><div><b>${N.c} g</b>carboidrati</div><div><b>${N.g} g</b>grassi</div></div>
     <p class="muto conta">Pesi a crudo, frutta senza buccia. Olio sempre pesato.</p>`;
   h += pasto("8:00", "Colazione", "~440 kcal · P 38", lista("", ["Latte parzialmente scremato o delattosato|250 ml", "Orzo solubile|5 g", "Whey isolate, sciolte nel latte|25 g"]) +
@@ -986,9 +1011,47 @@ const OMINO = {
   c: `<line class="sbarra" x1="15" y1="40" x2="145" y2="40"/><path class="corpo" d="M80 104 L80 175 M72 250 L74 175 L86 175 L88 250 M64 108 L80 110 L96 108"/><circle class="testa" cx="80" cy="93" r="11"/><path class="braccio" d="M55 40 L64 108 M105 40 L96 108"/><circle class="mano" cx="55" cy="40" r="6"/><circle class="mano" cx="105" cy="40" r="6"/>`,
 };
 const omino = (k) => `<svg viewBox="0 0 160 260">${OMINO[k]}</svg>`;
+/* La voce "Guide" della barra: un indice, e dentro le singole guide. Per aggiungerne una: una riga in GUIDE e la sua funzione. */
+let guida = null;
+function apriGuida(g) { guida = g; disegna(); window.scrollTo(0, 0); }
+const GUIDE = [
+  ["trazioni", "Trazioni", "I tre esercizi alla sbarra, con disegni, errori e test", '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>'],
+  ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'],
+  ["sigle", "Sigle e parole", "RIR, superserie, recupero, deload e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>'],
+];
 function vTecnica() {
-  return `<h1>Trazioni</h1>
-  <p class="muto">I tre esercizi alla sbarra di lunedì, giovedì e sabato. Obiettivo: la prima trazione da solo.</p>
+  if (guida === "trazioni") return vTrazioni();
+  if (guida === "esercizi") return vEsercizi();
+  if (guida === "sigle") return vSigle();
+  return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
+    GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')"><i><svg viewBox="0 0 24 24">${g[3]}</svg></i><span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
+}
+const testaGuida = (t) => `<div class="riga testata">${freccia("apriGuida(null)")}<div><div class="sopra">Guide</div><h1>${t}</h1></div></div>`;
+function vEsercizi() {
+  let h = testaGuida("Esercizi") + `<p class="muto">Tocca un esercizio per aprire la sua spiegazione.</p>`; const visti = {};
+  for (const k of ["A", "B", "C", "M", "F"]) {
+    const es = SEDUTE[k].es.filter((e) => !visti[e.id]); if (!es.length) continue;
+    h += `<h2>${esc(SEDUTE[k].nome)}</h2><div class="card"><ol class="piano">`;
+    for (const e of es) { visti[e.id] = 1; h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}<br><small class="muto">${INFO[e.id] ? esc(INFO[e.id].m) : ""}</small></span><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`; }
+    h += `</ol></div>`;
+  }
+  return h;
+}
+function vSigle() {
+  const v = [["RIR", "Ripetizioni in riserva: quante ne avresti ancora fatte, pulite, a fine serie. RIR 2 = ti fermi con 2 nel serbatoio. RIR 0 = non ne usciva più nessuna."],
+    ["3 × 8-12", "3 serie; in ognuna resti tra 8 e 12 ripetizioni."], ["Doppia progressione", "Prima sali di ripetizioni fino al massimo in tutte le serie, poi sali di carico e riparti dal minimo."],
+    ["rec", "Recupero tra una serie e l'altra: 2' sui multiarticolari, 60-90\" sugli isolamenti."], ["Superserie", "Due esercizi alternati senza pausa tra l'uno e l'altro, poi 60\" di recupero."],
+    ["Multiarticolare", "Esercizio che muove più articolazioni: squat, panca, rematore, lat machine."], ["Isolamento", "Esercizio su una sola articolazione: curl, alzate laterali, leg extension."],
+    ["Eccentrica", "La fase in cui il peso scende. Va controllata in 2-3\"."], ["ROM", "Ampiezza del movimento. Completa: dal massimo allungamento alla chiusura."],
+    ["Massimale stimato", "Il carico che faresti per una sola ripetizione, calcolato dalla tua serie migliore. Serve a confrontare sedute con carichi e ripetizioni diversi."],
+    ["Rientro", "Le prime settimane dopo uno stop: meno serie e più margine, per riabituare i tendini."], ["Deload", "Settimana di scarico: metà serie e sforzo basso, per recuperare."],
+    ["Seduta minima", "I primi 3 esercizi e basta. Per i giorni no: conta come fatta."], ["Come stai oggi", "Cinque voci da 1 a 5. 21-25 verde, 16-20 giallo, 11-15 arancione, fino a 10 rosso: la seduta si adatta."],
+    ["Giorno ON / OFF", "ON è il giorno con i pesi: più carboidrati. OFF è il giorno senza: meno carboidrati, stesse proteine."]];
+  return testaGuida("Sigle e parole") + `<div class="card spi">${v.map((x) => `<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`;
+}
+function vTrazioni() {
+  return testaGuida("Trazioni") + `
+  <p class="muto">I tre esercizi alla sbarra, a inizio seduta. Obiettivo: la prima trazione da solo.</p>
   <div class="card"><div class="nome">La presa, uguale per tutti e tre</div><ul>
     <li><b>Prona</b>: palmi in avanti, pollice chiuso attorno alla sbarra.</li>
     <li>Mani <b>poco più larghe delle spalle</b>, circa un palmo oltre per lato. Non di più: con le braccia lunghe la presa larga toglie forza.</li>
@@ -1003,7 +1066,7 @@ function vTecnica() {
   <div class="fig"><div>${omino("appesa")}<b>Appesa</b>Braccia tese, spalle che salgono verso le orecchie, rilassato.</div>
     <div>${omino("scap")}<b>Scapolare</b>Gomiti sempre tesi. Tiri le spalle in basso: il corpo sale di 3-5 cm. Tieni 1".</div></div>
   <div class="card"><ul><li>Nella scapolare <b>i gomiti non si piegano mai</b>: se si piegano stai tirando con le braccia.</li><li>È il primo pezzo della trazione vera: ogni trazione parte così.</li></ul></div>
-  <h2>3 · Negativa — lun e gio 2 × 3, sab 4 × 3</h2>
+  <h2>3 · Negativa — sedute A e B 2 × 3, seduta C 4 × 3</h2>
   <div class="fig tre"><div>${omino("a")}<b>A · Partenza</b>Sali con un saltello o da una sedia. Mento sopra la sbarra.</div>
     <div>${omino("b")}<b>B · Discesa</b>Piano e costante. Gomiti verso i fianchi, leggermente davanti al busto.</div>
     <div>${omino("c")}<b>C · Arrivo</b>Braccia distese, senza mollare l'ultimo tratto.</div></div>
@@ -1017,7 +1080,7 @@ function vTecnica() {
     <tr><td>Dondolio, gambe che scalciano</td><td>addome contratto, piedi uniti leggermente avanti</td></tr>
     <tr><td>Spalle alle orecchie in discesa</td><td>petto alto, spalle basse fino a braccia quasi tese</td></tr></table></div>
   <h2>Il test, ogni 2 settimane</h2>
-  <div class="card"><p>Il sabato, prima delle negative: una trazione vera, da braccia distese al mento sopra la sbarra. Puoi provarla anche con <b>presa supina</b> (palmi verso di te, mani alla larghezza delle spalle): è più facile, perché i bicipiti aiutano di più.</p>
+  <div class="card"><p>Nella seduta C, prima delle negative: una trazione vera, da braccia distese al mento sopra la sbarra. Puoi provarla anche con <b>presa supina</b> (palmi verso di te, mani alla larghezza delle spalle): è più facile, perché i bicipiti aiutano di più.</p>
     <p class="muto">Tempo realistico per la prima trazione: 6-12 settimane.</p></div>
   <p class="muto">Disegni: Everkinetic, CC BY-SA 3.0 · Foto: PTPioneer (www.ptpioneer.com), CC BY 2.0 · da Wikimedia Commons.</p>`;
 }
@@ -1056,7 +1119,8 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.2 del 05/11/2026 · app v8</p>`;
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.2 del 05/11/2026 · app v9</p>
+  <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
 async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Taccuino palestra", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
@@ -1083,7 +1147,7 @@ const TABS = [
   { id: "allena", nome: "Home", ico: '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>' },
   { id: "diario", nome: "Peso", ico: '<path d="M3 17l5-5 4 3 8-8M15 7h5v5"/>' },
   { id: "storico", nome: "Storico", ico: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
-  { id: "tecnica", nome: "Trazioni", ico: '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>' },
+  { id: "tecnica", nome: "Guide", ico: '<path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 21V5M9 8h6M9 12h4"/>' },
   { id: "esporta", nome: "Coach", ico: '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>' },
 ];
 const GL_VERT = `attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }`;
@@ -1433,7 +1497,7 @@ function infoEs(id) {
       <h2>Errori da evitare</h2><div class="card"><ul class="err">${I.e.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
       <h2>Se non puoi farlo</h2><div class="card">${esc(I.a)}</div>`;
   }
-  if (["appesa", "scapolari", "negative"].includes(id)) h += `<button class="largo" onclick="chiudi();vai('tecnica')">Apri la guida Trazioni con i disegni</button>`;
+  if (["appesa", "scapolari", "negative"].includes(id)) h += `<button class="largo" onclick="chiudi();vai('tecnica');apriGuida('trazioni')">Apri la guida Trazioni con i disegni</button>`;
   apri(h + `<button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
 
@@ -1443,6 +1507,7 @@ function infoEs(id) {
 function passoIndietro() {
   if ($("foglio").style.display === "block") { chiudi(); return true; }
   if (tab === "allena" && S.corso) { indietro(); return true; }
+  if (tab === "tecnica" && guida) { apriGuida(null); return true; }
   if (tab !== "allena") { vai("allena"); return true; }
   if (sub) { apriSub(null); return true; }
   return false;
