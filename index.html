@@ -179,6 +179,22 @@ ul { margin:6px 0; padding-left:20px; } li { margin:4px 0; }
 .vuoto { text-align:center; padding:34px 16px; color:var(--muto); }
 .vuoto b { display:block; color:var(--testo); font-size:17px; margin-bottom:4px; }
 
+/* scheda informativa dell'esercizio */
+button.info { flex:none; width:30px; height:30px; min-height:30px; padding:0; border-radius:50%; font:italic 700 16px Georgia,'Times New Roman',serif; line-height:1;
+              color:var(--verde); background:var(--verde3); border-color:rgba(61,220,132,.4); }
+ol.piano li { cursor:pointer; }
+#foglio.pagina { height:92vh; max-height:92vh; }
+#foglio h2:first-of-type { margin-top:18px; }
+.spi > div { display:grid; grid-template-columns:96px 1fr; gap:10px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.07); font-size:14px; }
+.spi > div:first-child { padding-top:0; } .spi > div:last-child { border-bottom:0; padding-bottom:0; }
+.spi b { color:var(--verde); font-variant-numeric:tabular-nums; }
+.spi span { color:#d3ded7; }
+ol.passi { margin:0; padding-left:22px; } ol.passi li { margin:6px 0; padding-left:2px; } ol.passi li::marker { color:var(--verde); font-weight:800; }
+ul.err { margin:0; padding:0; list-style:none; } ul.err li { margin:6px 0; padding-left:24px; position:relative; }
+ul.err li::before { content:"✕"; position:absolute; left:2px; color:var(--rosso); font-weight:800; font-size:13px; top:2px; }
+.consiglioCoach { border-color:rgba(247,169,79,.35); background:rgba(247,169,79,.08); font-size:14px; }
+.consiglioCoach b { display:block; color:var(--arancio); font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
+
 /* tecnica */
 .fig { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
 .fig.tre { grid-template-columns:1fr 1fr 1fr; }
@@ -325,7 +341,7 @@ function disegna() {
   if (inSeduta) disPan();
 }
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
-function apri(html) { $("foglio").innerHTML = html; $("foglio").style.display = "block"; $("velo").style.display = "block"; }
+function apri(html, pagina) { const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; }
 function chiudi() { $("foglio").style.display = "none"; $("velo").style.display = "none"; }
 
 /* ============ HOME ============ */
@@ -357,7 +373,7 @@ function vAllena() {
       <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div></div>
       <div class="muto">${esc(f.testo)}</div>
       <details><summary>${eOggi ? "Cosa fai oggi" : "Cosa si fa"}</summary><ol class="piano">`;
-    for (const e of se.es) h += `<li><span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b></li>`;
+    for (const e of se.es) h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
     h += `</ol></details><button class="${fattaOggi || !eOggi ? "" : "pri"} largo grosso" onclick="inizia('${sugg}')">${fattaOggi ? "Rifai la seduta" : eOggi ? "Inizia la seduta" : "Falla oggi"}</button>${torna}</div>`;
   } else {
     h += `<div class="card eroe"><span class="eti">${eOggi ? "Oggi" : esc(nomeV)}</span><div class="grande">Riposo</div>
@@ -411,7 +427,7 @@ function vSeduta() {
     const u = ultima(e.id, c.sid), att = c.cur && c.cur.e === i, tutto = e.sets.length && e.sets.every((r) => r.ok);
     h += `<div class="card ex ${att ? "att" : ""} ${tutto ? "fatto" : ""}" id="ex${i}">
       <div class="riga"><span class="n" onclick="scegli(${i},-1)">${tutto ? "✓" : i + 1}</span><div class="nome" onclick="scegli(${i},-1)">${esc(e.nome)}${daSalire(e, u) ? '<span class="badge">↑ sali di carico</span>' : ""}</div>
-        <button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div>
+        <button class="info" aria-label="Spiegazione dell'esercizio" onclick="infoEs('${esc(e.id)}')">i</button><button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div>
       <div class="det"><div class="muto">${e.sets.length} × ${esc(e.rip)}${e.u ? " " + e.u : ""}${e.norir ? "" : " · RIR " + f.rir(e)}${REC[e.t] ? " · rec " + REC[e.t] + '"' : ""}${e.ss ? " · superserie" : ""}</div>
       <div class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "prima volta"}</div>
       ${att && e.nota ? `<div class="muto consiglio">${esc(e.nota)}</div>` : ""}
@@ -479,6 +495,7 @@ function menuEs(i) {
   for (const x of righe) st += `<tr><td>${dataIt(x.d)}</td><td>${esc(testoSerie(x.e, x.e.serie))}</td></tr>`;
   apri(`<div class="nome">${esc(e.nome)}</div>${e.nota ? `<p class="muto">${esc(e.nota)}</p>` : ""}
     <div class="g2"><button onclick="chiudi();piuSerie(${i})">+ Serie</button><button onclick="menoSerie(${i})">− Serie</button></div>
+    <button class="largo" onclick="infoEs('${esc(e.id)}')">Come si fa e cosa vogliono dire i numeri</button>
     <button class="largo" onclick="sostituisci(${i})">Sostituisci esercizio</button>
     <button class="largo per" onclick="rimuovi(${i})">Rimuovi esercizio</button>
     <h2>Ultime volte</h2>${st ? `<table>${st}</table>` : `<p class="muto">Nessuna registrazione.</p>`}
@@ -716,7 +733,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 del 05/11/2026 · app v3</p>`;
+  <p class="muto" style="margin-top:16px">Scheda v2.0 del 05/11/2026 · app v6</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
 async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Taccuino palestra", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
@@ -974,6 +991,128 @@ const navVetro = (() => {
     },
   };
 })();
+
+/* ============ SCHEDA INFORMATIVA DELL'ESERCIZIO ============
+   m muscoli · p a cosa serve · c come si fa · s dove sentirlo · e errori · a alternativa se non puoi farlo.
+   Le chiavi sono gli id degli esercizi della scheda. */
+const INFO = {
+  "appesa": { m: "Presa, avambracci, spalle in allungamento", p: "Abitua mani e spalle a reggere il tuo peso: senza questo la trazione non parte.",
+    c: ["Presa prona, mani poco più larghe delle spalle, pollice chiuso attorno alla sbarra.", "Stacca i piedi e lasciati pendere a braccia tese.", "Spalle rilassate, che salgono verso le orecchie. Respira normalmente."],
+    s: "Avambracci che lavorano, allungamento sotto le ascelle.", e: ["Dondolare.", "Tenere i gomiti piegati.", "Trattenere il respiro."], a: "Se la presa cede prima dei 20\", fai più serie brevi da 10-15\"." },
+  "scapolari": { m: "Dorsali, trapezio basso", p: "È il primo centimetro di ogni trazione: insegna a partire dalle scapole e non dalle braccia.",
+    c: ["Parti dall'appesa passiva, braccia tese.", "Senza piegare i gomiti, tira le spalle in basso e lontano dalle orecchie: il corpo sale di 3-5 cm.", "Tieni 1\" in alto, poi torna giù piano."],
+    s: "Sotto le ascelle e tra le scapole, non nei bicipiti.", e: ["Piegare i gomiti: così tirano le braccia.", "Farle di slancio.", "Movimento troppo corto e veloce."], a: "Alla lat machine con carico leggero: stesso movimento, braccia tese." },
+  "negative": { m: "Dorsali, bicipiti, presa", p: "In discesa sei più forte che in salita: frenare il tuo peso costruisce la forza per la prima trazione vera.",
+    c: ["Sali con un saltello o da una sedia fino al mento sopra la sbarra.", "Scendi contando 5 secondi, a velocità costante.", "Gomiti verso i fianchi, leggermente davanti al busto.", "Arriva a braccia del tutto distese, poi risali con le gambe."],
+    s: "Dorsali e bicipiti per tutta la discesa, soprattutto nell'ultimo tratto.", e: ["Cadere negli ultimi centimetri.", "Aprire i gomiti di lato.", "Continuare quando non controlli più la discesa: mai a cedimento."],
+    a: "Macchina per trazioni assistite: sali con l'aiuto, scendi in 5\" con l'aiuto al minimo." },
+  "bulgaro": { m: "Quadricipiti, glutei", p: "Una gamba alla volta: con pochi chili a casa carica quanto uno squat pesante, e lavora il muscolo in allungamento.",
+    c: ["Collo del piede dietro appoggiato sulla panca, piede davanti a un passo lungo.", "Manubri lungo i fianchi, busto leggermente inclinato in avanti.", "Scendi in 2-3\" finché il ginocchio dietro sfiora terra.", "Spingi sul piede davanti, tutto il piede a terra."],
+    s: "Coscia e gluteo della gamba davanti.", e: ["Piede davanti troppo vicino alla panca: il tallone si alza.", "Spingere con la gamba dietro.", "Ginocchio che cade verso l'interno."], a: "Affondi indietro con manubri." },
+  "panca-piana-man": { m: "Petto, deltoide anteriore, tricipiti", p: "Con i manubri scendi più in basso che con il bilanciere: più allungamento del petto.",
+    c: ["Sdraiato, scapole strette e spinte nella panca, piedi a terra.", "Scendi in 2-3\" finché i manubri arrivano all'altezza del petto, gomiti a circa 45° dal busto.", "Spingi in alto avvicinando i manubri senza farli toccare."],
+    s: "Petto che si allunga in basso e si stringe in alto.", e: ["Spalle che si staccano dalla panca in alto.", "Gomiti larghi a 90°: stress sulla spalla.", "Discesa corta."], a: "Flessioni con i piedi rialzati, discesa lenta." },
+  "rematore-man": { m: "Dorsali, romboidi, bicipiti", p: "Tirata orizzontale: dà spessore alla schiena e bilancia le spinte.",
+    c: ["Mano e ginocchio dello stesso lato sulla panca, schiena piatta.", "Lascia scendere il manubrio fino ad allungare bene la scapola.", "Tira il gomito verso l'anca, non verso il soffitto.", "Scendi in 2-3\"."],
+    s: "Fianco della schiena, sotto l'ascella.", e: ["Ruotare il busto per tirare su il peso.", "Tirare verso la spalla: lavora solo il braccio.", "Non allungare in basso."], a: "Rematore con bilanciere, presa supina." },
+  "rumeno-bil": { m: "Femorali, glutei, lombari", p: "Allena i femorali in allungamento, che è lo stimolo più efficace per farli crescere.",
+    c: ["In piedi, bilanciere davanti alle cosce, ginocchia appena sbloccate.", "Manda il bacino indietro, come per chiudere una porta con il sedere.", "Il bilanciere scivola lungo le gambe finché i femorali tirano, di solito sotto il ginocchio.", "Risali spingendo il bacino in avanti."],
+    s: "Dietro le cosce che tirano; i lombari lavorano ma non devono fare male.", e: ["Piegare le ginocchia: diventa uno squat.", "Schiena che si arrotonda.", "Bilanciere lontano dalle gambe."], a: "Stacco rumeno su una gamba con manubrio." },
+  "laterali-panca": { m: "Deltoide laterale", p: "Sdraiato di fianco il muscolo è sotto carico già nel punto basso, dove in piedi non lavorerebbe. È il muscolo che allarga le spalle.",
+    c: ["Panca a 30-45°, sdraiato su un fianco.", "Il manubrio parte dal basso, davanti al corpo, braccio quasi teso.", "Sali fino a poco sopra l'altezza della spalla.", "Scendi in 2-3\" fino in fondo."],
+    s: "Lato esterno della spalla, bruciore già dalle prime ripetizioni.", e: ["Carico troppo alto: basta poco.", "Alzare la spalla verso l'orecchio.", "Accorciare la discesa."], a: "Alzate laterali in piedi, busto leggermente avanti." },
+  "curl-inclinata": { m: "Bicipiti, capo lungo", p: "Con il gomito dietro il busto il bicipite lavora allungato: utile con braccia lunghe come le tue.",
+    c: ["Panca a 45°, schiena e testa appoggiate, braccia che pendono dietro il busto.", "Piega i gomiti senza portarli in avanti.", "Scendi in 2-3\" fino a braccia distese."],
+    s: "Bicipite che tira forte nel punto basso.", e: ["Gomiti che avanzano.", "Staccare le spalle dalla panca.", "Fermarsi prima della distensione completa."], a: "Curl in piedi con la schiena al muro." },
+  "posteriori-panca": { m: "Deltoide posteriore, dorso alto", p: "Riequilibra le spalle chiuse da ufficio e completa la spalla vista di lato.",
+    c: ["A pancia in giù sulla panca inclinata, petto appoggiato.", "Braccia quasi tese che pendono verso terra.", "Apri all'indietro e in fuori fino all'altezza delle spalle, tieni un attimo.", "Scendi piano."],
+    s: "Dietro la spalla, non al centro della schiena.", e: ["Stringere le scapole: lavora il trapezio.", "Piegare i gomiti e remare.", "Carico troppo alto."], a: "In piedi, busto piegato a 90°, stesso movimento." },
+  "estensioni-man": { m: "Tricipiti, capo lungo", p: "Con il braccio sopra la testa il capo lungo, la parte più grossa del tricipite, lavora allungato.",
+    c: ["Seduto o in piedi, un manubrio tenuto con due mani sopra la testa.", "Gomiti stretti, che puntano in avanti e in alto.", "Scendi dietro la nuca fino in fondo in 2-3\".", "Distendi senza spostare i gomiti."],
+    s: "Dietro il braccio, vicino all'ascella.", e: ["Gomiti che si aprono.", "Inarcare la schiena.", "Discesa a metà."], a: "Estensioni sdraiato con i manubri, braccia inclinate verso la testa." },
+  "hack": { m: "Quadricipiti, glutei", p: "Qui metti il carico alto sulle gambe che a casa non hai, con la schiena appoggiata e sicura.",
+    c: ["Piedi alla larghezza delle spalle, a metà pedana.", "Scendi in 2-3\" il più in basso possibile, talloni sempre appoggiati.", "Risali senza bloccare di scatto le ginocchia."],
+    s: "Tutta la coscia davanti, soprattutto nel punto basso.", e: ["Discesa a metà con troppo carico.", "Talloni che si alzano.", "Ginocchia che chiudono verso l'interno.", "Bacino che si stacca dallo schienale."], a: "Leg press, piedi a metà pedana, discesa profonda." },
+  "lat": { m: "Dorsali, bicipiti", p: "È la trazione con il carico regolabile: la forza che fai qui si trasferisce alla sbarra.",
+    c: ["Presa prona poco più larga delle spalle, cosce bloccate sotto i cuscini.", "Parti a braccia distese con le scapole \"alte\".", "Tira la barra verso la parte alta del petto: prima le scapole giù, poi i gomiti verso i fianchi.", "Risali in 2-3\" fino a distendere del tutto."],
+    s: "Ai lati della schiena, sotto le ascelle.", e: ["Buttarsi indietro con il busto.", "Tirare dietro la nuca.", "Non distendere le braccia in alto."], a: "Macchina per trazioni assistite, oppure pulley basso." },
+  "panca-incl-bil": { m: "Petto alto, deltoide anteriore, tricipiti", p: "La parte alta del petto è quella che riempie sotto le clavicole.",
+    c: ["Panca a 30°, non di più: oltre lavorano le spalle.", "Scapole strette, piedi a terra, presa poco più larga delle spalle.", "Scendi in 2-3\" fino a sfiorare la parte alta del petto.", "Spingi in alto e leggermente indietro."],
+    s: "Petto sotto le clavicole.", e: ["Panca troppo inclinata.", "Rimbalzo sul petto.", "Gomiti a 90° dal busto.", "Sedere che si stacca."], a: "Panca inclinata con manubri, oppure chest press inclinata." },
+  "leg-curl": { m: "Femorali", p: "Da seduto i femorali partono allungati: cresce di più che da sdraiato.",
+    c: ["Schienale regolato in modo che il ginocchio sia in linea con il perno della macchina.", "Busto leggermente inclinato in avanti, mani sulle maniglie.", "Piega fino in fondo, tieni un attimo.", "Risali in 2-3\" fino a gamba quasi distesa."],
+    s: "Dietro la coscia, dal ginocchio al gluteo.", e: ["Lasciar tornare su il peso di colpo.", "Sedere che si alza.", "Movimento corto."], a: "Leg curl sdraiato." },
+  "laterali-cavo": { m: "Deltoide laterale", p: "Il cavo tiene il muscolo in tensione per tutto il movimento, anche in basso.",
+    c: ["Carrucola in basso, cavo che passa dietro il corpo, un braccio alla volta.", "Sali di lato fino all'altezza della spalla, gomito appena piegato.", "Scendi in 2-3\" lasciando che il cavo porti la mano dietro la schiena."],
+    s: "Lato esterno della spalla.", e: ["Alzare la spalla verso l'orecchio.", "Aiutarsi con il busto.", "Carico troppo alto."], a: "Alzate laterali con manubri." },
+  "tricipiti-cavo": { m: "Tricipiti, capo lungo", p: "Stesso principio delle estensioni con manubrio, con tensione costante.",
+    c: ["Corda sulla carrucola bassa o media, spalle al cavo, un piede avanti.", "Gomiti accanto alle orecchie, mani dietro la nuca.", "Distendi in avanti e in alto senza muovere i gomiti.", "Torna in 2-3\" fino al massimo allungamento."],
+    s: "Dietro il braccio.", e: ["Gomiti che si aprono o scendono.", "Spingere con il busto."], a: "Estensioni sopra la testa con un manubrio." },
+  "leg-ext": { m: "Quadricipiti", p: "Isola la coscia davanti, compreso il retto femorale che squat e pressa stimolano poco.",
+    c: ["Ginocchio in linea con il perno, cuscino sopra la caviglia.", "Schienale un po' reclinato, se si può.", "Distendi fino in cima, tieni 1\".", "Scendi in 2-3\" fino in fondo."],
+    s: "Tutta la coscia davanti, bruciore forte a fine serie.", e: ["Lanciare il peso.", "Non scendere fino in fondo.", "Sedere che si stacca."], a: "Sissy squat appoggiato, o un'altra serie di hack squat leggero." },
+  "crunch-cavo": { m: "Retto dell'addome", p: "Gli addominali crescono come gli altri muscoli: con un carico che sale nel tempo.",
+    c: ["In ginocchio davanti al cavo alto, corda tenuta ai lati della testa.", "Fianchi fermi: arrotola la schiena portando il petto verso il bacino.", "Tieni 1\" in chiusura, risali piano fino ad allungare l'addome."],
+    s: "Addome, non braccia né fianchi.", e: ["Tirare con le braccia.", "Sedersi sui talloni a ogni ripetizione.", "Schiena dritta che si piega solo all'anca."], a: "Crunch inverso a terra." },
+  "affondi": { m: "Glutei, quadricipiti", p: "Il passo indietro è più gentile sulle ginocchia e carica bene il gluteo.",
+    c: ["In piedi, manubri lungo i fianchi.", "Passo lungo indietro, scendi finché il ginocchio dietro sfiora terra.", "Busto leggermente avanti, peso sul piede davanti.", "Spingi sul piede davanti e torna su."],
+    s: "Gluteo e coscia della gamba davanti.", e: ["Passo corto.", "Spingere con la gamba dietro.", "Ginocchio davanti che cade in dentro."], a: "Squat bulgaro." },
+  "panca-incl-man": { m: "Petto alto, deltoide anteriore, tricipiti", p: "Seconda spinta della settimana per il petto alto, con più allungamento.",
+    c: ["Panca a 30°, scapole strette.", "Scendi in 2-3\" finché i manubri sono all'altezza del petto, gomiti a circa 45°.", "Spingi in alto avvicinandoli."],
+    s: "Petto sotto le clavicole.", e: ["Panca troppo inclinata.", "Discesa corta.", "Spalle che si staccano in alto."], a: "Flessioni con i piedi rialzati." },
+  "rematore-bil": { m: "Dorsali, romboidi, bicipiti", p: "La presa supina fa lavorare di più dorsali e bicipiti: aiuta la trazione.",
+    c: ["Presa supina alla larghezza delle spalle, busto a circa 45°, schiena piatta.", "Tira il bilanciere verso l'ombelico, gomiti vicini ai fianchi.", "Scendi in 2-3\" fino a braccia distese."],
+    s: "Centro e lati della schiena.", e: ["Raddrizzare il busto a ogni ripetizione.", "Schiena che si arrotonda.", "Strattonare."], a: "Rematore con manubrio alla panca." },
+  "rumeno-1g": { m: "Femorali, glutei", p: "Su una gamba sola, pochi chili bastano a caricare bene i femorali.",
+    c: ["Manubrio nella mano opposta alla gamba d'appoggio, l'altra mano al muro.", "Bacino indietro, la gamba libera sale dietro in linea con il busto.", "Scendi finché il femorale tira, schiena piatta.", "Risali spingendo il bacino in avanti."],
+    s: "Dietro la coscia della gamba d'appoggio.", e: ["Ruotare il bacino verso l'esterno.", "Piegare troppo il ginocchio.", "Rinunciare al muro: conta il femorale, non l'equilibrio."], a: "Stacco rumeno con bilanciere, discesa in 4\"." },
+  "laterali-piedi": { m: "Deltoide laterale", p: "Terza dose settimanale per le spalle: è la priorità del tuo obiettivo.",
+    c: ["In piedi, busto leggermente inclinato in avanti.", "Braccia appena piegate, sali di lato e un po' in avanti fino all'altezza della spalla.", "Scendi in 2-3\"."],
+    s: "Lato esterno della spalla.", e: ["Slancio con il busto.", "Spalle alle orecchie.", "Salire oltre la spalla."], a: "Alzate laterali di fianco su panca inclinata." },
+  "martello": { m: "Brachiale, brachioradiale, bicipiti", p: "Lavora il muscolo sotto il bicipite e l'avambraccio: dà spessore al braccio.",
+    c: ["In piedi, manubri con i palmi rivolti verso i fianchi.", "Piega i gomiti senza ruotare i polsi.", "Scendi in 2-3\" fino a braccia distese."],
+    s: "Lato esterno del braccio e avambraccio.", e: ["Gomiti che avanzano.", "Dondolare con il busto."], a: "Curl su panca inclinata con presa neutra." },
+  "gambe-sbarra": { m: "Addominali, flessori dell'anca, presa", p: "Allena l'addome e intanto la presa, che serve per la trazione.",
+    c: ["Appeso alla sbarra, corpo fermo.", "Porta le ginocchia al petto arrotolando il bacino verso l'alto.", "Scendi piano, senza lasciar dondolare le gambe."],
+    s: "Parte bassa dell'addome.", e: ["Dondolio.", "Alzare solo le cosce senza muovere il bacino.", "Scendere di colpo."], a: "Crunch inverso a terra." },
+  "calf-man": { m: "Polpacci", p: "Il polpaccio cresce se lo allunghi sotto carico: per questo il gradino e la pausa in basso.",
+    c: ["Avampiede sul gradino, tallone fuori, manubrio nella mano dello stesso lato.", "L'altra mano al muro.", "Scendi fino in fondo e fermati 1\".", "Sali più in alto che puoi, senza rimbalzo."],
+    s: "Polpaccio che tira in basso e si contrae in alto.", e: ["Rimbalzare.", "Movimento corto.", "Ginocchio che si piega."], a: "Stesso esercizio senza manubrio, discesa in 4\"." },
+  "calf-libero": { m: "Polpacci", p: "A corpo libero i polpacci si allenano bene anche in trasferta.",
+    c: ["Avampiede su un gradino, tallone fuori, una mano al muro.", "Scendi fino in fondo e fermati 1\".", "Sali più in alto che puoi."],
+    s: "Polpaccio.", e: ["Rimbalzare.", "Movimento corto."], a: "Su due gambe se su una non arrivi a 12." },
+  "crunch-inverso": { m: "Addominali", p: "Senza attrezzi, lavora l'addome muovendo il bacino: aiuta anche la postura del bacino.",
+    c: ["Sdraiato, mani lungo i fianchi, ginocchia piegate a 90°.", "Arrotola il bacino staccandolo da terra, ginocchia verso il petto.", "Scendi in 3\" senza appoggiare i piedi."],
+    s: "Parte bassa dell'addome.", e: ["Lanciare le gambe.", "Spingere con le mani.", "Inarcare la schiena in discesa."], a: "Con le mani che tengono un mobile dietro la testa, se scivoli." },
+  "corsa": { m: "Cuore e polmoni", p: "Base di fiato che non toglie recupero alle gambe.",
+    c: ["Ritmo a cui riesci a parlare a frasi intere.", "4 minuti di corsa facile, 1 di camminata, per 30 minuti.", "Ogni settimana 5 minuti in più, fino a 40 di corsa continua."],
+    s: "Respiro impegnato ma sotto controllo.", e: ["Partire troppo forte.", "Trasformarla in una gara."], a: "40' di bici o camminata veloce in salita, o una partita di calcetto." },
+};
+function infoEs(id) {
+  const c = S.corso, inC = c ? c.es.find((x) => x.id === id) : null, e = inC || catalogo()[id]; if (!e) return;
+  const f = fase(c ? c.data : oggi()), n = inC ? inC.sets.length : f.serie(e), I = INFO[id], [a, b] = intervallo(e);
+  const un = e.u === "sec" ? "secondi" : e.u === "min" ? "minuti" : "ripetizioni", comp = e.ss ? catalogo()[e.ss] : null, r = [];
+  r.push([`${n} × ${e.rip}${unita(e)}`, `${n} serie da ${e.rip} ${un}${/^per gamba/i.test(e.nota || "") ? " per gamba: prima tutte con una, poi tutte con l'altra" : ""}.` +
+    (a !== b ? ` Scegli un ${e.nokg ? "ritmo" : "carico"} che ti tenga tra ${a} e ${b}. Quando fai ${b} in tutte le serie, la volta dopo ${e.nokg ? "rendi l'esercizio più difficile (discesa più lenta)" : "sali di carico e riparti da " + a}.` : "")]);
+  if (!e.norir) r.push([`RIR ${f.rir(e)}`, `Ripetizioni che ti restano "nel serbatoio" a fine serie. Ti fermi quando ne faresti ancora ${f.rir(e)} pulite. RIR 0 vuol dire che non ne usciva più nessuna.`]);
+  if (comp) r.push(["Superserie", `Si alterna con "${comp.nome}": una serie di uno, subito una serie dell'altro, poi 60" di pausa. Serve a risparmiare tempo.`]);
+  else if (REC[e.t]) r.push([`rec ${REC[e.t]}"`, `Recupero tra una serie e l'altra. Il timer parte da solo quando premi "Fatto" e vibra alla fine.`]);
+  if (!e.u && !e.nokg) r.push(["↑ sali di carico", "Compare accanto al nome quando l'ultima volta hai raggiunto il massimo delle ripetizioni in tutte le serie."]);
+  r.push([f.nome.split(" · ")[0], f.testo]);
+  let h = `<div class="riga tra"><div class="nome" style="font-size:21px;line-height:1.2">${esc(e.nome)}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>`;
+  if (I) h += `<p><span class="pillola">${esc(I.m)}</span></p><p>${esc(I.p)}</p>`;
+  else h += `<p class="muto">Esercizio aggiunto da te: non ho una scheda di spiegazione. Chiedila al coach in chat.</p>`;
+  h += `<h2>Cosa vogliono dire i numeri</h2><div class="card spi">${r.map((x) => `<div><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join("")}</div>`;
+  if (I) {
+    h += `<h2>Come si fa</h2><div class="card"><ol class="passi">${I.c.map((x) => `<li>${esc(x)}</li>`).join("")}</ol></div>`;
+    if (e.nota) h += `<div class="card consiglioCoach"><b>Nota del coach</b>${esc(e.nota)}</div>`;
+    h += `<h2>Dove lo devi sentire</h2><div class="card">${esc(I.s)}</div>
+      <h2>Errori da evitare</h2><div class="card"><ul class="err">${I.e.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      <h2>Se non puoi farlo</h2><div class="card">${esc(I.a)}</div>`;
+  }
+  if (["appesa", "scapolari", "negative"].includes(id)) h += `<button class="largo" onclick="chiudi();vai('tecnica')">Apri la guida Trazioni con i disegni</button>`;
+  apri(h + `<button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
 
 /* ============ TASTO INDIETRO DEL TELEFONO ============
    Si tiene sempre una voce in più nella cronologia: il tasto indietro la consuma, l'app chiude ciò che è aperto
