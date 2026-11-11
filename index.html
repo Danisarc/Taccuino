@@ -15,7 +15,7 @@
 html { background:var(--bg); }
 body { margin:0 auto; color:var(--testo); font:16px/1.4 system-ui,'Segoe UI',Roboto,Arial,sans-serif; -webkit-font-smoothing:antialiased;
        padding:calc(18px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom)); max-width:560px; min-height:100vh; }
-body.inseduta { padding-bottom:calc(330px + env(safe-area-inset-bottom)); }
+body.inseduta { padding-bottom:calc(390px + env(safe-area-inset-bottom)); }
 /* sfondo con luci colorate: è quello che il vetro della barra lascia intravedere */
 body::before { content:""; position:fixed; inset:0; z-index:-1; background:
   radial-gradient(60% 45% at 12% 0%, rgba(61,220,132,.26), transparent 70%),
@@ -179,6 +179,44 @@ ul { margin:6px 0; padding-left:20px; } li { margin:4px 0; }
 .vuoto { text-align:center; padding:34px 16px; color:var(--muto); }
 .vuoto b { display:block; color:var(--testo); font-size:17px; margin-bottom:4px; }
 
+/* obiettivo della serie e riscaldamento, nel pannello */
+.obi { display:flex; align-items:baseline; gap:8px; margin:0 4px 8px; font-size:13px; white-space:nowrap; overflow:hidden; }
+.obi span { flex:none; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--verde); }
+.obi b { flex:none; font-size:17px; font-variant-numeric:tabular-nums; }
+.obi small { color:var(--muto); font-size:12px; overflow:hidden; text-overflow:ellipsis; }
+/* come stai oggi */
+.voce { margin:14px 0; } .voce b { font-size:15px; }
+.cinque { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:8px; }
+.cinque button { min-height:52px; font-size:18px; font-weight:700; padding:0; color:var(--muto); }
+.cinque button.on { background:var(--verde3); border-color:var(--verde); color:var(--verde); }
+.esito { font-size:14px; border-left-width:5px; } .esito b { display:block; font-size:18px; margin-bottom:2px; }
+.esito.verde { border-left-color:var(--verde); } .esito.giallo { border-left-color:#f2d14b; } .esito.arancione { border-left-color:var(--arancio); } .esito.rosso { border-left-color:var(--rosso); }
+.sem { font-weight:700; color:var(--testo); } .sem::before { content:""; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; background:var(--verde); }
+.sem.giallo::before { background:#f2d14b; } .sem.arancione::before { background:var(--arancio); } .sem.rosso::before { background:var(--rosso); }
+/* riepilogo */
+.tess { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0; }
+.tess div { background:var(--card); border:1px solid var(--linea); border-radius:16px; padding:10px 4px; text-align:center; font-size:11px; color:var(--muto); }
+.tess b { display:block; font-size:21px; color:var(--testo); line-height:1.2; font-variant-numeric:tabular-nums; }
+.rr { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.07); font-size:14px; }
+.rr:first-child { padding-top:0; } .rr:last-child { border-bottom:0; padding-bottom:0; }
+.rr span { min-width:0; } .rr small { display:block; color:var(--muto); font-size:12px; }
+.rr b { flex:none; font-size:12px; padding:3px 9px; border-radius:20px; background:rgba(255,255,255,.08); color:var(--muto); white-space:nowrap; }
+.rr b.su, .rr b.rec { background:var(--verde3); color:var(--verde); } .rr b.giu { background:rgba(255,107,94,.14); color:var(--rosso); }
+/* grafici */
+select { font:inherit; color:var(--testo); background:rgba(0,0,0,.35); border:1px solid var(--linea); border-radius:14px; padding:10px 12px; width:100%; min-height:48px; margin-top:10px; color-scheme:dark; }
+.graf { width:100%; height:auto; display:block; touch-action:pan-y; cursor:crosshair; }
+.graf text { font:500 10px system-ui,sans-serif; fill:var(--muto); }
+.graf .gr { stroke:rgba(255,255,255,.08); stroke-width:1; }
+.graf .ln { fill:none; stroke:var(--verde); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+.graf .pt { fill:var(--verde); stroke:#141b18; stroke-width:2; }
+.graf .pt2 { fill:rgba(255,255,255,.42); }
+.graf .br { fill:var(--verde); }
+.graf .rif { stroke:rgba(255,255,255,.45); stroke-width:1; stroke-dasharray:4 4; }
+.graf .cr { stroke:rgba(255,255,255,.55); stroke-width:1; }
+.gtip { font-size:13px; color:var(--muto); margin:8px 0 4px; font-variant-numeric:tabular-nums; } .gtip b { color:var(--testo); }
+.leg { display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--muto); margin-top:8px; }
+.leg i { display:inline-block; vertical-align:middle; margin-right:5px; } .leg .lp { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.42); } .leg .ll { width:16px; height:2px; background:var(--verde); }
+
 /* scheda informativa dell'esercizio */
 button.info { flex:none; width:30px; height:30px; min-height:30px; padding:0; border-radius:50%; font:italic 700 16px Georgia,'Times New Roman',serif; line-height:1;
               color:var(--verde); background:var(--verde3); border-color:rgba(61,220,132,.4); }
@@ -331,7 +369,54 @@ function daSalire(e, u) {
 
 /* ============ NAVIGAZIONE ============ */
 let tab = "allena";
-function vai(t) { tab = t; disegna(); window.scrollTo(0, 0); }
+function vai(t) { chiudi(); tab = t; disegna(); window.scrollTo(0, 0); }
+
+/* ============ GRAFICI ============
+   Una sola serie verde per grafico; nel peso le pesate sono punti grigi e la media a 7 giorni è la linea.
+   Toccando il grafico compaiono giorno e valore del punto più vicino. */
+const GRAF = {};
+function assi(pts, da0, rif) {
+  const W = 320, H = 150, L = 36, R = 12, T = 10, B = 22, ys = pts.flatMap((p) => [p.y, p.y2]).filter((v) => v != null).concat(rif != null ? [rif] : []);
+  let mn = da0 ? 0 : Math.min(...ys), mx = Math.max(...ys); if (mx === mn) { mx += 1; if (!da0) mn -= 1; }
+  const m = (mx - mn) * 0.12; if (!da0) mn -= m; mx += m;
+  const t0 = pts[0].t, t1 = pts[pts.length - 1].t, conT = t0 != null && t1 > t0;
+  const X = (p, i) => L + (conT ? (p.t - t0) / (t1 - t0) : pts.length > 1 ? i / (pts.length - 1) : 0.5) * (W - L - R), Y = (v) => T + (1 - (v - mn) / (mx - mn)) * (H - T - B);
+  let g = ""; const dec = mx - mn < 8 ? 1 : 0;
+  for (const k of [0, 0.5, 1]) { const v = mn + (da0 ? 0 : m) + k * (mx - mn - (da0 ? m : 2 * m)), y = Y(v).toFixed(1);
+    g += `<line class="gr" x1="${L}" x2="${W - R}" y1="${y}" y2="${y}"/><text x="${L - 6}" y="${(+y + 3.5).toFixed(1)}" text-anchor="end">${it(v.toFixed(dec))}</text>`; }
+  g += `<text x="${L}" y="${H - 5}">${pts[0].x}</text><text x="${W - R}" y="${H - 5}" text-anchor="end">${pts[pts.length - 1].x}</text>`;
+  return { W, H, L, R, T, B, X, Y, g };
+}
+function chiudiGraf(id, a, pts, corpo, testo) {
+  GRAF[id] = { pts, xs: pts.map(a.X), W: a.W, testo };
+  const u = pts[pts.length - 1];
+  return `<div class="gtip" id="tip-${id}"><b>${u.x}</b> · ${testo(u)}</div>
+    <svg class="graf" viewBox="0 0 ${a.W} ${a.H}" role="img" onpointerdown="toccaGraf(event,'${id}')" onpointermove="toccaGraf(event,'${id}')">${a.g}${corpo}<line class="cr" id="cr-${id}" y1="${a.T}" y2="${a.H - a.B}" x1="0" x2="0" visibility="hidden"/></svg>`;
+}
+function grafLinea(id, pts, o) {
+  if (pts.length < 2) return `<p class="muto">${o.vuoto || "Il grafico compare dal secondo dato."}</p>`;
+  const a = assi(pts), linea = (k) => pts.map((p, i) => (p[k] == null ? null : a.X(p, i).toFixed(1) + "," + a.Y(p[k]).toFixed(1))).filter(Boolean).join(" ");
+  let c = "";
+  if (o.media) { c += pts.map((p, i) => `<circle class="pt2" cx="${a.X(p, i).toFixed(1)}" cy="${a.Y(p.y).toFixed(1)}" r="3"/>`).join("") + `<polyline class="ln" points="${linea("y2")}"/>`; }
+  else c += `<polyline class="ln" points="${linea("y")}"/>` + pts.map((p, i) => `<circle class="pt" cx="${a.X(p, i).toFixed(1)}" cy="${a.Y(p.y).toFixed(1)}" r="4"/>`).join("");
+  return chiudiGraf(id, a, pts, c, o.testo);
+}
+function grafBarre(id, pts, o) {
+  if (!pts.length) return `<p class="muto">${o.vuoto || "Ancora nessun dato."}</p>`;
+  const a = assi(pts, true, o.rif), passo = (a.W - a.L - a.R) / pts.length, lw = Math.min(22, passo * 0.62), base = a.Y(0);
+  const cx = (i) => a.L + passo * (i + 0.5); a.X = (p, i) => cx(i);
+  let c = pts.map((p, i) => { const y = a.Y(p.y), h = base - y; return h > 0.5 ? `<path class="br" d="M${(cx(i) - lw / 2).toFixed(1)} ${base.toFixed(1)}v${(-h + Math.min(4, h)).toFixed(1)}q0 ${-Math.min(4, h)} ${Math.min(4, lw / 2)} ${-Math.min(4, h)}h${(lw - 2 * Math.min(4, lw / 2)).toFixed(1)}q${Math.min(4, lw / 2)} 0 ${Math.min(4, lw / 2)} ${Math.min(4, h)}v${(h - Math.min(4, h)).toFixed(1)}z"/>` : ""; }).join("");
+  if (o.rif != null) c += `<line class="rif" x1="${a.L}" x2="${a.W - a.R}" y1="${a.Y(o.rif).toFixed(1)}" y2="${a.Y(o.rif).toFixed(1)}"/>`;
+  return chiudiGraf(id, a, pts, c, o.testo);
+}
+function toccaGraf(ev, id) {
+  const G = GRAF[id]; if (!G) return;
+  const r = ev.currentTarget.getBoundingClientRect(), x = ((ev.clientX - r.left) / r.width) * G.W;
+  let k = 0; G.xs.forEach((v, i) => { if (Math.abs(v - x) < Math.abs(G.xs[k] - x)) k = i; });
+  const cr = $("cr-" + id), p = G.pts[k]; cr.setAttribute("x1", G.xs[k]); cr.setAttribute("x2", G.xs[k]); cr.setAttribute("visibility", "visible");
+  $("tip-" + id).innerHTML = `<b>${p.x}</b> · ${G.testo(p)}`;
+}
+const giornoN = (d) => Math.round(new Date(d + "T12:00").getTime() / 864e5);
 function disegna() {
   navVetro.attiva(tab);
   $("vista").innerHTML = { allena: vAllena, diario: vDiario, storico: vStorico, tecnica: vTecnica, esporta: vEsporta }[tab]();
@@ -396,11 +481,67 @@ function indietro() {
 /* ============ SEDUTA IN CORSO ============ */
 const nuovaSerie = () => ({ kg: null, rip: null, rir: null, ok: false });
 function copiaEs(e, n) { const x = Object.assign({}, e); x.sets = []; for (let i = 0; i < n; i++) x.sets.push(nuovaSerie()); return x; }
+/* Come stai oggi: 5 voci da 1 a 5. 21-25 verde, 16-20 giallo, 11-15 arancione, fino a 10 rosso (regole di CLAUDE.md) */
+const VOCI = [["Sonno", "pessimo", "ottimo"], ["Energia", "scarico", "carico"], ["Dolori muscolari", "molti", "nessuno"], ["Stress", "alto", "basso"], ["Voglia di allenarti", "zero", "tanta"]];
+let PR = { k: null, v: [] };
+function livello(tot) {
+  if (tot >= 21) return { col: "verde", nome: "Verde", testo: "Seduta piena, come da scheda." };
+  if (tot >= 16) return { col: "giallo", nome: "Giallo", testo: "Carichi pieni, una serie in meno sugli isolamenti." };
+  if (tot >= 11) return { col: "arancione", nome: "Arancione", testo: "Carichi −10%, circa un terzo di serie in meno, tutto a RIR 3." };
+  return { col: "rosso", nome: "Rosso", testo: "Seduta minima: solo i primi 3 esercizi, carichi −10%, RIR 3. Oppure oggi riposo e una camminata." };
+}
 function inizia(k) {
-  const d = oggi(), f = fase(d);
-  S.corso = { tipo: k, data: d, nome: SEDUTE[k].nome, corto: SEDUTE[k].corto, inizio: Date.now(), note: "", es: SEDUTE[k].es.map((e) => copiaEs(e, f.serie(e))), cur: null };
+  if (!"ABC".includes(k)) { avvia(k); return; }
+  PR = { k, v: [null, null, null, null, null] }; disPronto();
+}
+function disPronto(tieniPos) {
+  let h = `<div class="riga tra"><div class="nome" style="font-size:21px">Come stai oggi?</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>
+    <p class="muto">Cinque tocchi, da 1 a 5. La seduta si adatta a come stai.</p>`;
+  VOCI.forEach((x, i) => {
+    h += `<div class="voce"><div class="riga tra"><b>${x[0]}</b><span class="muto">1 ${x[1]} · 5 ${x[2]}</span></div><div class="cinque">`;
+    for (let n = 1; n <= 5; n++) h += `<button class="${PR.v[i] === n ? "on" : ""}" onclick="PR.v[${i}]=${n};disPronto(true)">${n}</button>`;
+    h += `</div></div>`;
+  });
+  if (PR.v.every((x) => x)) {
+    const tot = PR.v.reduce((a, b) => a + b, 0), L = livello(tot);
+    h += `<div class="card esito ${L.col}"><b>${tot}/25 · ${L.nome}</b>${L.testo}<div class="muto">Verifica con la prima serie: se va meglio del previsto, torna ai carichi pieni.</div></div>
+      <button class="pri largo grosso" onclick="avvia(PR.k,PR.v)">${L.col === "verde" ? "Inizia la seduta" : "Inizia la seduta adattata"}</button>`;
+    if (L.col !== "verde") h += `<button class="largo" onclick="avvia(PR.k,PR.v,true)">Ignora e fai la seduta piena</button>`;
+  }
+  h += `<button class="largo" onclick="avvia(PR.k)">Salta la domanda</button>`;
+  const y = tieniPos ? $("foglio").scrollTop : 0; apri(h, true); $("foglio").scrollTop = y;
+  if (tieniPos && PR.v.every((x) => x)) $("foglio").scrollTop = $("foglio").scrollHeight;
+}
+// v: le 5 risposte (facoltative). piena: ha risposto ma vuole comunque la seduta intera
+function avvia(k, v, piena) {
+  chiudi();
+  const d = oggi(), f = fase(d), tot = v ? v.reduce((a, b) => a + b, 0) : null, L = v ? livello(tot) : null, col = L && !piena ? L.col : "verde";
+  let lista = SEDUTE[k].es;
+  if (col === "rosso") lista = lista.filter((e) => e.t !== "b").slice(0, 3);
+  const quante = (e) => {
+    const n = f.serie(e); if (e.fisse || e.t === "b") return n;
+    if (col === "giallo") return e.t !== "m" && n === e.serie ? Math.max(1, n - 1) : n;
+    if (col === "arancione") return Math.max(1, Math.min(n, Math.round(e.serie * 0.7)));
+    return n;
+  };
+  S.corso = { tipo: k, data: d, nome: SEDUTE[k].nome, corto: SEDUTE[k].corto, inizio: Date.now(), note: "", es: lista.map((e) => copiaEs(e, quante(e))), cur: null,
+    pronto: v ? { v, tot, col: L.col, piena: !!piena } : null, adatta: col === "arancione" || col === "rosso" ? { rir: "3", carico: 0.9 } : null };
   S.corso.cur = primaAperta(0); prepara(); salva(); tab = "allena"; disegna(); window.scrollTo(0, 0); sveglio();
   if (!S.corso.es.length) aggiungi();
+}
+const rirSeduta = (e) => { const c = S.corso; return c && c.adatta ? c.adatta.rir : fase(c ? c.data : oggi()).rir(e); };
+const arrot = (v, p) => Math.round((Math.round(v / (p || 2.5)) * (p || 2.5)) * 100) / 100;
+// cosa provare a fare in questa serie, partendo dall'ultima volta: doppia progressione della scheda
+function obiettivo(e, s) {
+  const c = S.corso, u = ultima(e.id, c.sid); if (!u) return null;
+  const [a, b] = intervallo(e), uv = u.serie[Math.min(s, u.serie.length - 1)], piu = e.u ? 5 : 1;
+  let kg = e.nokg ? null : uv.kg, rip = uv.rip, perche;
+  if (c.adatta) { if (kg != null) kg = arrot(kg * c.adatta.carico, e.p); perche = "giornata no: carico −10%"; }
+  else if (e.fisse || a === b) { rip = b; perche = "stesso numero, più controllo"; }
+  else if (daSalire(e, u) && uv.kg != null) { kg = arrot(uv.kg + (e.p || 2.5), e.p); rip = a; perche = "sali di carico"; }
+  else if (uv.rip >= b) { rip = b; perche = e.nokg || e.u ? "sei al massimo: più lento e pulito" : "conferma, poi si sale"; }
+  else { rip = Math.min(uv.rip + piu, b); perche = e.u ? "qualche secondo in più" : "una ripetizione in più"; }
+  return { kg, rip, prima: uv, perche };
 }
 const cE = () => (S.corso && S.corso.cur ? S.corso.es[S.corso.cur.e] : null);
 const cS = () => { const e = cE(); return e ? e.sets[S.corso.cur.s] : null; };
@@ -412,15 +553,16 @@ function primaAperta(da) {
 function prepara() {            // riempie la serie corrente con i numeri più probabili
   const c = S.corso, e = cE(), r = cS(); if (!r || r.ok) return;
   const s = c.cur.s, prima = s > 0 ? e.sets[s - 1] : null, u = ultima(e.id, c.sid), uv = u ? u.serie[Math.min(s, u.serie.length - 1)] : null;
-  if (r.kg == null && !e.nokg) r.kg = prima && prima.kg != null ? prima.kg : uv ? uv.kg : null;
-  if (r.rip == null) r.rip = prima && prima.rip != null ? prima.rip : uv ? uv.rip : null;
-  if (r.rir == null && !e.norir) r.rir = prima && prima.rir != null ? prima.rir : parseInt(String(fase(c.data).rir(e)).split("-").pop(), 10);
+  const o = obiettivo(e, s);      // la prima serie parte dall'obiettivo, le successive dalla serie appena fatta
+  if (r.kg == null && !e.nokg) r.kg = prima && prima.kg != null ? prima.kg : o ? o.kg : uv ? uv.kg : null;
+  if (r.rip == null) r.rip = prima && prima.rip != null ? prima.rip : o ? o.rip : uv ? uv.rip : null;
+  if (r.rir == null && !e.norir) r.rir = prima && prima.rir != null ? prima.rir : parseInt(String(rirSeduta(e)).split("-").pop(), 10);
 }
 function vSeduta() {
   const c = S.corso, f = fase(c.data);
   let fatte = 0, tot = 0; c.es.forEach((e) => { tot += e.sets.length; fatte += e.sets.filter((r) => r.ok).length; });
   let h = `<div class="top"><div class="riga"><button class="ico dietro" aria-label="Indietro" onclick="indietro()">‹</button><div style="min-width:0;flex:1"><div class="tit">${esc(c.corto || c.nome)}</div>
-    <div class="muto">${nomeGiorno(c.data)} ${dataIt(c.data)} · <span id="durata"></span> · ${fatte}/${tot} serie</div></div>
+    <div class="muto">${nomeGiorno(c.data)} ${dataIt(c.data)} · <span id="durata"></span> · ${fatte}/${tot} serie${c.pronto ? ` · <span class="sem ${c.pronto.col}">${c.pronto.tot}/25${c.adatta ? " adattata" : ""}</span>` : ""}</div></div>
     <button class="pri pic" onclick="fine()">Fine</button></div>
     <div class="barra"><i style="width:${tot ? Math.round((fatte / tot) * 100) : 0}%"></i></div></div>`;
   c.es.forEach((e, i) => {
@@ -428,7 +570,7 @@ function vSeduta() {
     h += `<div class="card ex ${att ? "att" : ""} ${tutto ? "fatto" : ""}" id="ex${i}">
       <div class="riga"><span class="n" onclick="scegli(${i},-1)">${tutto ? "✓" : i + 1}</span><div class="nome" onclick="scegli(${i},-1)">${esc(e.nome)}${daSalire(e, u) ? '<span class="badge">↑ sali di carico</span>' : ""}</div>
         <button class="info" aria-label="Spiegazione dell'esercizio" onclick="infoEs('${esc(e.id)}')">i</button><button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div>
-      <div class="det"><div class="muto">${e.sets.length} × ${esc(e.rip)}${e.u ? " " + e.u : ""}${e.norir ? "" : " · RIR " + f.rir(e)}${REC[e.t] ? " · rec " + REC[e.t] + '"' : ""}${e.ss ? " · superserie" : ""}</div>
+      <div class="det"><div class="muto">${e.sets.length} × ${esc(e.rip)}${e.u ? " " + e.u : ""}${e.norir ? "" : " · RIR " + rirSeduta(e)}${REC[e.t] ? " · rec " + REC[e.t] + '"' : ""}${e.ss ? " · superserie" : ""}</div>
       <div class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "prima volta"}</div>
       ${att && e.nota ? `<div class="muto consiglio">${esc(e.nota)}</div>` : ""}
       <div class="chips">`;
@@ -446,9 +588,17 @@ function disPan() {
   if (!r) { p.innerHTML = `<div class="ptit"><b>${c.es.length ? "Tutte le serie fatte" : "Nessun esercizio"}</b></div><button class="pri largo" style="margin-top:0" onclick="${c.es.length ? "fine()" : "aggiungi()"}">${c.es.length ? "Fine seduta" : "+ Aggiungi esercizio"}</button>`; return; }
   const u = e.u || "rip", f = fase(c.data);
   const st = (k, v, lab) => `<div class="st"><button onclick="passo('${k}',-1)">−</button><input inputmode="decimal" value="${esc(it(v))}" placeholder="–" onfocus="this.select()" onchange="scrivi('${k}',this.value)"><button onclick="passo('${k}',1)">+</button><small>${lab}</small></div>`;
-  let h = `<div class="ptit"><b>${esc(e.nome)}</b> · serie ${c.cur.s + 1} di ${e.sets.length} · ${esc(e.rip)} ${e.u || "rip"}</div>
+  let extra = "";
+  if (!r.ok) {
+    const o = obiettivo(e, c.cur.s), iw = c.es.findIndex((x) => !x.nokg && x.t === "m");
+    extra = o ? `<div class="obi"><span>Obiettivo</span><b>${esc(unaSerie(e, o))}</b><small>l'altra volta ${esc(unaSerie(e, o.prima))} · ${o.perche}</small></div>`
+      : `<div class="obi"><span>Prima volta</span><small>cerca ${e.nokg ? "il ritmo" : "il carico"} che ti lascia ${e.norir ? "margine" : rirSeduta(e) + " ripetizioni nel serbatoio"}</small></div>`;
+    // serie di avvicinamento: solo sul primo esercizio con carico, prima della prima serie
+    if (c.cur.e === iw && c.cur.s === 0 && r.kg) extra += `<div class="obi"><span>Riscaldamento</span><small>${it(arrot(r.kg * 0.5, e.p))} kg × 8, poi ${it(arrot(r.kg * 0.75, e.p))} kg × 4</small></div>`;
+  }
+  let h = `<div class="ptit"><b>${esc(e.nome)}</b> · serie ${c.cur.s + 1} di ${e.sets.length} · ${esc(e.rip)} ${e.u || "rip"}</div>${extra}
     <div class="ctl ${e.nokg ? "uno" : ""}">${e.nokg ? "" : st("kg", r.kg, "kg")}${st("rip", r.rip, u === "rip" ? "ripetizioni" : u === "sec" ? "secondi" : "minuti")}</div><div class="ult">`;
-  if (!e.norir) { h += `<div><div class="lbl">RIR (obiettivo ${f.rir(e)})</div><div class="rir">`; for (let n = 0; n <= 4; n++) h += `<button class="${r.rir === n ? "on" : ""}" onclick="rir(${n})">${n}${n === 4 ? "+" : ""}</button>`; h += `</div></div>`; }
+  if (!e.norir) { h += `<div><div class="lbl">RIR (obiettivo ${rirSeduta(e)})</div><div class="rir">`; for (let n = 0; n <= 4; n++) h += `<button class="${r.rir === n ? "on" : ""}" onclick="rir(${n})">${n}${n === 4 ? "+" : ""}</button>`; h += `</div></div>`; }
   h += `<button class="pri" onclick="fatto()">${r.ok ? "Salva modifica" : "Fatto ✓"}</button></div>`;
   p.innerHTML = h;
 }
@@ -547,16 +697,44 @@ function fine() {
   if (!es.length) { avvisa("Nessuna serie fatta: usa Annulla seduta"); return; }
   const aperte = c.es.reduce((n, e) => n + e.sets.filter((r) => !r.ok).length, 0);
   if (aperte && !confirm(aperte + " serie non fatte: non verranno salvate. Chiudo la seduta?")) return;
-  const s = { id: c.sid || Date.now(), data: c.data, tipo: c.tipo, nome: c.nome, corto: c.corto, es, note: c.note, minuti: c.sid ? c.minuti : Math.round((Date.now() - c.inizio) / 60000) };
+  const s = { id: c.sid || Date.now(), data: c.data, tipo: c.tipo, nome: c.nome, corto: c.corto, es, note: c.note, pronto: c.pronto || null, minuti: c.sid ? c.minuti : Math.round((Date.now() - c.inizio) / 60000) };
   S.sedute = S.sedute.filter((x) => x.id !== s.id); S.sedute.push(s);
   S.sedute.sort((a, b) => (a.data < b.data ? -1 : a.data > b.data ? 1 : a.id - b.id));
-  S.corso = null; salva(); timerStop(); vai("storico"); avvisa("Seduta salvata");
+  S.corso = null; salva(); timerStop(); vai("storico"); riepilogo(s.id, true);
+}
+/* ============ RIEPILOGO DI FINE SEDUTA ============ */
+const forza = (e) => e.serie.reduce((m, r) => Math.max(m, r.kg ? r.kg * (1 + r.rip / 30) : r.rip || 0), 0);   // massimale stimato, o ripetizioni se a corpo libero
+// serie "in cima": la più pesante, e a parità di carico quella con più ripetizioni. Così salire di carico conta sempre come progresso
+const cima = (e) => e.serie.reduce((m, r) => ((r.kg || 0) > m.kg || ((r.kg || 0) === m.kg && (r.rip || 0) > m.rip) ? { kg: r.kg || 0, rip: r.rip || 0 } : m), { kg: -1, rip: -1 });
+const cmpCima = (a, b) => a.kg - b.kg || a.rip - b.rip;
+function riepilogo(id, appena) {
+  const s = S.sedute.find((x) => x.id === id); if (!s) return;
+  const prima = S.sedute.filter((x) => x.id !== id && (x.data < s.data || (x.data === s.data && x.id < s.id)));
+  let serie = 0, vol = 0, su = 0, conf = 0, rec = 0, righe = "";
+  for (const e of s.es) {
+    serie += e.serie.length; for (const r of e.serie) if (r.kg) vol += r.kg * r.rip;
+    const vecchi = prima.map((x) => x.es.find((y) => y.id === e.id)).filter(Boolean), v = cima(e);
+    let st = "nuovo", tx = "prima volta";
+    if (vecchi.length) {
+      conf++; const pv = cima(vecchi[vecchi.length - 1]), best = vecchi.map(cima).sort(cmpCima).pop(), dl = cmpCima(v, pv);
+      const q = v.kg !== pv.kg ? (v.kg > pv.kg ? "+" : "") + it(Math.round((v.kg - pv.kg) * 100) / 100) + " kg" : (v.rip > pv.rip ? "+" : "") + it(v.rip - pv.rip) + (e.u === "sec" ? '"' : e.u === "min" ? "'" : " rip");
+      if (cmpCima(v, best) > 0) { st = "rec"; tx = "★ record " + q; rec++; su++; } else if (dl > 0) { st = "su"; tx = "▲ " + q; su++; } else if (dl < 0) { st = "giu"; tx = "▼ " + q; } else { st = "pari"; tx = "= uguale"; }
+    }
+    righe += `<div class="rr"><span>${esc(e.nome)}<small>${esc(testoSerie(e, e.serie))}</small></span><b class="${st}">${tx}</b></div>`;
+  }
+  apri(`<div class="riga tra"><div><div class="sopra">${appena ? "Seduta salvata" : "Riepilogo"}</div><div class="nome" style="font-size:21px">${esc(s.corto || s.nome)} · ${nomeGiorno(s.data)} ${dataIt(s.data)}</div></div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>
+    <div class="tess"><div><b>${s.minuti || "–"}</b>minuti</div><div><b>${serie}</b>serie</div><div><b>${it(Math.round(vol))}</b>kg sollevati</div><div><b>${rec}</b>record</div></div>
+    <p>${conf ? `<b>${su} ${su === 1 ? "esercizio" : "esercizi"} su ${conf}</b> meglio dell'ultima volta.` : "Prima seduta registrata: dalla prossima vedrai qui i confronti."}</p>
+    ${s.pronto ? `<p class="muto">Come stavi: ${s.pronto.tot}/25, ${livello(s.pronto.tot).nome.toLowerCase()}${s.pronto.piena ? " (hai scelto la seduta piena)" : ""}.</p>` : ""}
+    <h2>Esercizio per esercizio</h2><div class="card">${righe}</div>
+    <p class="muto">Il confronto è sulla serie più pesante: prima conta il carico, a parità di carico le ripetizioni.</p>
+    <button class="pri largo" onclick="chiudi();vai('esporta')">Invia al coach</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
 function annulla() { if (confirm(S.corso.sid ? "Chiudo senza salvare le modifiche?" : "Cancello la seduta in corso senza salvarla?")) { S.corso = null; salva(); timerStop(); disegna(); } }
 function riapri(id) {
   if (S.corso) { avvisa("Chiudi prima la seduta in corso"); return; }
   const s = S.sedute.find((x) => x.id === id), c = catalogo(); if (!s) return;
-  S.corso = { sid: s.id, tipo: s.tipo, data: s.data, nome: s.nome, corto: s.corto, inizio: Date.now(), minuti: s.minuti, note: s.note || "", cur: null,
+  S.corso = { sid: s.id, tipo: s.tipo, data: s.data, nome: s.nome, corto: s.corto, inizio: Date.now(), minuti: s.minuti, note: s.note || "", pronto: s.pronto || null, cur: null,
     es: s.es.map((e) => Object.assign({}, c[e.id] || {}, { id: e.id, nome: e.nome, u: e.u || "", sets: e.serie.map((r) => ({ kg: r.kg, rip: r.rip, rir: r.rir, ok: true })) })) };
   S.corso.cur = { e: 0, s: 0 }; salva(); vai("allena");
 }
@@ -585,11 +763,15 @@ function media(da, a) {
   return v.length ? { m: v.reduce((x, y) => x + y, 0) / v.length, n: v.length } : null;
 }
 function grafico() {
-  const dd = Object.keys(S.diario).filter((d) => S.diario[d].peso != null).sort().slice(-30); if (dd.length < 3) return "";
-  const v = dd.map((d) => S.diario[d].peso), mn = Math.min(...v) - 0.3, mx = Math.max(...v) + 0.3;
-  const pt = v.map((x, i) => (10 + (i * 300) / (v.length - 1)).toFixed(1) + "," + (80 - ((x - mn) / (mx - mn)) * 70).toFixed(1)).join(" ");
-  return `<svg viewBox="0 0 320 90" style="width:100%;height:90px"><polyline points="${pt}" fill="none" stroke="#34c57a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>
-    <div class="riga tra muto"><span>${dataIt(dd[0])} · ${it(v[0])} kg</span><span>${dataIt(dd[dd.length - 1])} · ${it(v[v.length - 1])} kg</span></div>`;
+  const dd = Object.keys(S.diario).filter((d) => S.diario[d].peso != null).sort().slice(-45);
+  const pts = dd.map((d) => { const m = media(meno(d, 7), d); return { x: dataIt(d), t: giornoN(d), y: S.diario[d].peso, y2: m ? m.m : S.diario[d].peso }; });
+  return `<div class="leg"><span><i class="lp"></i>pesata</span><span><i class="ll"></i>media degli ultimi 7 giorni</span></div>` +
+    grafLinea("peso", pts, { media: true, vuoto: "Il grafico compare dalla seconda pesata.", testo: (p) => `${it(p.y)} kg · media ${it(p.y2.toFixed(1))} kg` });
+}
+function grafPassi() {
+  const dd = Object.keys(S.diario).filter((d) => S.diario[d].passi != null).sort().slice(-14); if (!dd.length) return "";
+  return `<div class="card"><div class="nome">Passi</div><p class="muto">Ultimi ${dd.length} giorni segnati. La linea tratteggiata è il minimo di 8000.</p>` +
+    grafBarre("passi", dd.map((d) => ({ x: dataIt(d), y: S.diario[d].passi })), { rif: 8000, testo: (p) => `${it(p.y)} passi` }) + `</div>`;
 }
 function vDiario() {
   const d = oggi(), r = S.diario[d] || {};
@@ -604,7 +786,7 @@ function vDiario() {
   h += `<div class="card"><div class="nome">Media del peso</div>
     <p>Ultimi 7 giorni: <b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "—"}</b> ${m1 ? `<span class="muto">(${m1.n} pesate)</span>` : ""}</p>
     <p>7 giorni prima: <b>${m0 ? it(m0.m.toFixed(1)) + " kg" : "—"}</b>${m1 && m0 ? ` · variazione <b>${(m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2))} kg</b>` : ""}</p>
-    ${grafico()}<p class="muto">3-4 pesate a settimana, al mattino a digiuno. Atteso: −0,2/−0,35 kg a settimana.</p></div>`;
+    ${grafico()}<p class="muto">3-4 pesate a settimana, al mattino a digiuno. Atteso: −0,2/−0,35 kg a settimana.</p></div>` + grafPassi();
   const dd = Object.keys(S.diario).sort().reverse().slice(0, 30);
   if (dd.length) {
     h += `<div class="card"><table><tr><th>Giorno</th><th>Peso</th><th>Passi</th><th>Sonno</th><th></th></tr>`;
@@ -642,15 +824,39 @@ function vStorico() {
       h += `<tr><td>${esc(prog[k].nome)}</td><td style="white-space:nowrap">${it(a.kg)}×${a.rip} → <b>${it(b.kg)}×${b.rip}</b></td><td style="text-align:right;color:${dl > 0 ? "var(--verde)" : "var(--muto)"}">${dl > 0 ? "+" : ""}${it(dl.toFixed(1))}</td></tr>`; }
     h += `</table><p class="muto">Ultima colonna: variazione del massimale stimato, in kg.</p></div>`;
   }
-  h += `<h2>Sedute</h2>`;
+  h += andamenti() + `<h2>Sedute</h2>`;
   for (let i = S.sedute.length - 1; i >= 0; i--) {
     const s = S.sedute[i];
     h += `<div class="card"><div class="nome">${nomeGiorno(s.data)} ${dataIt(s.data)} · ${esc(s.corto || s.nome)}</div>
       <div class="muto" style="margin-bottom:6px">${s.es.reduce((n, e) => n + e.serie.length, 0)} serie${s.minuti ? " · " + s.minuti + " min" : ""}</div>`;
     for (const e of s.es) h += `<div style="font-size:14px;margin:2px 0"><span class="muto">${esc(e.nome)}</span><br>${esc(testoSerie(e, e.serie))}<span class="muto">${rirTesto(e)}</span></div>`;
     if (s.note) h += `<p class="muto">Note: ${esc(s.note)}</p>`;
-    h += `<div class="riga" style="margin-top:10px"><button class="pic" onclick="riapri(${s.id})">Modifica</button><button class="pic per" onclick="cancella(${s.id})">Elimina</button></div></div>`;
+    h += `<div class="riga" style="margin-top:10px"><button class="pic" onclick="riepilogo(${s.id})">Riepilogo</button><button class="pic" onclick="riapri(${s.id})">Modifica</button><button class="pic per" onclick="cancella(${s.id})">Elimina</button></div></div>`;
   }
+  return h;
+}
+let grafEs = null;
+function andamenti() {
+  const per = {};
+  for (const s of S.sedute) for (const e of s.es) {
+    const x = (per[e.id] = per[e.id] || { nome: e.nome, u: e.u, kg: false, pts: [] });
+    if (e.serie.some((r) => r.kg)) x.kg = true;
+    x.pts.push({ x: dataIt(s.data), t: giornoN(s.data), y: Math.round(forza(e) * 10) / 10 });
+  }
+  const ids = Object.keys(per).sort((a, b) => per[b].kg - per[a].kg || per[b].pts.length - per[a].pts.length);
+  if (!ids.length) return "";
+  if (!per[grafEs]) grafEs = ids[0];
+  const P = per[grafEs], un = P.kg ? " kg" : P.u === "sec" ? '"' : P.u === "min" ? "'" : " rip";
+  let h = `<h2>Andamenti</h2><div class="card"><div class="nome">Forza per esercizio</div>
+    <select aria-label="Esercizio" onchange="grafEs=this.value;tieni(disegna)">${ids.map((k) => `<option value="${esc(k)}" ${k === grafEs ? "selected" : ""}>${esc(per[k].nome)}</option>`).join("")}</select>
+    <p class="muto">${P.kg ? "Massimale stimato dalla serie migliore di ogni seduta, in kg. Quando sali di carico e riparti dalle ripetizioni basse può scendere di poco: è normale." : "Serie migliore di ogni seduta."}</p>` +
+    grafLinea("es", P.pts.slice(-20), { vuoto: "Il grafico compare dalla seconda seduta con questo esercizio.", testo: (p) => it(p.y) + un }) + `</div>`;
+  // serie fatte nelle ultime 8 settimane, da lunedì a domenica
+  const d = oggi(), lun = meno(d, (new Date(d + "T12:00").getDay() + 6) % 7), sett = [];
+  for (let w = 7; w >= 0; w--) { const a = meno(lun, w * 7), b = meno(a, -6);
+    sett.push({ x: dataIt(a), y: S.sedute.filter((s) => s.data >= a && s.data <= b).reduce((n, s) => n + s.es.reduce((m, e) => m + e.serie.length, 0), 0) }); }
+  h += `<div class="card"><div class="nome">Serie a settimana</div><p class="muto">Ultime 8 settimane, da lunedì a domenica.</p>` +
+    grafBarre("sett", sett, { testo: (p) => `settimana del ${p.x}: ${p.y} serie` }) + `</div>`;
   return h;
 }
 function cancella(id) { if (confirm("Elimino questa seduta dallo storico?")) { S.sedute = S.sedute.filter((s) => s.id !== id); salva(); disegna(); } }
@@ -706,6 +912,7 @@ function testoCoach(da) {
   for (const s of S.sedute.filter((x) => x.data > da)) {
     t += `## ${s.data} — ${s.nome}${s.minuti ? " (" + s.minuti + " min)" : ""}\n`;
     for (const e of s.es) t += `- ${e.nome}: ${testoSerie(e, e.serie)}${rirTesto(e)}\n`;
+    if (s.pronto) t += `Readiness (sonno/energia/dolori/stress/voglia): ${s.pronto.v.join("/")} = ${s.pronto.tot} ${s.pronto.col}${s.pronto.piena ? ", seduta piena per scelta" : ""}\n`;
     t += `Note: ${s.note || ""}\n\n`;
   }
   const dd = Object.keys(S.diario).filter((d) => d > da).sort();
@@ -733,7 +940,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 del 05/11/2026 · app v6</p>`;
+  <p class="muto" style="margin-top:16px">Scheda v2.0 del 05/11/2026 · app v7</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
 async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Taccuino palestra", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
@@ -1094,7 +1301,7 @@ function infoEs(id) {
   const un = e.u === "sec" ? "secondi" : e.u === "min" ? "minuti" : "ripetizioni", comp = e.ss ? catalogo()[e.ss] : null, r = [];
   r.push([`${n} × ${e.rip}${unita(e)}`, `${n} serie da ${e.rip} ${un}${/^per gamba/i.test(e.nota || "") ? " per gamba: prima tutte con una, poi tutte con l'altra" : ""}.` +
     (a !== b ? ` Scegli un ${e.nokg ? "ritmo" : "carico"} che ti tenga tra ${a} e ${b}. Quando fai ${b} in tutte le serie, la volta dopo ${e.nokg ? "rendi l'esercizio più difficile (discesa più lenta)" : "sali di carico e riparti da " + a}.` : "")]);
-  if (!e.norir) r.push([`RIR ${f.rir(e)}`, `Ripetizioni che ti restano "nel serbatoio" a fine serie. Ti fermi quando ne faresti ancora ${f.rir(e)} pulite. RIR 0 vuol dire che non ne usciva più nessuna.`]);
+  if (!e.norir) r.push([`RIR ${rirSeduta(e)}`, `Ripetizioni che ti restano "nel serbatoio" a fine serie. Ti fermi quando ne faresti ancora ${rirSeduta(e)} pulite. RIR 0 vuol dire che non ne usciva più nessuna.`]);
   if (comp) r.push(["Superserie", `Si alterna con "${comp.nome}": una serie di uno, subito una serie dell'altro, poi 60" di pausa. Serve a risparmiare tempo.`]);
   else if (REC[e.t]) r.push([`rec ${REC[e.t]}"`, `Recupero tra una serie e l'altra. Il timer parte da solo quando premi "Fatto" e vibra alla fine.`]);
   if (!e.u && !e.nokg) r.push(["↑ sali di carico", "Compare accanto al nome quando l'ultima volta hai raggiunto il massimo delle ripetizioni in tutte le serie."]);
