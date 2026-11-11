@@ -204,6 +204,8 @@ ol.piano small.muto { font-size:12px; }
 .tile { text-align:left; padding:14px; border-radius:20px; background:var(--card); display:flex; flex-direction:column; gap:2px; min-height:96px; }
 .tile small { color:var(--muto); font-size:12px; } .tile b { font-size:20px; line-height:1.2; } .tile span { color:var(--muto); font-size:12px; }
 .testata { margin-bottom:14px; } .testata h1 { margin:0; }
+#cam { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:18px; background:#000; display:block; margin:12px 0; }
+.pasto li .ico { flex:none; margin:-8px -8px -8px 0; }
 /* piano alimentare: conto della giornata, caselle da spuntare, acqua */
 .kc { font-size:15px; color:var(--muto); } .kc b { font-size:28px; color:var(--testo); font-variant-numeric:tabular-nums; letter-spacing:-.5px; }
 .mt { margin-top:12px; font-size:14px; } .mt b { font-variant-numeric:tabular-nums; } .mt small { color:var(--muto); font-weight:400; font-size:12px; } .mt .barra { margin-top:5px; height:5px; }
@@ -367,7 +369,7 @@ function fase(d) {
 
 /* ============ ARCHIVIO (solo su questo telefono) ============ */
 const CHIAVE = "taccuino-palestra-v1";
-let S = { sedute: [], diario: {}, cibo: {}, corso: null, inviatoFino: "" };
+let S = { sedute: [], diario: {}, cibo: {}, alimenti: [], corso: null, inviatoFino: "" };
 try { const x = JSON.parse(localStorage.getItem(CHIAVE)); if (x && Array.isArray(x.sedute)) S = Object.assign(S, x); } catch (e) {}
 if (S.corso && !Array.isArray(S.corso.es)) S.corso = null;
 function salva() { try { localStorage.setItem(CHIAVE, JSON.stringify(S)); } catch (e) { avvisa("Non riesco a salvare sul telefono"); } }
@@ -468,8 +470,8 @@ function disegna() {
   if (inSeduta) disPan();
 }
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
-function apri(html, pagina) { const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; }
-function chiudi() { $("foglio").style.display = "none"; $("velo").style.display = "none"; }
+function apri(html, pagina) { fermaCamera(); const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; }
+function chiudi() { fermaCamera(); $("foglio").style.display = "none"; $("velo").style.display = "none"; }
 
 /* ============ HOME ============ */
 /* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
@@ -584,7 +586,7 @@ function vScheda() {
 }
 function vediSeduta(k) { schedaSel = k; disegna(); window.scrollTo(0, 0); }
 
-/* ============ PIANO ALIMENTARE v2.2 (2026-11-05) ============
+/* ============ PIANO ALIMENTARE v2.3 (2026-11-11) ============
    Copia di piano/alimentazione.md: se cambia il file, va aggiornata anche questa.
    Ogni alimento si spunta quando è stato mangiato; l'app somma la giornata.
    Valori per voce, nell'ordine di NUTR: kcal, proteine, carboidrati, grassi (dal piano), poi fibra, calcio, ferro,
@@ -599,6 +601,7 @@ const proteineDi = (p, cena) => [
   [p + "-pesce", "Pesce bianco (merluzzo, nasello, platessa, branzino)", "250 g", [200, 44, 0, 2, 0, 60, 0.8, 65, 850, 0]],
   [p + "-tonno", "Tonno al naturale sgocciolato", "180 g", [200, 45, 0, 2, 0, 10, 1.8, 50, 430, 0]],
   [p + "-salmone", "Salmone, e niente olio in quel pasto", "150 g", [300, 30, 0, 20, 0, 20, 0.5, 42, 540, 0]],
+  [p + "-mozz", "Mozzarella proteica, e niente olio in quel pasto", "200 g", [330, 44, 3, 16, 0, 800, 0.4, 30, 180, 0]],
 ].concat(cena ? [[p + "-uova", "2 uova intere + albume", "2 + 300 g", [275, 44, 2, 10, 0, 75, 2.2, 45, 630, 0]]] : []);
 const PASTI = [
   { id: "col", ora: "8:00", nome: "Colazione", g: [
@@ -659,6 +662,7 @@ function totali(d) {
     if (!r.x[it[0]] || !visibile(it, on)) continue;
     const f = !on && it[4] && it[4].off ? it[4].off[1] : 1; it[3].forEach((v, i) => (t[i] += v * f));
   }
+  for (const e of r.extra || []) e.v.forEach((v, i) => (t[i] += v || 0));      // alimenti aggiunti a mano o con lo scanner
   return t;
 }
 function spunta(id) {
@@ -690,7 +694,7 @@ const misura = (nome, val, tgt, un, dec) => `<div class="mt"><div class="riga tr
   <div class="barra"><i style="width:${Math.min(100, Math.round((val / tgt) * 100))}%"></i></div></div>`;
 function vCibo() {
   const d = oggi(), auto = giornoOn(d), on = modoOn(d), N = CIBO[on ? "on" : "off"], r = recCibo(d), T = totali(d), resta = Math.round(N.kcal - T[0]);
-  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.2 · definizione lenta</div><h1>Alimentazione</h1></div></div>
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.3 · definizione lenta</div><h1>Alimentazione</h1></div></div>
     <div class="g2"><button class="${on ? "pri" : ""}" onclick="mettiOn(true)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="mettiOn(false)">Giorno OFF · riposo</button></div>
     <p class="muto conta">${auto ? "Oggi hai segnato una seduta di pesi: <b>giorno ON</b>." : "Oggi non risultano pesi: <b>giorno OFF</b>. Se ti alleni più tardi, tocca Giorno ON."} Tra ON e OFF cambiano solo la banana e il carboidrato del pranzo.</p>
     <div class="card conto"><div class="riga tra"><div><div class="sopra">Mangiato oggi</div><div class="kc"><b>${Math.round(T[0])}</b> di ${N.kcal} kcal</div></div>
@@ -702,7 +706,7 @@ function vCibo() {
     <p class="muto conta">Spunta quello che hai mangiato: il conto si aggiorna da solo. Pesi a crudo, frutta senza buccia, olio sempre pesato.</p>`;
   for (const p of PASTI) {
     const voci = p.g.flatMap((g) => g.v).filter((v) => visibile(v, on)), k = voci.reduce((n, v) => n + (r.x[v[0]] ? v[3][0] * (!on && v[4] && v[4].off ? v[4].off[1] : 1) : 0), 0);
-    if (p.id === "int") h += `<h2>Integratori</h2>`;
+    if (p.id === "int") h += boxExtra() + `<h2>Integratori</h2>`;
     h += `<div class="card pasto"><div class="riga tra"><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div>
       <div class="riga"><span class="pillola">${Math.round(k)} kcal</span><button class="pic" onclick="tuttoPasto('${p.id}')">Tutto</button></div></div>`;
     for (const g of p.g) {
@@ -1210,7 +1214,8 @@ function testoCoach(da) {
   const cc = Object.keys(S.cibo || {}).filter((d) => d > da).sort().filter((d) => totali(d)[0] > 0 || S.cibo[d].acqua);
   if (cc.length) {
     t += "\nAlimentazione spuntata nell'app (data | giorno | kcal | proteine g | carboidrati g | grassi g | fibra g | acqua L)\n";
-    for (const d of cc) { const x = totali(d); t += `${d} | ${modoOn(d) ? "ON" : "OFF"} | ${Math.round(x[0])} | ${Math.round(x[1])} | ${Math.round(x[2])} | ${Math.round(x[3])} | ${Math.round(x[4])} | ${litri(S.cibo[d].acqua || 0)}\n`; }
+    for (const d of cc) { const x = totali(d); t += `${d} | ${modoOn(d) ? "ON" : "OFF"} | ${Math.round(x[0])} | ${Math.round(x[1])} | ${Math.round(x[2])} | ${Math.round(x[3])} | ${Math.round(x[4])} | ${litri(S.cibo[d].acqua || 0)}\n`;
+      if ((S.cibo[d].extra || []).length) t += `  fuori piano: ${S.cibo[d].extra.map((e) => e.nome + " " + e.q + " (" + Math.round(e.v[0]) + " kcal)").join("; ")}\n`; }
   }
   return t.trim();
 }
@@ -1232,7 +1237,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.2 del 05/11/2026 · app v10</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.3 · app v11</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -1612,6 +1617,88 @@ function infoEs(id) {
   }
   if (["appesa", "scapolari", "negative"].includes(id)) h += `<button class="largo" onclick="chiudi();vai('tecnica');apriGuida('trazioni')">Apri la guida Trazioni con i disegni</button>`;
   apri(h + `<button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+
+/* ============ ALIMENTI AGGIUNTI: scanner, ricerca per codice, inserimento a mano ============
+   Per gli alimenti fuori piano e le giornate particolari. Lo scanner usa la fotocamera e il lettore di codici del browser
+   (BarcodeDetector, presente in Chrome su Android); i valori arrivano da Open Food Facts, a cui si manda solo il codice a barre.
+   Gli aggiunti del giorno stanno in S.cibo[giorno].extra, gli alimenti da riusare in S.alimenti. */
+let bozza = null, flusso = null, tScan = null;
+function fermaCamera() { clearInterval(tScan); tScan = null; if (flusso) { flusso.getTracks().forEach((t) => t.stop()); flusso = null; } }
+const testaFoglio = (t) => `<div class="riga tra"><div class="nome" style="font-size:21px">${t}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>`;
+function aggiungiCibo() {
+  const miei = S.alimenti || [];
+  apri(testaFoglio("Aggiungi un alimento") + `<p class="muto">Per un alimento fuori piano o una giornata particolare. Entra nel conto di oggi.</p>
+    <button class="pri largo" onclick="scansiona()">Scansiona il codice a barre</button>
+    <label>Oppure scrivi il numero sotto il codice a barre</label>
+    <div class="riga"><input id="cCod" inputmode="numeric" placeholder="8001234567890" autocomplete="off"><button onclick="cercaCodice($('cCod').value)">Cerca</button></div>
+    <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button>` +
+    (miei.length ? `<h2>I tuoi alimenti</h2><div class="card pasto"><ul>` + miei.map((a, i) => `<li class="sp" onclick="formAlimento(S.alimenti[${i}])"><span>${esc(a.nome)}</span><b>${Math.round(a.per100[0])} kcal / 100 g</b></li>`).join("") + `</ul></div>` : "") +
+    `<button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+async function scansiona() {
+  if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { avvisa("Questo browser non legge i codici: scrivi il numero"); return; }
+  apri(testaFoglio("Inquadra il codice a barre") + `<video id="cam" playsinline muted></video>
+    <p class="muto">Tieni il codice ben illuminato, a 10-15 cm dalla fotocamera.</p><button class="largo" onclick="aggiungiCibo()">Annulla</button>`, true);
+  try {
+    const f = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+    const v = $("cam"); if (!v) { f.getTracks().forEach((t) => t.stop()); return; }       // foglio chiuso nel frattempo
+    flusso = f; v.srcObject = f; await v.play();
+    const det = new BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] }); let occupato = false;
+    tScan = setInterval(async () => {
+      if (occupato || !$("cam")) return; occupato = true;
+      try { const r = await det.detect(v); if (r.length) { const c = r[0].rawValue; fermaCamera(); if (navigator.vibrate) navigator.vibrate(80); cercaCodice(c); } } catch (e) {}
+      occupato = false;
+    }, 300);
+  } catch (e) { fermaCamera(); aggiungiCibo(); avvisa("Fotocamera non disponibile: scrivi il numero"); }
+}
+async function cercaCodice(cod) {
+  cod = String(cod || "").replace(/\D/g, ""); if (cod.length < 8) { avvisa("Codice non valido"); return; }
+  const mio = (S.alimenti || []).find((a) => a.codice === cod); if (mio) { formAlimento(mio); return; }
+  avvisa("Cerco il prodotto…");
+  try {
+    const r = await fetch("https://world.openfoodfacts.org/api/v2/product/" + cod + ".json?fields=product_name,product_name_it,brands,serving_quantity,nutriments");
+    const j = await r.json(), p = j.product, n = p && p.nutriments;
+    if (!n || n["energy-kcal_100g"] == null) { formAlimento({ codice: cod }); avvisa("Prodotto non trovato: scrivi i valori dell'etichetta"); return; }
+    const g = (k) => +n[k] || 0, mg = (k) => (+n[k] || 0) * 1000;
+    formAlimento({ codice: cod, trovato: 1, porz: +p.serving_quantity || null, nome: [p.brands ? p.brands.split(",")[0].trim() : "", p.product_name_it || p.product_name || ""].filter(Boolean).join(" · "),
+      per100: [g("energy-kcal_100g"), g("proteins_100g"), g("carbohydrates_100g"), g("fat_100g"), g("fiber_100g"), mg("calcium_100g"), mg("iron_100g"), mg("magnesium_100g"), mg("potassium_100g"), mg("vitamin-c_100g")] });
+  } catch (e) { formAlimento({ codice: cod }); avvisa("Serve la rete per cercare: scrivi i valori a mano"); }
+}
+function formAlimento(a) {
+  bozza = { codice: a.codice || "", per100: (a.per100 || new Array(10).fill(0)).slice() };
+  const v = bozza.per100, campo = (id, et, val, ph) => `<div><label>${et}</label><input id="${id}" inputmode="decimal" autocomplete="off" value="${val ? esc(it(Math.round(val * 10) / 10)) : ""}" placeholder="${ph || "0"}"></div>`;
+  apri(testaFoglio("Aggiungi a oggi") + (a.trovato ? `<p class="muto">Trovato su Open Food Facts. Controlla che i valori siano quelli dell'etichetta.</p>` : "") +
+    `<label>Nome</label><input id="aNome" value="${esc(a.nome || "")}" placeholder="Es. Mozzarella proteica" autocomplete="off">
+    ${campo("aG", "Quanti grammi hai mangiato", a.porz, "100")}
+    <h2>Valori per 100 g, dall'etichetta</h2>
+    <div class="g2">${campo("aK", "Calorie (kcal)", v[0])}${campo("aP", "Proteine (g)", v[1])}${campo("aC", "Carboidrati (g)", v[2])}${campo("aF", "Grassi (g)", v[3])}</div>
+    ${campo("aFi", "Fibra (g), se c'è", v[4])}
+    <p class="muto">Se conosci solo i valori della porzione intera (una pizza, un piatto al ristorante), scrivi quelli e metti 100 nei grammi.</p>
+    <label class="riga" style="gap:10px;color:var(--testo)"><input type="checkbox" id="aSalva" checked style="width:24px;min-height:24px;flex:none"> Tienilo tra i miei alimenti</label>
+    <button class="pri largo" onclick="confAlimento()">Aggiungi a oggi</button><button class="largo" onclick="aggiungiCibo()">Indietro</button>`, true);
+}
+function confAlimento() {
+  const nome = $("aNome").value.trim(), g = num($("aG").value), p = bozza.per100;
+  if (!nome) { avvisa("Scrivi il nome"); return; }
+  if (!g || g <= 0) { avvisa("Scrivi quanti grammi"); return; }
+  ["aK", "aP", "aC", "aF", "aFi"].forEach((id, i) => (p[i] = Math.max(0, num($(id).value) || 0)));
+  if (!p[0]) p[0] = Math.round(p[1] * 4 + p[2] * 4 + p[3] * 9);          // calorie mancanti: le ricava dai macro
+  if (!p[0]) { avvisa("Scrivi almeno le calorie"); return; }
+  const r = recCibo(oggi(), true); (r.extra = r.extra || []).push({ id: Date.now(), nome, q: it(g) + " g", v: p.map((x) => (x * g) / 100) });
+  if ($("aSalva").checked) {
+    S.alimenti = (S.alimenti || []).filter((x) => (bozza.codice ? x.codice !== bozza.codice : x.nome.toLowerCase() !== nome.toLowerCase()));
+    S.alimenti.unshift({ nome, per100: p.slice(), porz: g, codice: bozza.codice }); S.alimenti = S.alimenti.slice(0, 40);
+  }
+  salva(); chiudi(); tieni(disegna); avvisa("Aggiunto al conto di oggi");
+}
+function togliExtra(id) { const r = recCibo(oggi(), true); r.extra = (r.extra || []).filter((x) => x.id !== id); salva(); tieni(disegna); }
+function boxExtra() {
+  const ex = recCibo(oggi()).extra || [];
+  return `<h2>Aggiunti oggi</h2><div class="card pasto">` +
+    (ex.length ? `<ul>` + ex.map((x) => `<li><span>${esc(x.nome)}<br><small class="muto">${Math.round(x.v[0])} kcal · P ${Math.round(x.v[1])} · C ${Math.round(x.v[2])} · G ${Math.round(x.v[3])}</small></span><b>${esc(x.q)}</b><button class="ico" aria-label="Togli" onclick="togliExtra(${x.id})">✕</button></li>`).join("") + `</ul>`
+      : `<p class="muto" style="margin-top:0">Qui metti quello che mangi fuori piano: un alimento diverso, una cena fuori, una giornata particolare.</p>`) +
+    `<button class="pri largo" onclick="aggiungiCibo()">+ Aggiungi un alimento</button></div>`;
 }
 
 /* ============ TASTO INDIETRO DEL TELEFONO ============

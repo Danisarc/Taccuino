@@ -1,5 +1,5 @@
 // Taccuino palestra: funziona anche senza rete. Cambia VERSIONE a ogni aggiornamento dell'app.
-const VERSIONE = "taccuino-v10";
+const VERSIONE = "taccuino-v11";
 const FILE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "img/allenamento.jpg", "img/alimentazione.jpg",
   "img/trazione-basso.png", "img/trazione-alto.png", "img/foto-alto.jpg", "img/foto-da-dietro.jpg"];
 
@@ -11,7 +11,7 @@ self.addEventListener("activate", (e) => {
 });
 // prima la rete (così gli aggiornamenti arrivano subito), se manca si usa la copia salvata
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
+  if (e.request.method !== "GET" || new URL(e.request.url).origin !== self.location.origin) return;   // le ricerche su Open Food Facts vanno dirette in rete
   e.respondWith(
     fetch(e.request).then((r) => {
       const copia = r.clone();
