@@ -714,7 +714,7 @@ function boxAcqua() {
 }
 const misura = (nome, val, tgt, un, dec) => `<div class="mt"><div class="riga tra"><span>${nome}</span><b>${it(val.toFixed(dec || 0))} <small>/ ${it(tgt)} ${un}</small></b></div>
   <div class="barra"><i style="width:${Math.min(100, Math.round((val / tgt) * 100))}%"></i></div></div>`;
-const CAT = { carbo: "Carboidrato", prot: "Proteina", altro: "Altro" };
+const CAT = { carbo: "Carboidrato", prot: "Proteina", legumi: "Legumi", altro: "Altro" };
 function vCibo() {
   const d = oggi(), auto = giornoOn(d), on = modoOn(d), N = CIBO[on ? "on" : "off"], r = recCibo(d), pers = !!r.pers, T = totali(d), resta = Math.round(N.kcal - T[0]);
   let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.3 · definizione lenta</div><h1>Alimentazione</h1></div></div>
@@ -728,7 +728,7 @@ function vCibo() {
       <details><summary>Fibra, vitamine e minerali</summary>${MICRO.map((m) => misura(m[0], T[m[3]], m[0] === "Fibra" && !on ? 28 : m[2], m[1], m[1] === "g" || m[0] === "Ferro" ? 1 : 0)).join("")}
         <p class="muto">Sono stime da tabelle medie: marca, cottura e tipo di frutta e verdura spostano i valori. Il traguardo è il fabbisogno giornaliero di un uomo adulto. Il magnesio dell'integratore non è contato, perché dipende dal prodotto.</p></details></div>
     <p class="muto conta">${pers ? "Giorno personalizzato: spunta quello che mangi, anche più alimenti per gruppo, e <b>correggi la quantità</b> nel campo a destra. Gli alimenti del piano restano come suggerimento." : "Spunta quello che hai mangiato: il conto si aggiorna da solo. Pesi a crudo, frutta senza buccia, olio sempre pesato."}</p>`;
-  const kEx = (e) => `${CAT[e.cat] ? CAT[e.cat] + " · " : ""}${Math.round(e.v[0])} kcal · P ${Math.round(e.v[1])} · C ${Math.round(e.v[2])} · G ${Math.round(e.v[3])}`;
+  const kEx = (e) => `${e.sost ? "al posto di " + esc(e.sost) + " · " : ""}${CAT[e.cat] ? CAT[e.cat] + " · " : ""}${Math.round(e.v[0])} kcal · P ${Math.round(e.v[1])} · C ${Math.round(e.v[2])} · G ${Math.round(e.v[3])}`;
   const rigaEx = (e) => `<li class="sp on"><i class="chk"></i><span>${esc(e.nome)}<br><small class="muto">${kEx(e)}</small></span><b>${esc(e.q)}</b><button class="ico" aria-label="Togli" onclick="togliExtra(${e.id})">✕</button></li>`;
   for (const p of PASTI) {
     const voci = p.g.flatMap((g) => g.v).filter((v) => visibile(v, on)), ex = (r.extra || []).filter((e) => e.pasto === p.id);
@@ -746,7 +746,7 @@ function vCibo() {
       }).join("") + `</ul>`;
     }
     if (ex.length) h += `<h3>Aggiunti da te</h3><ul>${ex.map(rigaEx).join("")}</ul>`;
-    if (p.id !== "int") h += `<button class="largo piuCibo" onclick="aggiungiCibo('${p.id}')">+ Aggiungi a ${p.nome.toLowerCase()}</button>`;
+    if (p.id !== "int") h += `<button class="largo piuCibo" onclick="aggiungiCibo('${p.id}')">+ Aggiungi a ${p.nome.toLowerCase()}</button><button class="largo piuCibo" onclick="sostituisciCibo('${p.id}')">⇄ Non ho un alimento: sostituiscilo</button>`;
     h += `</div>`;
   }
   const orfani = (r.extra || []).filter((e) => !PASTI.some((p) => p.id === e.pasto));       // aggiunti prima che ogni alimento avesse il suo pasto
@@ -755,6 +755,7 @@ function vCibo() {
     <h2>Da ricordare</h2><div class="card"><ul>
       <li><b>Acqua</b> 2,2-2,5 litri: la segni nella home.</li>
       <li><b>Pasto libero</b>: uno a settimana, in un giorno OFF, al posto della cena. Una pizza e una bibita light; nessuna compensazione il giorno dopo.</li>
+      <li><b>Ti manca un alimento?</b> Tocca "Non ho un alimento" sotto il pasto: l'app ti dice quanti grammi servono di quello che hai, anche per carne, legumi e formaggi senza codice a barre. La tabella completa è in Guide → Sostituzioni.</li>
       <li><b>Giorno personalizzato</b>: va bene ogni tanto. Tieni le proteine vicine al traguardo e resta nelle calorie del giorno.</li>
       <li><b>Sedute a casa in un altro orario</b>: sposta la banana 60-90' prima dei pesi, e almeno 2 ore dopo un pasto principale.</li>
       <li><b>Zuccheri liquidi</b> (succhi, bibite, ginseng zuccherato): zero.</li>
@@ -1167,11 +1168,13 @@ const GUIDE = [
   ["trazioni", "Trazioni", "I tre esercizi alla sbarra, con disegni, errori e test", '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>'],
   ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'],
   ["sigle", "Sigle e parole", "RIR, superserie, recupero, deload e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>'],
+  ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],
 ];
 function vTecnica() {
   if (guida === "trazioni") return vTrazioni();
   if (guida === "esercizi") return vEsercizi();
   if (guida === "sigle") return vSigle();
+  if (guida === "cambi") return vCambi();
   return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
     GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')"><i><svg viewBox="0 0 24 24">${g[3]}</svg></i><span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
 }
@@ -1252,7 +1255,7 @@ function testoCoach(da) {
   if (cc.length) {
     t += "\nAlimentazione spuntata nell'app (data | giorno | kcal | proteine g | carboidrati g | grassi g | fibra g | acqua L)\n";
     for (const d of cc) { const x = totali(d); t += `${d} | ${modoOn(d) ? "ON" : "OFF"}${S.cibo[d].pers ? " personalizzato" : ""} | ${Math.round(x[0])} | ${Math.round(x[1])} | ${Math.round(x[2])} | ${Math.round(x[3])} | ${Math.round(x[4])} | ${litri(S.cibo[d].acqua || 0)}\n`;
-      if ((S.cibo[d].extra || []).length) t += `  fuori piano: ${S.cibo[d].extra.map((e) => e.nome + " " + e.q + " (" + Math.round(e.v[0]) + " kcal" + (PASTI.some((p) => p.id === e.pasto) ? ", " + PASTI.find((p) => p.id === e.pasto).nome.toLowerCase() : "") + ")").join("; ")}\n`; }
+      if ((S.cibo[d].extra || []).length) t += `  fuori piano: ${S.cibo[d].extra.map((e) => e.nome + " " + e.q + " (" + Math.round(e.v[0]) + " kcal" + (PASTI.some((p) => p.id === e.pasto) ? ", " + PASTI.find((p) => p.id === e.pasto).nome.toLowerCase() : "") + (e.sost ? ", al posto di " + e.sost : "") + ")").join("; ")}\n`; }
   }
   return t.trim();
 }
@@ -1274,7 +1277,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.3 · app v12</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.3 · app v13</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -1661,20 +1664,191 @@ function infoEs(id) {
    Lo scanner usa la fotocamera e il lettore di codici del browser (BarcodeDetector, presente in Chrome su Android);
    i valori arrivano da Open Food Facts, a cui si manda solo il codice a barre.
    Gli aggiunti del giorno stanno in S.cibo[giorno].extra, gli alimenti da riusare in S.alimenti. */
-let bozza = null, flusso = null, tScan = null, dove = "pra";
+let bozza = null, flusso = null, tScan = null, dove = "pra";      // sost (più sotto): la voce del piano che si sta sostituendo
 function fermaCamera() { clearInterval(tScan); tScan = null; if (flusso) { flusso.getTracks().forEach((t) => t.stop()); flusso = null; } }
 const testaFoglio = (t) => `<div class="riga tra"><div class="nome" style="font-size:21px">${t}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>`;
 const nomePasto = () => (PASTI.find((p) => p.id === dove) || PASTI[2]).nome.toLowerCase();
+/* ============ SOSTITUZIONI E ALIMENTI SENZA CODICE ============
+   "Nel piano ho X ma in casa ho Y": l'app calcola i grammi di Y che pareggiano X.
+   Si pareggiano i carboidrati se X è un carboidrato, le proteine se è una proteina, i grassi se è quasi solo grasso
+   (olio, frutta secca), altrimenti le calorie. I legumi fanno da carboidrato e da proteina insieme: pareggiano le calorie dei due.
+   sost: { ids: voci del piano sostituite, nome, q, ks: gruppi "uno a scelta" da svuotare, m: [indice del valore, nome],
+           v: valori di riferimento nella quantità di oggi, auto: riferimento scelto dall'app e non a mano }
+   BASE: alimenti comuni senza codice a barre. [nome, tipo, per 100 g a crudo: kcal, proteine, carboidrati, grassi, fibra, porzione tipica in g, 1 se contiene glutine]
+   Valori medi da tabelle di composizione (CREA): servono a dare la grammatura, non sono un'analisi. */
+const SENZA_GLUTINE = false;
+const BASE = [
+  ["Pasta di semola", "carbo", [353, 11, 79, 1.4, 2.7], 80, 1], ["Pasta integrale", "carbo", [324, 13.4, 66, 2.5, 6.4], 80, 1],
+  ["Pasta di riso o di mais", "carbo", [355, 7, 79, 1, 1.5], 80], ["Riso", "carbo", [332, 6.7, 80, 0.4, 1], 80],
+  ["Riso integrale", "carbo", [337, 7.5, 77, 1.9, 1.9], 80], ["Farro", "carbo", [335, 15, 67, 2.5, 6.8], 80, 1],
+  ["Orzo perlato", "carbo", [319, 10, 70, 1.4, 9], 80, 1], ["Cous cous", "carbo", [356, 12.8, 72, 0.6, 5], 80, 1],
+  ["Quinoa", "carbo", [368, 14, 64, 6, 7], 80], ["Grano saraceno", "carbo", [343, 13, 62, 3.4, 10], 80],
+  ["Polenta, farina di mais", "carbo", [362, 8.7, 80, 2.7, 3], 80], ["Gnocchi di patate", "carbo", [150, 3.7, 32.5, 0.4, 1.5], 200, 1],
+  ["Patate", "carbo", [80, 2, 18, 0.1, 1.6], 250], ["Patate dolci", "carbo", [86, 1.6, 20, 0.1, 3], 250],
+  ["Pane comune", "carbo", [270, 8.5, 57, 0.5, 3.5], 80, 1], ["Pane integrale", "carbo", [224, 7.5, 48, 1.3, 6.5], 80, 1],
+  ["Pane di segale", "carbo", [219, 8.3, 46, 1.7, 6], 80, 1], ["Pane senza glutine", "carbo", [260, 4, 50, 4.7, 5], 80],
+  ["Piadina", "carbo", [330, 8, 55, 9, 2.5], 100, 1], ["Gallette di riso o di mais", "carbo", [385, 8, 81, 2.8, 3.4], 30],
+  ["Fiocchi d'avena", "carbo", [370, 13, 60, 7, 10], 40, 1], ["Mais dolce in scatola", "carbo", [80, 2.5, 15, 1, 2.5], 150],
+  ["Ceci secchi", "legumi", [334, 21, 47, 6, 14], 80], ["Ceci in scatola, sgocciolati", "legumi", [120, 7, 15, 2.5, 6], 240],
+  ["Lenticchie secche", "legumi", [325, 23, 51, 1, 14], 80], ["Lenticchie in scatola, sgocciolate", "legumi", [92, 6.5, 13, 0.5, 5], 240],
+  ["Fagioli secchi", "legumi", [311, 23, 48, 2, 17], 80], ["Fagioli in scatola, sgocciolati", "legumi", [91, 6.5, 13, 0.6, 6], 240],
+  ["Piselli freschi o surgelati", "legumi", [68, 5.5, 9, 0.6, 6], 200], ["Fave fresche o surgelate", "legumi", [60, 5, 7, 0.4, 5], 200],
+  ["Edamame sgusciati", "legumi", [122, 11, 9, 5, 5], 150],
+  ["Petto di pollo", "prot", [110, 23, 0, 1.5, 0], 150], ["Fesa di tacchino", "prot", [107, 24, 0, 1.2, 0], 150],
+  ["Manzo magro (fesa, girello)", "prot", [120, 21.5, 0, 3.5, 0], 150], ["Macinato di manzo scelto", "prot", [170, 20, 0, 10, 0], 150],
+  ["Vitello magro", "prot", [107, 21, 0, 2.5, 0], 150], ["Lonza di maiale", "prot", [125, 21.5, 0, 4.3, 0], 150],
+  ["Coniglio", "prot", [125, 21, 0, 4.5, 0], 150], ["Merluzzo o nasello", "prot", [80, 17.5, 0, 1, 0], 200],
+  ["Orata o branzino", "prot", [100, 18, 0, 3, 0], 200], ["Pesce spada", "prot", [110, 17, 0, 4.5, 0], 180],
+  ["Salmone", "prot", [200, 20, 0, 13, 0], 150], ["Gamberi", "prot", [72, 15, 1, 0.8, 0], 200],
+  ["Polpo, calamari, seppie", "prot", [70, 13, 1.5, 1.2, 0], 200], ["Tonno al naturale, sgocciolato", "prot", [108, 25, 0, 1, 0], 120],
+  ["Sgombro al naturale, sgocciolato", "prot", [170, 22, 0, 9, 0], 120], ["Uova intere (1 uovo = 55 g)", "prot", [143, 12.5, 0.7, 10, 0], 110],
+  ["Albume", "prot", [52, 10.7, 0.7, 0, 0], 200], ["Bresaola", "prot", [150, 32, 0, 2.3, 0], 80],
+  ["Prosciutto crudo sgrassato", "prot", [160, 28, 0, 5, 0], 80], ["Prosciutto cotto", "prot", [135, 20, 1, 6, 0], 80],
+  ["Fesa di tacchino affettata", "prot", [105, 21, 1, 2, 0], 100], ["Tofu", "prot", [120, 13, 2, 7, 1], 150],
+  ["Yogurt greco 0%", "prot", [57, 10, 4, 0, 0], 150], ["Skyr bianco", "prot", [63, 11, 4, 0.2, 0], 150],
+  ["Fiocchi di latte", "prot", [90, 11, 3, 4, 0], 150], ["Ricotta vaccina", "prot", [146, 9, 3.5, 11, 0], 100],
+  ["Mozzarella light", "prot", [165, 20, 1.5, 9, 0], 125], ["Mozzarella", "prot", [250, 18, 1, 19.5, 0], 100],
+  ["Primo sale", "prot", [240, 16, 2, 19, 0], 100], ["Stracchino o crescenza", "prot", [280, 16, 1, 24, 0], 80],
+  ["Feta", "prot", [264, 14, 4, 21, 0], 80], ["Scamorza o provola", "prot", [330, 25, 1, 25, 0], 80],
+  ["Parmigiano o grana", "prot", [392, 33, 0, 28.5, 0], 50],
+  ["Olio extravergine", "altro", [900, 0, 0, 100, 0], 10], ["Burro", "altro", [750, 1, 1, 83, 0], 10],
+  ["Avocado", "altro", [160, 2, 2, 15, 7], 70], ["Olive", "altro", [145, 1, 1, 15, 3], 40],
+  ["Mandorle", "altro", [600, 21, 5, 53, 12], 15], ["Noci", "altro", [660, 15, 5, 64, 7], 15],
+  ["Burro di arachidi 100%", "altro", [610, 26, 12, 50, 7], 15], ["Cioccolato fondente 85%", "altro", [600, 10, 20, 50, 12], 10],
+  ["Verdura mista", "altro", [24, 2, 3, 0.2, 2.8], 250], ["Mela o pera", "altro", [50, 0.3, 12, 0.2, 2.5], 200],
+  ["Banana", "altro", [89, 1.1, 21, 0.3, 2.6], 120], ["Kiwi", "altro", [44, 1.2, 9, 0.6, 2.2], 150],
+  ["Frutti di bosco", "altro", [40, 1, 7, 0.4, 4], 150],
+];
+const GRUPPI_BASE = { carbo: "Carboidrati", legumi: "Legumi", prot: "Carne, pesce, uova, latticini", altro: "Grassi, frutta e verdura" };
+const baseVisibili = () => BASE.map((b, i) => ({ b, i })).filter((x) => !(SENZA_GLUTINE && x.b[4]));
+const baseCibo = (i) => ({ nome: BASE[i][0], cat: BASE[i][1], per100: BASE[i][2].concat([0, 0, 0, 0, 0]), porz: BASE[i][3], base: 1 });
+let sost = null;
+function vociPasto(pid) {
+  const on = modoOn(oggi()), r = recCibo(oggi()), p = PASTI.find((x) => x.id === pid), out = [];
+  for (const g of p.g) for (const v of g.v) if (visibile(v, on)) out.push({ v, g, f: fattore(v, r, on), q: !on && v[4] && v[4].off ? v[4].off[0] : v[2] });
+  return out;
+}
+const olioPasto = (pid) => vociPasto(pid).filter((x) => /-olio$/.test(x.v[0])).reduce((n, x) => n + x.v[3][0] * x.f, 0);      // kcal dell'olio previsto nel pasto
+function macroDi(x) {
+  if (x.g.k === "carbo") return [2, "carboidrati"];
+  if (x.g.k === "prot") return [1, "proteine"];
+  const v = x.v[3], k = v[0] || 1;
+  return (v[1] * 4) / k >= 0.6 ? [1, "proteine"] : (v[2] * 4) / k >= 0.6 ? [2, "carboidrati"] : (v[3] * 9) / k >= 0.6 ? [3, "grassi"] : [0, "calorie"];
+}
+// riferimento scelto dall'app: la voce del piano che un alimento di questo tipo va a sostituire in quel pasto.
+// piano = true: la prima riga del piano; altrimenti la voce spuntata oggi, se c'è
+function rifAuto(cat, pid, piano) {
+  const voci = vociPasto(pid), r = recCibo(oggi()), olio = olioPasto(pid);
+  const scelta = (k) => { const vv = voci.filter((x) => x.g.k === k); return (!piano && vv.find((x) => r.x[x.v[0]])) || vv[0]; };
+  const val = (x) => x.v[3].map((n) => n * (piano ? (x.v[4] && x.v[4].off && !modoOn(oggi()) ? x.v[4].off[1] : 1) : x.f));
+  if (cat === "carbo" || cat === "prot") { const x = scelta(cat); return x ? { ids: [x.v[0]], nome: x.v[1], q: x.q, ks: [cat], m: macroDi(x), v: val(x), olio, auto: 1 } : null; }
+  if (cat === "legumi") {
+    const a = scelta("carbo"), b = scelta("prot"); if (!a || !b) return null;
+    const va = val(a), vb = val(b);
+    return { ids: [a.v[0], b.v[0]], nome: "carboidrato e proteina", q: a.v[1] + " " + a.q + " + " + b.v[1] + " " + b.q, ks: ["carbo", "prot"], m: [0, "calorie"], v: va.map((n, i) => n + vb[i]), auto: 1 };
+  }
+  return null;
+}
+// a cosa pareggiare un alimento di questo tipo: la voce scelta a mano, oppure quella che trova l'app
+function rifPer(cat) {
+  if (sost && !sost.auto) return cat === "legumi" && sost.ks.length ? rifAuto("legumi", dove) || sost : sost;
+  return rifAuto(cat, dove);
+}
+function grammiSost(p, s) {
+  s = s || sost; const d = p[s.m[0]] || 0; if (d <= 0) return null;
+  let g = (s.v[s.m[0]] / d) * 100;
+  // proteina più grassa di quella del piano (formaggi, salmone, uova): si toglie l'olio e ci si ferma alle calorie di proteina + olio
+  if (s.m[0] === 1 && p[0] > 0 && (p[3] * g) / 100 - s.v[3] > 5) g = Math.min(g, ((s.v[0] + (s.olio || 0)) / p[0]) * 100);
+  return g >= 50 ? Math.round(g / 5) * 5 : Math.max(1, Math.round(g));
+}
+const piuGrassi = (p, g, s) => (p[3] * g) / 100 - s.v[3];
+function testoSost(p) {
+  const g = grammiSost(p), i = sost.m[0], leg = sost.ks.length > 1;
+  const base = leg ? `I legumi fanno da <b>carboidrato e da proteina insieme</b> (al posto di ${esc(sost.q)}): ` : `Al posto di <b>${esc(sost.nome)}</b> (${esc(sost.q)}): `;
+  if (!g) return base + `scrivi qui sotto i valori per 100 g di quello che hai, poi tocca "Calcola i grammi".`;
+  let t = base + `per avere ${i ? "gli stessi " + Math.round(sost.v[i]) + " g di " + sost.m[1] : "le stesse " + Math.round(sost.v[0]) + " kcal"} servono <b>${it(g)} g</b>` +
+    (i ? ` (${Math.round((p[0] * g) / 100)} kcal invece di ${Math.round(sost.v[0])})` : "") + ".";
+  if (leg) t += ` Proteine: ${Math.round((p[1] * g) / 100)} g invece di ${Math.round(sost.v[1])}.`;
+  if (g > 600) t += " È una quantità molto alta: questo alimento non è un buon sostituto.";
+  else if (i === 1 && piuGrassi(p, g, sost) > 5) {
+    const pr = Math.round((p[1] * g) / 100);
+    t = base + `servono <b>${it(g)} g</b>, e <b>niente olio</b> in questo pasto: è più grasso della proteina del piano (${Math.round((p[0] * g) / 100)} kcal, contro ${Math.round(sost.v[0] + (sost.olio || 0))} di proteina e olio).` +
+      (pr < sost.v[1] * 0.9 ? ` Proteine: ${pr} g invece di ${Math.round(sost.v[1])}, va bene ogni tanto.` : "");
+  }
+  return t;
+}
+function aggiornaSost() {       // rilegge i valori scritti nel modulo e aggiorna messaggio e grammi
+  const p = bozza.per100, m = $("sostMsg");
+  ["aK", "aP", "aC", "aF", "aFi"].forEach((id, i) => (p[i] = Math.max(0, num($(id).value) || 0)));
+  if (!sost) { m.style.display = "none"; return false; }
+  const g = grammiSost(p); m.style.display = ""; m.innerHTML = testoSost(p);
+  if (g) $("aG").value = it(g);
+  return !!g;
+}
+function calcolaSost() {
+  sost = rifPer(bozza.cat);
+  if (!sost) { aggiornaSost(); avvisa("In questo pasto non c'è una voce del piano da pareggiare: scrivi tu i grammi"); return; }
+  if (!aggiornaSost()) avvisa("Mancano i valori per 100 g");
+}
+function sostituisciCibo(pid) {
+  dove = pid; sost = null;
+  apri(testaFoglio("Cosa non hai in casa?") + `<p class="muto">Scegli l'alimento del piano da sostituire. Poi indichi cosa hai, e l'app calcola quanti grammi ne servono.</p>
+    <div class="card pasto"><ul>` + vociPasto(pid).filter((x) => x.v[3][0] > 0).map((x) => `<li class="sp" onclick="scegliSost('${x.v[0]}')"><span>${x.v[1]}</span><b>${x.q}</b></li>`).join("") +
+    `</ul></div><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+function scegliSost(id) {
+  const x = vociPasto(dove).find((y) => y.v[0] === id); if (!x) return;
+  sost = { ids: [id], nome: x.v[1], q: x.q, ks: x.g.k ? [x.g.k] : [], m: macroDi(x), v: x.v[3].map((n) => n * x.f), olio: olioPasto(dove) };
+  aggiungiCibo();
+}
+// elenco degli alimenti senza codice: a destra i grammi che servono in questo pasto, quando c'è qualcosa da pareggiare
+function listaBase(q) {
+  q = String(q || "").toLowerCase().trim(); let h = "", ult = "";
+  for (const { b, i } of baseVisibili()) {
+    if (q && !b[0].toLowerCase().includes(q)) continue;
+    if (b[1] !== ult) { ult = b[1]; h += `<li style="padding:12px 0 4px"><b class="sopra">${GRUPPI_BASE[ult]}</b></li>`; }
+    const rif = rifPer(b[1]), g = rif ? grammiSost(b[2], rif) : null;
+    h += `<li class="sp" onclick="formAlimento(baseCibo(${i}))"><span>${b[0]}</span><b>${g ? it(g) + " g" : b[2][0] + " kcal / 100 g"}</b></li>`;
+  }
+  return h || `<li class="muto" style="padding:10px 0">Non c'è: tocca "Scrivi i valori a mano" e copia quelli dell'etichetta.</li>`;
+}
+/* Guida "Sostituzioni": le stesse grammature in tabella, per i pasti che hanno carboidrato e proteina a scelta */
+function vCambi() {
+  const pasti = PASTI.filter((p) => p.g.some((g) => g.k));
+  let h = testaGuida("Sostituzioni") + `
+  <p class="muto">Nel piano c'è un alimento, in casa ne hai un altro: ecco quanto metterne. Pesi a crudo; per i prodotti in scatola, sgocciolati.</p>
+  <div class="card"><ul>
+    <li>Un <b>carboidrato</b> si cambia con un altro carboidrato, a parità di carboidrati.</li>
+    <li>Una <b>proteina</b> con un'altra proteina, a parità di proteine. Se è più grassa (formaggi, salmone, uova) se ne mette meno e in quel pasto <b>niente olio</b>: così le calorie restano quelle.</li>
+    <li>I <b>legumi</b> fanno da carboidrato e da proteina insieme: prendono il posto di tutti e due, a parità di calorie.</li>
+    <li>La <b>verdura</b> si cambia liberamente con altra verdura, stessa quantità.</li>
+    <li>Sotto ogni pasto del piano, <b>"Non ho un alimento"</b> fa lo stesso conto e aggiorna la giornata. Vale anche per i prodotti con il codice a barre.</li></ul></div>`;
+  for (const cat of ["carbo", "legumi", "prot"]) {
+    h += `<h2>${GRUPPI_BASE[cat]}${cat === "legumi" ? " · al posto di carboidrato e proteina" : ""}</h2><div class="card"><table><tr><th>A crudo</th>${pasti.map((p) => `<th style="text-align:right">${p.nome}</th>`).join("")}</tr>`;
+    for (const { b } of baseVisibili().filter((x) => x.b[1] === cat)) {
+      h += `<tr><td>${b[0]}</td>` + pasti.map((p) => {
+        const r = rifAuto(cat, p.id, true), g = r ? grammiSost(b[2], r) : null;
+        return `<td style="text-align:right;white-space:nowrap">${g ? it(g) + " g" + (cat === "prot" && piuGrassi(b[2], g, r) > 5 ? "*" : "") : "–"}</td>`;
+      }).join("") + `</tr>`;
+    }
+    h += `</table>${cat === "prot" ? `<p class="muto">* più grasso della proteina del piano: la quantità è già ridotta, e in quel pasto niente olio.</p>` : ""}</div>`;
+  }
+  return h + `<p class="muto">Quantità calcolate sul piano di oggi, da valori medi di composizione: marca e taglio spostano un po' i numeri.</p>`;
+}
 function aggiungiCibo(pid) {
-  if (pid) dove = pid;
+  if (pid) { dove = pid; sost = null; } else if (sost && sost.auto) sost = null;
   const miei = S.alimenti || [];
-  apri(testaFoglio("Aggiungi a " + nomePasto()) + `<p class="muto">Entra nel conto di oggi, dentro questo pasto.</p>
+  apri(testaFoglio(sost ? "Cosa hai in casa?" : "Aggiungi a " + nomePasto()) + `<p class="muto">${sost ? "Prende il posto di <b>" + esc(sost.nome) + "</b> (" + esc(sost.q) + ") a " + nomePasto() + "." : "Entra nel conto di oggi, dentro questo pasto."}</p>
     <button class="pri largo" onclick="scansiona()">Scansiona il codice a barre</button>
     <label>Oppure scrivi il numero sotto il codice a barre</label>
     <div class="riga"><input id="cCod" inputmode="numeric" placeholder="8001234567890" autocomplete="off"><button onclick="cercaCodice($('cCod').value)">Cerca</button></div>
     <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button>` +
     (miei.length ? `<h2>I tuoi alimenti</h2><div class="card pasto"><ul>` + miei.map((a, i) => `<li class="sp" onclick="formAlimento(S.alimenti[${i}])"><span>${esc(a.nome)}<br><small class="muto">${CAT[a.cat] || "Altro"}</small></span><b>${Math.round(a.per100[0])} kcal / 100 g</b></li>`).join("") + `</ul></div>` : "") +
-    `<button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+    `<h2>Senza codice: carne, pesce, legumi, formaggi…</h2>
+    <input id="cBase" placeholder="Cerca: ceci, mozzarella, patate…" autocomplete="off" oninput="$('lBase').innerHTML=listaBase(this.value)">
+    <p class="muto">A destra i grammi che servono ${sost ? "per questa sostituzione" : "in questo pasto"}, a crudo.</p>
+    <div class="card pasto"><ul id="lBase">${listaBase("")}</ul></div>
+    <button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
 async function scansiona() {
   if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { avvisa("Questo browser non legge i codici: scrivi il numero"); return; }
@@ -1708,20 +1882,27 @@ async function cercaCodice(cod) {
       nome: [p.brands ? p.brands.split(",")[0].trim() : "", p.product_name_it || p.product_name || ""].filter(Boolean).join(" · ") });
   } catch (e) { formAlimento({ codice: cod }); avvisa("Serve la rete per cercare: scrivi i valori a mano"); }
 }
-function scegliCat(c) { bozza.cat = c; for (const k in CAT) { const b = $("cat-" + k); if (b) { b.classList.toggle("pri", k === c); b.setAttribute("aria-pressed", k === c); } } }
+function scegliCat(c) {
+  bozza.cat = c; for (const k in CAT) { const b = $("cat-" + k); if (b) { b.classList.toggle("pri", k === c); b.setAttribute("aria-pressed", k === c); } }
+  if (!sost || sost.auto || c === "legumi") { sost = rifPer(c); aggiornaSost(); }      // cambia il tipo: cambia anche a cosa si pareggia
+}
 function formAlimento(a) {
   bozza = { codice: a.codice || "", per100: (a.per100 || new Array(10).fill(0)).slice(), cat: a.cat || "altro" };
+  if (sost && !sost.auto && sost.ks.length === 1 && a.cat !== "legumi") bozza.cat = sost.ks[0];
+  if (a.per100) sost = rifPer(bozza.cat);        // alimento con i valori già noti: l'app trova da sola a cosa pareggiarlo
+  const gs = sost ? grammiSost(bozza.per100) : null;
   const v = bozza.per100, campo = (id, et, val, ph) => `<div><label>${et}</label><input id="${id}" inputmode="decimal" autocomplete="off" value="${val ? esc(it(Math.round(val * 10) / 10)) : ""}" placeholder="${ph || "0"}"></div>`;
-  apri(testaFoglio("Aggiungi a " + nomePasto()) + (a.trovato ? `<p class="muto">Trovato su Open Food Facts. Bastano i grammi e il tipo; controlla che i valori siano quelli dell'etichetta.</p>` : "") +
+  apri(testaFoglio(sost && !sost.auto ? "Sostituzione" : "Aggiungi a " + nomePasto()) + `<div class="card esito verde" id="sostMsg" style="${sost ? "" : "display:none"}">${sost ? testoSost(bozza.per100) : ""}</div>` + (a.trovato ? `<p class="muto">Trovato su Open Food Facts. Bastano i grammi e il tipo; controlla che i valori siano quelli dell'etichetta.</p>` : "") +
     `<label>Nome</label><input id="aNome" value="${esc(a.nome || "")}" placeholder="Es. Mozzarella proteica" autocomplete="off">
-    ${campo("aG", "Quanti grammi", a.porz, "100")}
-    <label>Che cos'è</label><div class="tre3c">${Object.keys(CAT).map((k) => `<button type="button" id="cat-${k}" class="${k === bozza.cat ? "pri" : ""}" aria-pressed="${k === bozza.cat}" onclick="scegliCat('${k}')">${CAT[k]}</button>`).join("")}</div>
-    <p class="muto">Carboidrato e proteina prendono il posto della scelta del piano in quel pasto.</p>
+    ${campo("aG", "Quanti grammi", gs || a.porz, "100")}
+    <label>Che cos'è</label><div class="tre3c" style="grid-template-columns:1fr 1fr">${Object.keys(CAT).map((k) => `<button type="button" id="cat-${k}" class="${k === bozza.cat ? "pri" : ""}" aria-pressed="${k === bozza.cat}" onclick="scegliCat('${k}')">${CAT[k]}</button>`).join("")}</div>
+    <p class="muto">Carboidrato e proteina prendono il posto della scelta del piano in quel pasto; i legumi di tutte e due.</p>
     <h2>Valori per 100 g, dall'etichetta</h2>
     <div class="g2">${campo("aK", "Calorie (kcal)", v[0])}${campo("aP", "Proteine (g)", v[1])}${campo("aC", "Carboidrati (g)", v[2])}${campo("aF", "Grassi (g)", v[3])}</div>
     ${campo("aFi", "Fibra (g), se c'è", v[4])}
+    <button type="button" class="largo" onclick="calcolaSost()">Calcola i grammi per questo pasto</button>
     <p class="muto">Se conosci solo i valori della porzione intera (una pizza, un piatto al ristorante), scrivi quelli e metti 100 nei grammi.</p>
-    <label class="riga" style="gap:10px;color:var(--testo)"><input type="checkbox" id="aSalva" checked style="width:24px;min-height:24px;flex:none"> Tienilo tra i miei alimenti</label>
+    <label class="riga" style="gap:10px;color:var(--testo)"><input type="checkbox" id="aSalva" ${a.base ? "" : "checked"} style="width:24px;min-height:24px;flex:none"> Tienilo tra i miei alimenti</label>
     <button class="pri largo" onclick="confAlimento()">Aggiungi a ${nomePasto()}</button><button class="largo" onclick="aggiungiCibo()">Indietro</button>`, true);
   if (a.nome) setTimeout(() => { const g = $("aG"); if (g && !g.value) g.focus(); }, 60);       // alimento già noto: si parte dai grammi
 }
@@ -1733,15 +1914,18 @@ function confAlimento() {
   if (!p[0]) p[0] = Math.round(p[1] * 4 + p[2] * 4 + p[3] * 9);          // calorie mancanti: le ricava dai macro
   if (!p[0]) { avvisa("Scrivi almeno le calorie"); return; }
   const r = recCibo(oggi(), true), pasto = PASTI.find((x) => x.id === dove) || PASTI[2];
-  (r.extra = r.extra || []).push({ id: Date.now(), nome, q: it(g) + " g", v: p.map((x) => (x * g) / 100), pasto: pasto.id, cat });
+  (r.extra = r.extra || []).push({ id: Date.now(), nome, q: it(g) + " g", v: p.map((x) => (x * g) / 100), pasto: pasto.id, cat, sost: sost ? sost.nome : undefined });
   // carboidrato o proteina: prende il posto della scelta del piano in quel pasto (non nel giorno personalizzato)
-  const gruppo = pasto.g.find((x) => x.k === cat);
-  if (gruppo && !r.pers) for (const o of gruppo.v) delete r.x[o[0]];
+  // una sostituzione toglie la voce sostituita (e, se era una scelta "uno a scelta", le altre del suo gruppo)
+  const ks = sost ? sost.ks : cat === "legumi" ? ["carbo", "prot"] : [cat];
+  if (sost) for (const id of sost.ids) { delete r.x[id]; if (r.q) delete r.q[id]; }
+  if (!r.pers) for (const gr of pasto.g) if (gr.k && ks.includes(gr.k)) for (const o of gr.v) delete r.x[o[0]];
+  const era = sost && !sost.auto ? sost.nome : ""; sost = null;
   if ($("aSalva").checked) {
     S.alimenti = (S.alimenti || []).filter((x) => (bozza.codice ? x.codice !== bozza.codice : x.nome.toLowerCase() !== nome.toLowerCase()));
     S.alimenti.unshift({ nome, per100: p.slice(), porz: g, codice: bozza.codice, cat }); S.alimenti = S.alimenti.slice(0, 40);
   }
-  salva(); chiudi(); tieni(disegna); avvisa("Aggiunto a " + pasto.nome.toLowerCase());
+  salva(); chiudi(); tieni(disegna); avvisa(era ? "Sostituito: " + era : "Aggiunto a " + pasto.nome.toLowerCase());
 }
 function togliExtra(id) { const r = recCibo(oggi(), true); r.extra = (r.extra || []).filter((x) => x.id !== id); salva(); tieni(disegna); }
 
