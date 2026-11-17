@@ -414,6 +414,36 @@ body { overflow-x:clip; }
 .testata > div { flex:1; min-width:0; } button.tre-linee { flex:none; width:48px; min-height:48px; background:var(--card); border-color:var(--linea); border-radius:16px; color:var(--testo); }
 .tre-linee svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
 .blocco small + br + small { font-size:12.5px; }
+/* v21: identità. Carattere dei titoli e dei numeri (Archivo, largo e pesante, in font/), zone più luminose e un solo accento,
+   riquadri "pieni" solo dove serve e liste senza scatola, foto nei pasti, il manubrio dell'icona come segno che torna */
+@font-face { font-family:"Titoli"; src:url(font/archivo.woff2) format("woff2"); font-weight:500 900; font-stretch:100% 125%; font-display:swap; }
+:root { --bg:#0a110d; --solido:#18231d; --card:rgba(255,255,255,.085); --card2:rgba(255,255,255,.13); --linea:rgba(255,255,255,.15); --muto:#a9b9b0;
+        --tit:"Titoli",system-ui,'Segoe UI',Roboto,Arial,sans-serif; --manubrio:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cg transform='rotate(-32 256 256)' fill='%233ddc84'%3E%3Crect x='150' y='238' width='212' height='36' rx='18'/%3E%3Crect x='98' y='214' width='34' height='84' rx='15'/%3E%3Crect x='380' y='214' width='34' height='84' rx='15'/%3E%3Crect x='124' y='186' width='44' height='140' rx='19'/%3E%3Crect x='344' y='186' width='44' height='140' rx='19'/%3E%3C/g%3E%3C/svg%3E"); }
+body::before { background:radial-gradient(75% 50% at 8% 0%, rgba(61,220,132,.36), transparent 70%), radial-gradient(60% 45% at 100% 32%, rgba(61,220,132,.17), transparent 70%),
+  radial-gradient(85% 50% at 40% 100%, rgba(61,220,132,.24), transparent 72%), var(--bg); }
+body::after { content:""; position:fixed; z-index:-1; pointer-events:none; top:calc(-46px + env(safe-area-inset-top)); right:-84px; width:310px; height:310px; opacity:.09; background:var(--manubrio) center/contain no-repeat; }
+h1, h2, .sopra, .eti, .nome, .grande, .foto b, .dato > b, .kc b, .tess b, .tre b, .eroe .num b, .st input, #rec b, .top .tit, .numerone, .blocco b, .tile b, .voceH b, .es b, .serie b,
+.adesso .atit, button.pri, .avatar, .sett b, .vuoto b, .esito b, #avvio b, .pillola, .legm b, .mt b, .ban .nome { font-family:var(--tit); font-stretch:112%; }
+h1 { font-stretch:118%; font-weight:850; letter-spacing:-1px; font-size:30px; }
+.testata h1, .testata .sopra { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .testata .sopra { font-size:12px; letter-spacing:.6px; }
+h2 { font-stretch:120%; letter-spacing:1.5px; color:#c6d5cc; }
+.sopra, .eti { font-stretch:118%; }
+.dato > b, .kc b, .tess b, .numerone, .st input, #rec b { font-stretch:118%; font-weight:850; }
+.card { box-shadow:inset 0 1px 0 rgba(255,255,255,.07); }
+.card.lista { background:transparent; border-color:transparent; box-shadow:none; padding:0 4px; margin:4px 0; } .voceH { border-bottom-color:rgba(255,255,255,.10); }
+.conto { background:linear-gradient(150deg,rgba(61,220,132,.22),rgba(61,220,132,.06) 60%,rgba(255,255,255,.05)); border-color:rgba(61,220,132,.38); }
+.dato { background:rgba(255,255,255,.095); } .barra { background:rgba(255,255,255,.16); }
+.pasto li.sp:not(.on) span { color:#dde8e1; } .pasto li { border-bottom-color:rgba(255,255,255,.10); }
+input, textarea, select { background:rgba(0,0,0,.28); }
+.vuoto::before { content:""; display:block; width:72px; height:72px; margin:0 auto 6px; background:var(--manubrio) center/contain no-repeat; }
+/* foto: fascia in cima a ogni pasto, testata del ricettario, seduta consigliata */
+.ban { position:relative; align-items:flex-end; margin:-16px -16px 14px; padding:58px 16px 12px; border-radius:21px 21px 0 0; background:#141b18 center/cover no-repeat; overflow:hidden; }
+.ban::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,17,13,.10) 10%,rgba(10,17,13,.90)); }
+.ban > * { position:relative; } .ban .sopra { color:#d6f7e5; } .ban .nome { font-size:23px; letter-spacing:-.4px; } .ban .pillola { background:rgba(10,17,13,.62); }
+.fotoTesta { position:relative; height:150px; padding:0; overflow:hidden; background:#141b18 center/cover no-repeat; margin-top:0; }
+.fotoTesta::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,17,13,.05) 30%,rgba(10,17,13,.88)); }
+.fotoTesta span { position:absolute; left:16px; right:16px; bottom:12px; } .fotoTesta b { display:block; font-family:var(--tit); font-stretch:112%; font-size:20px; } .fotoTesta small { color:#d3ded7; font-size:13px; }
+.eroe.confoto { background:linear-gradient(150deg,rgba(10,26,17,.80),rgba(10,17,13,.93)), var(--f) center/cover no-repeat; }
 @media (prefers-reduced-motion:reduce) { button, .barra i, .av { transition:none; } #avvio { display:none; }
   #vista, #foglio, #velo, .fantasma, .festa *, .festa svg { animation:none !important; } }
 </style>
@@ -766,13 +796,14 @@ function profilo() {
     <p class="muto">Nome, altezza, pesate e tutto quello che segni restano su questo telefono.</p><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
 function salvaProfilo() { S.profilo = { nome: $("pNome").value.trim(), altezza: num($("pAlt").value) }; salva(); chiudi(); disegna(); avvisa("Profilo salvato"); }
+const fotoSed = (se) => { const e = se.es.filter((x) => x.t === "m" || x.t === "sa").concat(se.es).find((x) => FOTO[x.id] && FOTO[x.id][1]); return e ? FOTO[e.id][1] : ""; };
 function vScheda() {
   const q = quadro(), { f, sett, fatte } = q, pross = prossima(), scelta = !!schedaSel, k = schedaSel || pross, se = SEDUTE[k];
   const nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), gia = fatte[k], mai = !S.sedute.some((s) => PESI.includes(s.tipo));
   let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 1.1 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q) +
     `<p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 2</b>. I giorni li scegli tu, con almeno un giorno libero in mezzo.</p>` +
     (mai ? `<div class="card consiglioCoach"><b>Prima di cominciare</b>La prima seduta di pesi si fa quando il coach ti dà il via. Fino ad allora: alimentazione, pilates e passi.</div>` : "") +
-    `<div class="card eroe"><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : "Prossima consigliata"}${gia ? " · già fatta " + nomeGiorno(gia.data) : ""}</span><span class="pillola">${esc(f.nome.split(" · ")[0])}</span></div>
+    `<div class="card eroe ${fotoSed(se) ? "confoto" : ""}" ${fotoSed(se) ? `style="--f:url(${fotoSed(se)})"` : ""}><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : "Prossima consigliata"}${gia ? " · già fatta " + nomeGiorno(gia.data) : ""}</span><span class="pillola">${esc(f.nome.split(" · ")[0])}</span></div>
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>${PESI.includes(k) ? "RIR " + esc(f.rir({ t: "m" })) : "–"}</b>sforzo</div></div>
       <div class="muto">${PESI.includes(k) ? esc(f.testo) : "Fuori dalla scheda dei pesi: serve a tenere il conto della settimana."}</div>
@@ -1109,6 +1140,7 @@ function comePiano(pid) {
 }
 function togliVecchio() { const r = recCibo(oggi(), true); r.x = {}; r.extra = []; r.q = {}; r.pers = false; salva(); tieni(disegna); }
 
+const FOTO_PASTO = ["col", "spu", "pra", "mer", "cen"];      // i pasti che hanno la foto in img/pasti/<id>.jpg
 function avvisiCibo(R) {
   const su = [], kc = R.scarto[0] * 4 + R.scarto[1] * 4 + R.scarto[2] * 9; let h = "";
   for (const key in R.agg) { const [pid, s] = key.split("."), a = R.agg[key]; if (pid === "col" && s === "g") continue;      // i grassi della colazione stanno già nei pancake: lo dice la sezione
@@ -1157,7 +1189,7 @@ function vCibo() {
     if ((p.libere || []).length) corpo += `<h3>${p.libereT || "Quando capita"}</h3><ul>` + p.libere.map((f) => { const sel = !!(r.f && r.f[p.id + ":" + f[0]]); if (sel) { kc += f[3][0]; pieno = true; }
       return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b></li>`; }).join("") + `</ul>`;
     if (p.id === "int") h += `<h2>Integratori</h2>`;
-    h += `<div class="card pasto" id="pasto-${p.id}"><div class="riga tra"><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div><span class="pillola">${Math.round(kc)} kcal</span></div>${corpo}` +
+    h += `<div class="card pasto" id="pasto-${p.id}"><div class="riga tra ${FOTO_PASTO.includes(p.id) ? "ban" : ""}" ${FOTO_PASTO.includes(p.id) ? `style="background-image:url(img/pasti/${p.id}.jpg)"` : ""}><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div><span class="pillola">${Math.round(kc)} kcal</span></div>${corpo}` +
       (p.id !== "int" ? `<div class="g2" style="margin-top:14px"><button class="pic" onclick="comePiano('${p.id}')">Come da piano</button><button class="pic" onclick="prepPasto='${p.id}';apriSub('prep')">Meal prep</button></div>` : "") + `</div>`;
   }
   h += `<p class="muto conta">${APP.notaInt}</p>
@@ -1209,6 +1241,7 @@ const chipsPasto = (sel, js, vuoto) => `<div class="chips">${vuoto ? `<button cl
 function vPrep() {
   const L = piatti();
   return `<div class="riga testata">${freccia("apriSub('cibo')")}<div><div class="sopra">Il tuo ricettario</div><h1>Meal prep</h1></div></div>
+    <div class="card fotoTesta" style="background-image:url(img/pasti/prep.jpg)"><span><b>${L.length ? L.length + (L.length === 1 ? " piatto salvato" : " piatti salvati") : "I tuoi piatti pronti"}</b><small>Li scrivi una volta, li inserisci con un tocco</small></span></div>
     <button class="pri largo grosso" style="margin-top:0" onclick="nuovoPrep()">+ Aggiungi meal prep</button>
     <p class="muto conta">Tieni qui i piatti che ti prepari. Quando ne mangi uno lo tocchi, metti i grammi di oggi, scegli il momento della giornata e finisce da solo nella dieta.</p>` +
     (L.length ? L.map((q, n) => `<button class="blocco" onclick="usaPrep(${n})"><span><b>${esc(q.nome)}</b><small>${esc(testoIng(q.ing))}</small><br><small style="color:var(--verde)">${macroA(sommaIng(q.ing))}</small></span><em>›</em></button>`).join("")
@@ -2006,8 +2039,8 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v5</p>
-  <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v6</p>
+  <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
 async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Taccuino", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
