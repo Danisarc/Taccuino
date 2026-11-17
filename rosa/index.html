@@ -15,7 +15,7 @@
 html { background:var(--bg); }
 body { margin:0 auto; color:var(--testo); font:16px/1.4 system-ui,'Segoe UI',Roboto,Arial,sans-serif; -webkit-font-smoothing:antialiased;
        padding:calc(18px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom)); max-width:560px; min-height:100vh; }
-body.inseduta { padding-bottom:calc(390px + env(safe-area-inset-bottom)); }
+body.inseduta { padding-bottom:calc(180px + env(safe-area-inset-bottom)); }
 /* sfondo con luci colorate: è quello che il vetro della barra lascia intravedere */
 body::before { content:""; position:fixed; inset:0; z-index:-1; background:
   radial-gradient(60% 45% at 12% 0%, rgba(61,220,132,.26), transparent 70%),
@@ -119,11 +119,35 @@ ol.piano b { flex:none; color:var(--muto); font-weight:600; font-size:13px; font
 .chip.cur { border-color:var(--verde); color:var(--testo); box-shadow:0 0 0 1px var(--verde) inset; }
 .chip.piu { min-width:42px; border-style:dashed; background:transparent; }
 
-/* pannello della serie */
+/* seduta: elenco degli esercizi (miniatura, nome, serie fatte) */
+.es { display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:10px; margin:10px 0; border-radius:20px; background:var(--card); min-height:86px; }
+.mini { flex:none; width:64px; height:64px; border-radius:14px; background:#141b18 center/cover no-repeat; display:flex; align-items:center; justify-content:center;
+        font-style:normal; font-weight:800; font-size:20px; color:var(--muto); }
+.mini.p { width:44px; height:44px; border-radius:10px; }
+.es .tx { flex:1; min-width:0; } .es b { display:block; font-size:16px; line-height:1.25; } .es small { color:var(--muto); font-size:13px; }
+.es em { flex:none; font-style:normal; font-size:13px; font-weight:700; color:var(--muto); padding:4px 10px; border-radius:20px; background:rgba(255,255,255,.08); font-variant-numeric:tabular-nums; }
+.es.att { border-color:rgba(61,220,132,.55); background:linear-gradient(150deg,rgba(61,220,132,.16),rgba(61,220,132,.04)); }
+.es.att em { background:var(--verde); color:#04130a; }
+.es.fatto em { background:var(--verde3); color:var(--verde); } .es.fatto .mini { opacity:.5; }
+/* pagina del singolo esercizio: foto in due tempi, numeri, serie */
+.demo { position:relative; aspect-ratio:3/2; border-radius:22px; overflow:hidden; background:#141b18; margin:0 0 14px; border:1px solid var(--linea); }
+.demo img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.demo img + img { animation:demo 2.4s step-end infinite; }
+@keyframes demo { 0% { opacity:0; } 50% { opacity:1; } }
+.serie { display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:10px 12px; margin:8px 0; border-radius:18px; background:var(--card); min-height:56px; }
+.serie i { flex:none; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.10); font-style:normal; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.serie span { flex:1; min-width:0; color:var(--muto); font-size:14px; } .serie b { font-size:18px; color:var(--testo); font-variant-numeric:tabular-nums; }
+.serie small { flex:none; color:var(--muto); font-size:12px; }
+.serie.ok i { background:var(--verde); color:#04130a; }
+.adesso { border:1px solid rgba(61,220,132,.55); border-radius:24px; padding:12px; margin:8px 0; background:linear-gradient(150deg,rgba(61,220,132,.14),rgba(61,220,132,.03)); }
+.adesso .atit { font-weight:800; font-size:17px; margin:0 4px 8px; }
+.adesso .obi { white-space:normal; flex-wrap:wrap; row-gap:0; }
+
+/* pannello fisso in basso: solo il timer di recupero */
 #pan { position:fixed; left:0; right:0; bottom:calc(82px + env(safe-area-inset-bottom)); z-index:6; display:none; padding:0 12px; pointer-events:none; }
 #pan .dentro { pointer-events:auto; max-width:440px; margin:0 auto; background:rgba(17,24,21,.86); -webkit-backdrop-filter:blur(26px) saturate(160%); backdrop-filter:blur(26px) saturate(160%);
-               border:1px solid rgba(255,255,255,.14); border-radius:28px; padding:12px; box-shadow:0 12px 40px rgba(0,0,0,.55); }
-#rec { display:none; align-items:center; justify-content:space-between; background:var(--verde3); border:1px solid rgba(61,220,132,.4); border-radius:18px; padding:4px 6px 4px 14px; margin-bottom:10px; color:var(--verde); }
+               border:1px solid rgba(255,255,255,.14); border-radius:26px; padding:8px; box-shadow:0 12px 40px rgba(0,0,0,.55); }
+#rec { display:none; align-items:center; justify-content:space-between; background:var(--verde3); border:1px solid rgba(61,220,132,.4); border-radius:18px; padding:4px 6px 4px 14px; color:var(--verde); }
 #rec.fine { background:rgba(247,169,79,.16); border-color:var(--arancio); color:var(--arancio); }
 #rec b { font-size:24px; font-variant-numeric:tabular-nums; margin-left:8px; color:var(--testo); }
 .ptit { font-size:13px; color:var(--muto); margin:0 4px 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -162,6 +186,42 @@ ol.piano b { flex:none; color:var(--muto); font-weight:600; font-size:13px; font
 #nav .att div { color:var(--verde); font-weight:700; }
 #nav .att svg { stroke-width:2.3; }
 
+/* home v15: saluto, prossima seduta con foto, i quattro numeri di oggi con l'anello */
+.saluto { margin-bottom:14px; } .saluto h1 { margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .saluto .avatar { cursor:pointer; }
+.hero { position:relative; border-radius:28px; overflow:hidden; border:1px solid rgba(61,220,132,.32); background:#141b18 center/cover no-repeat; padding:18px; margin:14px 0 4px; box-shadow:0 12px 40px rgba(0,0,0,.4); }
+.hero::before { content:""; position:absolute; inset:0; background:linear-gradient(165deg,rgba(7,11,9,.50),rgba(7,11,9,.90) 62%,rgba(7,11,9,.96)); }
+.hero > * { position:relative; }
+.hero .eti { font-size:12px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--verde); }
+.hero .grande { font-size:30px; font-weight:800; letter-spacing:-.6px; line-height:1.1; margin:26px 0 6px; }
+.hero .sotto { font-size:14px; color:#d3ded7; }
+.fila { display:flex; align-items:center; margin-top:14px; } .fila .mini { margin-right:-8px; border:2px solid #0c120f; } .fila span { margin-left:18px; font-size:13px; font-weight:700; color:#d3ded7; }
+.dato { display:flex; flex-direction:column; align-items:stretch; gap:4px; text-align:left; padding:14px; border-radius:24px; background:var(--card); border:1px solid var(--linea); min-height:138px; color:var(--testo); }
+.dato small { color:var(--muto); font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; }
+.dato > b { font-size:27px; line-height:1.1; letter-spacing:-.6px; font-variant-numeric:tabular-nums; margin-top:auto; white-space:nowrap; }
+.dato u { text-decoration:none; font-size:13px; font-weight:600; color:var(--muto); letter-spacing:0; }
+.dato em { font-style:normal; font-size:12px; color:var(--muto); } .dato em.fai { color:var(--verde); font-weight:700; }
+.dato .tondo { width:38px; min-height:38px; font-size:21px; }
+.anello { flex:none; width:44px; height:44px; transform:rotate(-90deg); } .af { fill:none; stroke:rgba(255,255,255,.10); stroke-width:5; } .av { fill:none; stroke-width:5; stroke-linecap:round; }
+.blocco.avv { border-color:rgba(247,169,79,.45); } .blocco.avv i { background:rgba(247,169,79,.16); color:var(--arancio); }
+input.numerone { font-size:34px; font-weight:800; text-align:center; min-height:76px; margin-top:14px; letter-spacing:-.5px; }
+#nav.nuovo > button:last-of-type::after { content:""; position:absolute; top:7px; left:calc(50% + 7px); width:9px; height:9px; border-radius:50%; background:var(--arancio); box-shadow:0 0 0 2px rgba(7,11,9,.6); }
+/* v16: riquadro largo del sonno, righe della spesa, foto dei progressi */
+.dato.largo2 { grid-column:1/-1; min-height:0; }
+.pasto li.volte { align-items:center; gap:10px; } .pasto li.volte span { flex:1; min-width:0; } .pasto li.volte b { min-width:22px; text-align:center; font-size:17px; }
+.pasto li.volte .tondo { width:38px; min-height:38px; font-size:20px; }
+.fig.uno { grid-template-columns:1fr; max-width:320px; margin-left:auto; margin-right:auto; }
+img.prog { aspect-ratio:3/4; object-fit:cover; background:#141b18; color:var(--muto); font-size:12px; }
+/* home v17: i due ingressi con la barra di avanzamento, e le liste dentro una sola scheda */
+.foto { height:176px; } .foto .barra { display:block; height:4px; margin:7px 0 5px; background:rgba(255,255,255,.22); } .foto .barra i { height:4px; }
+.foto small { display:block; }
+.lista { padding:2px 14px; }
+.voceH { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid rgba(255,255,255,.07); border-radius:0; padding:12px 0; min-height:62px; }
+.voceH:last-child { border-bottom:0; }
+.voceH > i { flex:none; width:38px; height:38px; border-radius:12px; background:var(--verde3); color:var(--verde); display:flex; align-items:center; justify-content:center; }
+.voceH svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.voceH span { flex:1; min-width:0; } .voceH b { display:block; font-size:15px; } .voceH small { color:var(--muto); font-size:12.5px; }
+.voceH em { flex:none; font-style:normal; font-size:24px; color:var(--muto); line-height:1; padding-bottom:3px; }
+.dato .tondo.piu { background:var(--verde); color:#04130a; }
 /* foglio dal basso e avvisi */
 #velo { position:fixed; inset:0; background:rgba(0,0,0,.6); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); z-index:8; display:none; }
 #foglio { position:fixed; left:0; right:0; bottom:0; z-index:9; display:none; max-height:85vh; overflow:auto; background:var(--solido); border-radius:28px 28px 0 0;
@@ -311,7 +371,6 @@ svg text { font:700 11px system-ui,sans-serif; fill:#f7a94f; }
 <div id="pan"><div class="dentro">
   <div id="rec"><span class="muto" style="color:inherit">Recupero <b id="tempo">0:00</b></span>
     <span class="riga"><button class="pic" onclick="timerPiu(30)">+30"</button><button class="ico" onclick="timerStop()">✕</button></span></div>
-  <div id="pcorpo"></div>
 </div></div>
 
 <nav id="nav" aria-label="Sezioni"></nav>
@@ -434,7 +493,7 @@ function daSalire(e, u) {
 
 /* ============ NAVIGAZIONE ============ */
 let tab = "allena";
-function vai(t) { chiudi(); tab = t; sub = null; schedaSel = null; guida = null; disegna(); window.scrollTo(0, 0); }
+function vai(t) { chiudi(); tab = t; vistaFoto = false; sub = null; schedaSel = null; guida = null; disegna(); window.scrollTo(0, 0); }
 
 /* ============ GRAFICI ============
    Una sola serie verde per grafico; nel peso le pesate sono punti grigi e la media a 7 giorni è la linea.
@@ -487,19 +546,21 @@ function disegna() {
   $("vista").innerHTML = { allena: vAllena, diario: vDiario, storico: vStorico, tecnica: vTecnica, esporta: vEsporta }[tab]();
   const inSeduta = tab === "allena" && !!S.corso;
   document.body.classList.toggle("inseduta", inSeduta);
-  $("pan").style.display = inSeduta ? "block" : "none";
-  if (inSeduta) disPan();
+  const di = daInviare(); $("nav").classList.toggle("nuovo", !!(di.s || di.g));      // pallino sulla voce Coach: c'è qualcosa da inviare
+  if (tab === "diario" && vistaFoto) caricaFoto();
+  $("pan").style.display = inSeduta && tInt ? "block" : "none";      // in basso resta solo il timer di recupero, quando gira
+  allinea();
 }
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
-function apri(html, pagina) { fermaCamera(); const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; }
-function chiudi() { fermaCamera(); $("foglio").style.display = "none"; $("velo").style.display = "none"; }
+function apri(html, pagina) { fermaCamera(); const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; allinea(); }
+function chiudi() { fermaCamera(); $("foglio").style.display = "none"; $("velo").style.display = "none"; if (typeof allinea === "function") allinea(); }
 
 /* ============ HOME ============ */
 /* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
    sub: schermata aperta dalla home · schedaSel: seduta scelta a mano nella scheda */
 let sub = null, schedaSel = null;
 function apriSub(s) { sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
-function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : vHome(); }
+function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : sub === "spesa" ? vSpesa() : vHome(); }
 function quadro() {
   const d = oggi(), f = fase(d), lun = lunedi(d), domenica = meno(lun, -6);
   const fatte = {}; let sett = 0;       // sedute di pesi salvate questa settimana: è così che l'app sa se ti sei allenata
@@ -529,27 +590,56 @@ function toccaGiorno(g) {
 }
 const freccia = (js) => `<button class="ico dietro" aria-label="Indietro" onclick="${js}">‹</button>`;
 const prof = () => Object.assign({ nome: "", altezza: null }, S.profilo || {});
-function mediaPassi(d) {
-  const v = []; for (let i = 0; i < 7; i++) { const r = S.diario[meno(d, i)]; if (r && r.passi != null) v.push(r.passi); }
-  return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null;
+/* Home: saluto, settimana, il piano, e i quattro numeri di oggi (peso, passi di ieri, sonno, acqua).
+   Peso e passi si segnano da qui con un tocco: i passi li conta il telefono, l'app non può leggerli da sola. */
+const mila = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+const PASSI_MIN = 8000;
+function daInviare() { const da = S.inviatoFino || ""; return { s: S.sedute.filter((x) => x.data > da).length, g: Object.keys(S.diario).filter((d) => d > da).length }; }
+function mediaPassi(a) {
+  const v = Object.keys(S.diario).filter((d) => d > meno(a, 7) && d <= a && S.diario[d].passi != null).map((d) => S.diario[d].passi);
+  return v.length ? { m: v.reduce((x, y) => x + y, 0) / v.length, n: v.length } : null;
 }
+const anello = (p, col) => { const c = 2 * Math.PI * 20; return `<svg class="anello" viewBox="0 0 48 48"><circle class="af" cx="24" cy="24" r="20"/><circle class="av" cx="24" cy="24" r="20" style="stroke:${col};stroke-dasharray:${c.toFixed(1)};stroke-dashoffset:${(c * (1 - Math.max(0, Math.min(1, p || 0)))).toFixed(1)}"/></svg>`; };
 function vHome() {
-  const q = quadro(), { d, f, sett } = q, P = prof();
+  const q = quadro(), { d } = q, P = prof(), ieri = meno(d, 1), R = S.diario[d] || {};
   const giornoLungo = new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
-  const u = S.sedute[S.sedute.length - 1], N = CIBO.on, mp = mediaPassi(d), m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7));
-  let h = `<div class="sopra">${esc(giornoLungo)}</div><h1>Oggi</h1>
-    <div class="card profilo" onclick="profilo()"><div class="riga"><i class="avatar">${esc((P.nome || "?").trim().charAt(0).toUpperCase())}</i>
-      <span class="chi"><b>${esc(P.nome || "Il mio profilo")}</b><small>${esc(f.nome)}</small></span><em>›</em></div>
-      <div class="tre"><div><b>${m1 ? it(m1.m.toFixed(1)) : "–"}</b>kg, media 7 giorni</div><div><b>${sett} di 2</b>sedute di pesi questa settimana</div><div><b>${mp ? mp : "–"}</b>passi, media 7 giorni</div></div></div>` +
-    striscia(q) + `<p class="muto conta">La settimana mostra gli allenamenti che hai segnato. I giorni li scegli tu.</p>
-    <h2>Il tuo piano</h2><div class="g2">
-      <button class="foto" style="background-image:url(img/allenamento.jpg)" onclick="apriSub('scheda')"><span><b>Allenamento</b><small>Scheda 1.1 · prossima: ${esc(SEDUTE[prossima()].corto)}</small></span></button>
-      <button class="foto" style="background-image:url(img/alimentazione.jpg)" onclick="apriSub('cibo')"><span><b>Alimentazione</b><small>Oggi ${Math.round(totali(d)[0])} di ${N.kcal} kcal</small></span></button></div>
-    <h2>Acqua di oggi</h2>${boxAcqua()}
-    <h2>I tuoi numeri</h2><div class="g2">
-    <button class="tile" onclick="vai('diario')"><small>Peso · media 7 giorni</small><b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "–"}</b><span>${m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : m1 ? m1.n + (m1.n === 1 ? " pesata" : " pesate") : "segna la prima pesata"}</span></button>
-    <button class="tile" onclick="vai('storico')"><small>Ultima seduta</small><b>${u ? esc(u.corto || u.nome) : "–"}</b><span>${u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie" : "nessuna ancora"}</span></button></div>`;
-  return h;
+  const m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7)), pes7 = m1 ? m1.n : 0, pIeri = (S.diario[ieri] || {}).passi, mp = mediaPassi(d);
+  const N = CIBO.on, T = totali(d), aq = recCibo(d).acqua || 0, u = S.sedute[S.sedute.length - 1], di = daInviare();
+  const k = prossima(), se = SEDUTE[k], oggiFatta = S.sedute.filter((s) => s.data === d && PESI.includes(s.tipo)).pop(), mai = !S.sedute.some((s) => PESI.includes(s.tipo));
+  const V = "var(--verde)", riga = (js, ico, t, s) => `<button class="voceH" onclick="${js}"><i><svg viewBox="0 0 24 24">${ico}</svg></i><span><b>${t}</b><small>${s}</small></span><em>›</em></button>`;
+  /* 1 · il piano: i due ingressi principali, e sotto il tasto per allenarsi */
+  let h = `<div class="riga tra saluto"><div style="min-width:0"><div class="sopra">${esc(giornoLungo)}</div><h1>Ciao${P.nome ? ", " + esc(P.nome) : ""}</h1></div>
+      <i class="avatar" role="button" aria-label="Il mio profilo" onclick="profilo()">${esc((P.nome || "?").trim().charAt(0).toUpperCase())}</i></div>` + striscia(q) +
+    `<h2>Il tuo piano</h2><div class="g2">
+      <button class="foto" style="background-image:url(img/allenamento.jpg)" onclick="apriSub('scheda')"><span><b>Allenamento</b><small>${oggiFatta ? "Oggi fatta ✓" : "Prossima: " + esc(se.corto)}</small>
+        <i class="barra"><i style="width:${Math.min(100, Math.round((q.sett / 2) * 100))}%"></i></i><small>${q.sett} di 2 sedute di pesi in settimana</small></span></button>
+      <button class="foto" style="background-image:url(img/alimentazione.jpg)" onclick="apriSub('cibo')"><span><b>Alimentazione</b><small>Proteine ${Math.round(T[1])} di ${N.p} g</small>
+        <i class="barra"><i style="width:${Math.min(100, Math.round((T[0] / N.kcal) * 100))}%"></i></i><small>${mila(T[0])} di ${mila(N.kcal)} kcal</small></span></button></div>` +
+    (oggiFatta ? `<button class="largo grosso" onclick="riepilogo(${oggiFatta.id})">Seduta di oggi fatta ✓ · vedi il riepilogo</button>`
+      : mai ? `<button class="largo grosso" onclick="apriSub('scheda')">Apri la scheda</button>`       // la prima seduta di pesi parte quando il coach dà il via: l'avviso è nella scheda
+      : `<button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta ${esc(se.corto)}</button>`) +
+    /* 2 · le quattro cose da segnare ogni giorno */
+    `<h2>Da segnare oggi</h2><div class="g2">
+      <button class="dato" onclick="segna('peso')"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, V)}</span>
+        <b>${R.peso != null ? it(R.peso) : m1 ? it(m1.m.toFixed(1)) : "–"} <u>kg</u></b>
+        <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
+      <button class="dato" onclick="segna('passi')"><span class="riga tra"><small>Passi di ieri</small>${anello((pIeri || 0) / PASSI_MIN, V)}</span>
+        <b>${pIeri != null ? mila(pIeri) : "–"}</b>
+        <em class="${pIeri == null ? "fai" : ""}">${pIeri == null ? "＋ Segna i passi" : "media 7 giorni " + mila(mp.m)}</em></button>` + tileSonno() +
+      `<div class="dato"><span class="riga tra"><small>Acqua</small>${anello(aq / ACQUA_ML, V)}</span>
+        <b>${litri(aq)} <u>/ ${litri(ACQUA_ML)} L</u></b>
+        <span class="riga"><button class="tondo" aria-label="Togli un bicchiere" onclick="acqua(${-BICCHIERE})">−</button><button class="tondo piu" aria-label="Aggiungi un bicchiere da ${BICCHIERE} ml" onclick="acqua(${BICCHIERE})">+</button><em>${BICCHIERE} ml</em></span></div></div>`;
+  /* 3 · le cose in scadenza: giro vita ogni 14 giorni, foto ogni 28, dati da inviare */
+  const fare = [], uv = ultimoCon("vita"), uf = (S.foto || []).map((x) => x.d).sort().pop();
+  if (!uv || giorniDa(uv) >= 14) fare.push(riga("segna('vita')", ICO.metro, "Misura il giro vita", uv ? "l'ultima misura è di " + giorniDa(uv) + " giorni fa" : "la prima misura, poi una ogni 2 settimane"));
+  if (!uf || giorniDa(uf) >= 28) fare.push(riga("apriFoto()", ICO.foto, "Foto dei progressi", uf ? "le ultime sono di " + giorniDa(uf) + " giorni fa" : "fronte, lato e retro, poi ogni 4 settimane"));
+  if (di.s || di.g) fare.push(riga("vai('esporta')", '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>', "Invia i dati al coach", [di.s ? di.s + (di.s === 1 ? " seduta" : " sedute") : "", di.g ? di.g + (di.g === 1 ? " giorno" : " giorni") + " di misure" : ""].filter(Boolean).join(" · ")));
+  if (fare.length) h += `<h2>Da fare</h2><div class="card lista">${fare.join("")}</div>`;
+  /* 4 · il percorso */
+  return h + `<h2>Il tuo percorso</h2><div class="card lista">` +
+    riga("apriSub('scheda')", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', esc(q.f.nome), esc(q.f.testo)) +
+    riga("vai('storico')", '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', u ? "Ultima seduta: " + esc(u.corto || u.nome) : "Storico delle sedute",
+      u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie · " + S.sedute.length + " in tutto" : "nessuna seduta ancora") + `</div>`;
 }
 /* Profilo: nome e altezza si scrivono qui e restano sul telefono; il resto si ricava da pesate e sedute */
 function profilo() {
@@ -575,8 +665,8 @@ function vScheda() {
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>${PESI.includes(k) ? "RIR " + esc(f.rir({ t: "m" })) : "–"}</b>sforzo</div></div>
       <div class="muto">${PESI.includes(k) ? esc(f.testo) : "Fuori dalla scheda dei pesi: serve a tenere il conto della settimana."}</div>
-      <details ${scelta ? "open" : ""}><summary>Cosa si fa</summary><ol class="piano">`;
-  for (const e of se.es) h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
+      <details open><summary>Cosa si fa</summary><ol class="piano">`;
+  for (const e of se.es) h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
   h += `</ol></details><button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta</button>
       ${scelta ? `<button class="largo" onclick="schedaSel=null;disegna()">‹ Torna alla consigliata</button>` : ""}</div>`;
   const gruppo = (titolo, chiavi) => {
@@ -743,6 +833,7 @@ const CAT = { carbo: "Carboidrato", prot: "Proteina", legumi: "Legumi", altro: "
 function vCibo() {
   const d = oggi(), auto = giornoOn(d), on = modoOn(d), N = CIBO[on ? "on" : "off"], r = recCibo(d), pers = !!r.pers, T = totali(d), resta = Math.round(N.kcal - T[0]);
   let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 1.2 · 5 pasti, senza glutine</div><h1>Alimentazione</h1></div></div>
+    <button class="blocco" onclick="apriSub('spesa')"><i><svg viewBox="0 0 24 24">${ICO.carrello}</svg></i><span><b>Lista della spesa</b><small>La settimana del piano, con le quantità già sommate</small></span><em>›</em></button>
     <div class="card interr ${pers ? "on" : ""}" role="switch" aria-checked="${pers}" onclick="mettiPers(${!pers})"><span><b>Giorno personalizzato</b><small>Stessi traguardi, ma alimenti e grammature li decidi tu</small></span><i class="leva"></i></div>
     <div class="card conto"><div class="riga tra"><div><div class="sopra">Mangiato oggi</div><div class="kc"><b>${Math.round(T[0])}</b> di ${N.kcal} kcal</div></div>
         <span class="pillola">${resta >= 0 ? "restano " + resta : "oltre di " + -resta}</span></div>
@@ -792,7 +883,7 @@ function vCibo() {
 function indietro() {
   const c = S.corso; if (!c) return;
   if (c.sid || c.es.some((e) => e.sets.some((r) => r.ok))) { annulla(); return; }
-  S.corso = null; salva(); timerStop(); disegna(); window.scrollTo(0, 0);
+  S.corso = null; esAperto = null; salva(); timerStop(); disegna(); window.scrollTo(0, 0);
 }
 
 /* ============ SEDUTA IN CORSO ============ */
@@ -842,7 +933,7 @@ function avvia(k, v, piena) {
   };
   S.corso = { tipo: k, data: d, nome: SEDUTE[k].nome, corto: SEDUTE[k].corto, inizio: Date.now(), note: "", es: lista.map((e) => copiaEs(e, quante(e))), cur: null,
     pronto: v ? { v, tot, col: L.col, piena: !!piena } : null, adatta: col === "arancione" || col === "rosso" ? { rir: "3", carico: 0.9 } : null };
-  S.corso.cur = primaAperta(0); prepara(); salva(); tab = "allena"; disegna(); window.scrollTo(0, 0); sveglio();
+  esAperto = null; S.corso.cur = primaAperta(0); prepara(); salva(); tab = "allena"; disegna(); window.scrollTo(0, 0); sveglio();
   if (!S.corso.es.length) aggiungi();
 }
 const rirSeduta = (e) => { const c = S.corso; return c && c.adatta ? c.adatta.rir : fase(c ? c.data : oggi()).rir(e); };
@@ -874,66 +965,115 @@ function prepara() {            // riempie la serie corrente con i numeri più p
   if (r.rip == null) r.rip = prima && prima.rip != null ? prima.rip : o ? o.rip : uv ? uv.rip : null;
   if (r.rir == null && !e.norir) r.rir = prima && prima.rir != null ? prima.rir : parseInt(String(rirSeduta(e)).split("-").pop(), 10);
 }
+/* Foto degli esercizi: due tempi del movimento (partenza e arrivo), che la pagina alterna.
+   File in img/es/<id>-1.jpg e <id>-2.jpg, da free-exercise-db (pubblico dominio). Se aggiungi un esercizio alla scheda,
+   metti qui il suo id, le due foto nella cartella e i loro nomi in FILE dentro sw.js. */
+const FOTO = {};
+"leg-press lat hip-thrust chest-press leg-curl laterali-man pallof goblet pulley rumeno-man lento-man abductor face-pull dead-bug bulgaro ponte-fem rematore-man posteriori-seduta"
+  .split(" ").forEach((id) => { FOTO[id] = ["img/es/" + id + "-1.jpg", "img/es/" + id + "-2.jpg"]; });
+FOTO["goblet-lento"] = FOTO.goblet; FOTO["hip-thrust-casa"] = FOTO["hip-thrust"];      // stesso movimento, attrezzo diverso
+const fotoEs = (id, tocco) => (FOTO[id] ? `<div class="demo" ${tocco ? `onclick="infoEs('${esc(id)}')"` : ""}>${FOTO[id].map((f) => `<img src="${f}" alt="">`).join("")}</div>` : "");
+const miniEs = (id, cl, n) => `<i class="mini ${cl || ""}" ${FOTO[id] ? `style="background-image:url(${FOTO[id][0]})"` : ""}>${FOTO[id] ? "" : n || ""}</i>`;
+
+/* La seduta ha due schermate: l'elenco degli esercizi, e la pagina di un esercizio (foto, numeri, serie da segnare).
+   esAperto: indice dell'esercizio aperto, null se si guarda l'elenco. */
+let esAperto = null;
+function apriEs(i) {
+  const c = S.corso, e = c.es[i]; if (!e) return;
+  const s = e.sets.findIndex((r) => !r.ok);
+  if (s >= 0) { c.cur = { e: i, s }; prepara(); } else if (c.cur && c.cur.e === i) c.cur = primaAperta(0);
+  esAperto = i; salva(); disegna(); window.scrollTo(0, 0);
+}
+function chiudiEs() { esAperto = null; disegna(); window.scrollTo(0, 0); }
+const lunga = (e, r) => (r.kg != null && r.kg !== 0 ? it(r.kg) + " kg × " : "") + it(r.rip) + (e.u ? unita(e) : r.kg ? "" : " rip");
 function vSeduta() {
-  const c = S.corso, f = fase(c.data);
+  const c = S.corso;
+  if (esAperto != null && c.es[esAperto]) return vEsercizio(esAperto);
+  esAperto = null;
   let fatte = 0, tot = 0; c.es.forEach((e) => { tot += e.sets.length; fatte += e.sets.filter((r) => r.ok).length; });
   let h = `<div class="top"><div class="riga"><button class="ico dietro" aria-label="Indietro" onclick="indietro()">‹</button><div style="min-width:0;flex:1"><div class="tit">${esc(c.corto || c.nome)}</div>
     <div class="muto">${nomeGiorno(c.data)} ${dataIt(c.data)} · <span id="durata"></span> · ${fatte}/${tot} serie${c.pronto ? ` · <span class="sem ${c.pronto.col}">${c.pronto.tot}/25${c.adatta ? " adattata" : ""}</span>` : ""}</div></div>
     <button class="pri pic" onclick="fine()">Fine</button></div>
-    <div class="barra"><i style="width:${tot ? Math.round((fatte / tot) * 100) : 0}%"></i></div></div>`;
+    <div class="barra"><i style="width:${tot ? Math.round((fatte / tot) * 100) : 0}%"></i></div></div>
+    <p class="muto conta">Tocca un esercizio: si apre con la foto e le serie da segnare.</p>`;
   c.es.forEach((e, i) => {
-    const u = ultima(e.id, c.sid), att = c.cur && c.cur.e === i, tutto = e.sets.length && e.sets.every((r) => r.ok);
-    h += `<div class="card ex ${att ? "att" : ""} ${tutto ? "fatto" : ""}" id="ex${i}">
-      <div class="riga"><span class="n" onclick="scegli(${i},-1)">${tutto ? "✓" : i + 1}</span><div class="nome" onclick="scegli(${i},-1)">${esc(e.nome)}${daSalire(e, u) ? '<span class="badge">↑ sali di carico</span>' : ""}</div>
-        <button class="info" aria-label="Spiegazione dell'esercizio" onclick="infoEs('${esc(e.id)}')">i</button><button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div>
-      <div class="det"><div class="muto">${e.sets.length} × ${esc(e.rip)}${e.u ? " " + e.u : ""}${e.norir ? "" : " · RIR " + rirSeduta(e)}${REC[e.t] ? " · rec " + REC[e.t] + '"' : ""}${e.ss ? " · superserie" : ""}</div>
-      <div class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "prima volta"}</div>
-      ${att && e.nota ? `<div class="muto consiglio">${esc(e.nota)}</div>` : ""}
-      <div class="chips">`;
-    e.sets.forEach((r, s) => { h += `<button class="chip ${r.ok ? "ok" : ""} ${att && c.cur.s === s ? "cur" : ""}" onclick="scegli(${i},${s})">${r.ok ? esc(unaSerie(e, r)) : s + 1}</button>`; });
-    h += `<button class="chip piu" aria-label="Aggiungi una serie" onclick="piuSerie(${i})">+</button></div></div></div>`;
+    const ok = e.sets.filter((r) => r.ok).length, tutto = e.sets.length && ok === e.sets.length, att = !tutto && c.cur && c.cur.e === i;
+    h += `<button class="es ${att ? "att" : ""} ${tutto ? "fatto" : ""}" onclick="apriEs(${i})">${miniEs(e.id, "", i + 1)}
+      <span class="tx"><b>${esc(e.nome)}</b><small>${e.sets.length} × ${esc(e.rip)}${unita(e)}${e.ss ? " · superserie" : ""}${att ? " · adesso" : ""}</small></span><em>${tutto ? "✓" : ok + "/" + e.sets.length}</em></button>`;
   });
+  if (tot && fatte === tot) h += `<button class="pri largo grosso" onclick="fine()">Fine seduta</button>`;
   h += `<button class="largo" onclick="aggiungi()">+ Aggiungi esercizio</button>
     <div class="card"><label style="margin-top:0">Giorno della seduta</label><input type="date" value="${c.data}" onchange="if(this.value){S.corso.data=this.value;salva();tieni(disegna)}">
     <label>Note</label><textarea onchange="S.corso.note=this.value;salva()" placeholder="Com'è andata, fastidi, energia...">${esc(c.note)}</textarea></div>
     <button class="per largo" onclick="annulla()">Annulla seduta</button>`;
   return h;
 }
-function disPan() {
-  const c = S.corso, e = cE(), r = cS(), p = $("pcorpo");
-  if (!r) { p.innerHTML = `<div class="ptit"><b>${c.es.length ? "Tutte le serie fatte" : "Nessun esercizio"}</b></div><button class="pri largo" style="margin-top:0" onclick="${c.es.length ? "fine()" : "aggiungi()"}">${c.es.length ? "Fine seduta" : "+ Aggiungi esercizio"}</button>`; return; }
-  const u = e.u || "rip", f = fase(c.data);
+function vEsercizio(i) {
+  const c = S.corso, e = c.es[i], u = ultima(e.id, c.sid), I = INFO[e.id], comp = e.ss ? c.es.find((x) => x.id === e.ss) : null;
+  const tutto = e.sets.length && e.sets.every((r) => r.ok), un = e.u === "sec" ? "secondi" : e.u === "min" ? "minuti" : "ripetizioni";
+  let h = `<div class="top"><div class="riga"><button class="ico dietro" aria-label="Torna all'elenco" onclick="chiudiEs()">‹</button>
+    <div style="min-width:0;flex:1"><div class="tit">Esercizio ${i + 1} di ${c.es.length}</div><div class="muto">${esc(c.corto || c.nome)} · <span id="durata"></span></div></div>
+    <button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div></div>` + fotoEs(e.id, true) +
+    `<div class="nome" style="font-size:23px;line-height:1.2">${esc(e.nome)}${daSalire(e, u) ? '<span class="badge">↑ sali di carico</span>' : ""}</div>` +
+    (I ? `<div class="muto" style="margin-top:2px">${esc(I.m)}</div>` : "") +
+    `<div class="tess"><div><b>${e.sets.length}</b>serie</div><div><b>${esc(e.rip)}${unita(e)}</b>${un}</div><div><b>${e.norir ? "–" : rirSeduta(e)}</b>RIR</div><div><b>${REC[e.t] ? REC[e.t] + '"' : "–"}</b>recupero</div></div>
+    <p class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "è la prima volta"}</p>` +
+    (comp ? `<p class="muto">Superserie con <b style="color:var(--testo)">${esc(comp.nome)}</b>: una serie di questo, subito una dell'altro, poi 60" di pausa. L'app passa da sola dall'uno all'altro.</p>` : "") +
+    (e.nota ? `<div class="card consiglioCoach"><b>Nota del coach</b>${esc(e.nota)}</div>` : "") + `<h2>Le serie</h2>`;
+  e.sets.forEach((r, s) => {
+    if (c.cur && c.cur.e === i && c.cur.s === s) { h += adesso(e, r, s); return; }
+    const o = r.ok ? null : obiettivo(e, s);
+    h += `<button class="serie ${r.ok ? "ok" : ""}" onclick="scegli(${i},${s})"><i>${r.ok ? "✓" : s + 1}</i>
+      <span>${r.ok ? `<b>${esc(lunga(e, r))}</b>${r.rir != null && !e.norir ? " · RIR " + r.rir + (r.rir === 4 ? "+" : "") : ""}` : o ? "da fare · obiettivo " + esc(lunga(e, o)) : "da fare"}</span><small>${r.ok ? "modifica" : ""}</small></button>`;
+  });
+  h += `<button class="largo piuCibo" onclick="piuSerie(${i})">+ Aggiungi una serie</button>`;
+  if (tutto) {
+    const nx = primaAperta(i + 1);
+    h += nx ? `<button class="pri largo grosso" onclick="apriEs(${nx.e})">Prossimo: ${esc(c.es[nx.e].nome)} ›</button>` : `<button class="pri largo grosso" onclick="fine()">Fine seduta</button>`;
+  }
+  h += `<button class="largo" onclick="infoEs('${esc(e.id)}')">Come si fa, passo per passo</button><button class="largo" onclick="chiudiEs()">‹ Tutti gli esercizi</button>`;
+  return h;
+}
+// la serie da segnare adesso: kg, ripetizioni, RIR e il tasto Fatto
+function adesso(e, r, s) {
+  const c = S.corso, u = e.u || "rip";
   const st = (k, v, lab) => `<div class="st"><button onclick="passo('${k}',-1)">−</button><input inputmode="decimal" value="${esc(it(v))}" placeholder="–" onfocus="this.select()" onchange="scrivi('${k}',this.value)"><button onclick="passo('${k}',1)">+</button><small>${lab}</small></div>`;
   let extra = "";
   if (!r.ok) {
-    const o = obiettivo(e, c.cur.s), iw = c.es.findIndex((x) => !x.nokg && x.t === "m");
-    extra = o ? `<div class="obi"><span>Obiettivo</span><b>${esc(unaSerie(e, o))}</b><small>l'altra volta ${esc(unaSerie(e, o.prima))} · ${o.perche}</small></div>`
+    const o = obiettivo(e, s), iw = c.es.findIndex((x) => !x.nokg && x.t === "m");
+    extra = o ? `<div class="obi"><span>Obiettivo</span><b>${esc(unaSerie(e, o))}</b><small>${o.perche}</small></div><button class="pic" style="margin:0 0 10px" onclick="comePrima()">↺ Come l'altra volta: ${esc(unaSerie(e, o.prima))}</button>`
       : `<div class="obi"><span>Prima volta</span><small>cerca ${e.nokg ? "il ritmo" : "il carico"} che ti lascia ${e.norir ? "margine" : rirSeduta(e) + " ripetizioni nel serbatoio"}</small></div>`;
     // serie di avvicinamento: solo sul primo esercizio con carico, prima della prima serie
-    if (c.cur.e === iw && c.cur.s === 0 && r.kg) extra += `<div class="obi"><span>Riscaldamento</span><small>${it(arrot(r.kg * 0.5, e.p))} kg × 8, poi ${it(arrot(r.kg * 0.75, e.p))} kg × 4</small></div>`;
+    if (c.cur.e === iw && s === 0 && r.kg) extra += `<div class="obi"><span>Riscaldamento</span><small>${it(arrot(r.kg * 0.5, e.p))} kg × 8, poi ${it(arrot(r.kg * 0.75, e.p))} kg × 4</small></div>`;
   }
-  let h = `<div class="ptit"><b>${esc(e.nome)}</b> · serie ${c.cur.s + 1} di ${e.sets.length} · ${esc(e.rip)} ${e.u || "rip"}</div>${extra}
+  let h = `<div class="adesso"><div class="atit">Serie ${s + 1} di ${e.sets.length}${r.ok ? " · modifica" : ""}</div>${extra}
     <div class="ctl ${e.nokg ? "uno" : ""}">${e.nokg ? "" : st("kg", r.kg, "kg")}${st("rip", r.rip, u === "rip" ? "ripetizioni" : u === "sec" ? "secondi" : "minuti")}</div><div class="ult">`;
-  if (!e.norir) { h += `<div><div class="lbl">RIR (obiettivo ${rirSeduta(e)})</div><div class="rir">`; for (let n = 0; n <= 4; n++) h += `<button class="${r.rir === n ? "on" : ""}" onclick="rir(${n})">${n}${n === 4 ? "+" : ""}</button>`; h += `</div></div>`; }
-  h += `<button class="pri" onclick="fatto()">${r.ok ? "Salva modifica" : "Fatto ✓"}</button></div>`;
-  p.innerHTML = h;
+  if (!e.norir) { h += `<div><div class="lbl">Quante ne avevi ancora? (RIR ${rirSeduta(e)})</div><div class="rir">`; for (let n = 0; n <= 4; n++) h += `<button class="${r.rir === n ? "on" : ""}" onclick="rir(${n})">${n}${n === 4 ? "+" : ""}</button>`; h += `</div></div>`; }
+  return h + `<button class="pri" onclick="fatto()">${r.ok ? "Salva modifica" : "Fatto ✓"}</button></div></div>`;
+}
+// un tocco per rimettere kg e ripetizioni della stessa serie dell'ultima volta
+function comePrima() {
+  const c = S.corso, e = cE(), r = cS(), u = e ? ultima(e.id, c.sid) : null; if (!u || !r) return;
+  const uv = u.serie[Math.min(c.cur.s, u.serie.length - 1)]; if (!e.nokg) r.kg = uv.kg; r.rip = uv.rip; salva(); tieni(disegna);
 }
 function passo(k, dir) {
   const e = cE(), r = cS(); let v = r[k];
   const p = k === "kg" ? e.p || 2.5 : e.u ? 5 : 1;
   if (v == null) v = k === "kg" ? Math.max(0, dir * p) : intervallo(e)[0]; else v = Math.max(0, Math.round((v + dir * p) * 100) / 100);
-  r[k] = v; salva(); disPan();
+  r[k] = v; salva(); tieni(disegna);
 }
 function scrivi(k, v) { cS()[k] = num(v); salva(); }
-function rir(n) { const r = cS(); r.rir = r.rir === n ? null : n; salva(); disPan(); }
+function rir(n) { const r = cS(); r.rir = r.rir === n ? null : n; salva(); tieni(disegna); }
 function fatto() {
   const c = S.corso, e = cE(), r = cS(); if (!r) return;
   if (document.activeElement && document.activeElement.tagName === "INPUT") document.activeElement.blur();
   if (r.rip == null || r.rip <= 0) { avvisa("Inserisci " + (e.u ? "la durata" : "le ripetizioni")); return; }
   const era = r.ok; r.ok = true;
   if (!era && REC[e.t]) timerVia(REC[e.t]);
-  const prima = c.cur.e; avanza(); prepara(); salva(); tieni(disegna);
-  if (c.cur && c.cur.e !== prima) { const el = $("ex" + c.cur.e); if (el && el.scrollIntoView) el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  const prima = c.cur.e; avanza(); prepara(); salva();
+  // superserie: la pagina passa da sola al compagno. Negli altri casi resta sull'esercizio, che mostra il tasto "Prossimo"
+  if (esAperto != null && c.cur && c.cur.e !== prima && c.es[c.cur.e].id === c.es[prima].ss) { esAperto = c.cur.e; disegna(); window.scrollTo(0, 0); avvisa("Superserie: ora " + c.es[c.cur.e].nome); }
+  else tieni(disegna);
 }
 function avanza() {
   const c = S.corso, i = c.cur.e, s = c.cur.s, e = c.es[i];
@@ -987,8 +1127,7 @@ function confAggiungi() {
   const b = daNome(); if (!b) return; const c = S.corso;
   if (c.es.some((x) => x.id === b.id)) { avvisa("È già nella seduta"); return; }
   const e = copiaEs(b, fase(c.data).serie(b)); delete e.ss; if (e.t === "sa") e.t = "i";
-  c.es.push(e); c.cur = { e: c.es.length - 1, s: 0 }; prepara(); salva(); chiudi(); disegna();
-  const el = $("ex" + c.cur.e); if (el && el.scrollIntoView) el.scrollIntoView({ block: "center" });
+  c.es.push(e); c.cur = { e: c.es.length - 1, s: 0 }; esAperto = c.cur.e; prepara(); salva(); chiudi(); disegna(); window.scrollTo(0, 0);
 }
 function sostituisci(i) { foglioNome("Sostituisci: " + esc(S.corso.es[i].nome), "confSostituisci(" + i + ")"); }
 function confSostituisci(i) {
@@ -1002,7 +1141,7 @@ function confSostituisci(i) {
 }
 function rimuovi(i) {
   const c = S.corso; if (c.es[i].sets.some((r) => r.ok) && !confirm("Questo esercizio ha serie già fatte. Lo rimuovo?")) return;
-  c.es.splice(i, 1); c.cur = c.es.length ? primaAperta(Math.min(i, c.es.length - 1)) : null; prepara(); salva(); chiudi(); tieni(disegna);
+  c.es.splice(i, 1); esAperto = null; c.cur = c.es.length ? primaAperta(Math.min(i, c.es.length - 1)) : null; prepara(); salva(); chiudi(); tieni(disegna);
 }
 function fine() {
   const c = S.corso, es = [];
@@ -1016,7 +1155,7 @@ function fine() {
   const s = { id: c.sid || Date.now(), data: c.data, tipo: c.tipo, nome: c.nome, corto: c.corto, es, note: c.note, pronto: c.pronto || null, minuti: c.sid ? c.minuti : Math.round((Date.now() - c.inizio) / 60000) };
   S.sedute = S.sedute.filter((x) => x.id !== s.id); S.sedute.push(s);
   S.sedute.sort((a, b) => (a.data < b.data ? -1 : a.data > b.data ? 1 : a.id - b.id));
-  S.corso = null; salva(); timerStop(); vai("storico"); riepilogo(s.id, true);
+  S.corso = null; esAperto = null; salva(); timerStop(); vai("storico"); riepilogo(s.id, true);
 }
 /* ============ RIEPILOGO DI FINE SEDUTA ============ */
 const forza = (e) => e.serie.reduce((m, r) => Math.max(m, r.kg ? r.kg * (1 + r.rip / 30) : r.rip || 0), 0);   // massimale stimato, o ripetizioni se a corpo libero
@@ -1046,20 +1185,20 @@ function riepilogo(id, appena) {
     <p class="muto">Il confronto è sulla serie più pesante: prima conta il carico, a parità di carico le ripetizioni.</p>
     <button class="pri largo" onclick="chiudi();vai('esporta')">Invia al coach</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
-function annulla() { if (confirm(S.corso.sid ? "Chiudo senza salvare le modifiche?" : "Cancello la seduta in corso senza salvarla?")) { S.corso = null; salva(); timerStop(); disegna(); } }
+function annulla() { if (confirm(S.corso.sid ? "Chiudo senza salvare le modifiche?" : "Cancello la seduta in corso senza salvarla?")) { S.corso = null; esAperto = null; salva(); timerStop(); disegna(); } }
 function riapri(id) {
   if (S.corso) { avvisa("Chiudi prima la seduta in corso"); return; }
   const s = S.sedute.find((x) => x.id === id), c = catalogo(); if (!s) return;
   S.corso = { sid: s.id, tipo: s.tipo, data: s.data, nome: s.nome, corto: s.corto, inizio: Date.now(), minuti: s.minuti, note: s.note || "", pronto: s.pronto || null, cur: null,
     es: s.es.map((e) => Object.assign({}, c[e.id] || {}, { id: e.id, nome: e.nome, u: e.u || "", sets: e.serie.map((r) => ({ kg: r.kg, rip: r.rip, rir: r.rir, ok: true })) })) };
-  S.corso.cur = { e: 0, s: 0 }; salva(); vai("allena");
+  S.corso.cur = null; esAperto = null; salva(); vai("allena");
 }
 
 /* ============ TIMER DI RECUPERO ============ */
 let tFine = 0, tInt = null, suonato = false;
-function timerVia(sec) { tFine = Date.now() + sec * 1000; suonato = false; $("rec").style.display = "flex"; clearInterval(tInt); tInt = setInterval(tic, 250); tic(); }
+function timerVia(sec) { tFine = Date.now() + sec * 1000; suonato = false; $("rec").style.display = "flex"; $("pan").style.display = "block"; clearInterval(tInt); tInt = setInterval(tic, 250); tic(); }
 function timerPiu(sec) { tFine = Math.max(tFine, Date.now()) + sec * 1000; suonato = false; tic(); }
-function timerStop() { clearInterval(tInt); tInt = null; $("rec").style.display = "none"; }
+function timerStop() { clearInterval(tInt); tInt = null; $("rec").style.display = "none"; $("pan").style.display = "none"; }
 function tic() {
   const r = Math.ceil((tFine - Date.now()) / 1000), a = Math.abs(r);
   $("tempo").textContent = (r < 0 ? "+" : "") + Math.floor(a / 60) + ":" + String(a % 60).padStart(2, "0");
@@ -1090,6 +1229,7 @@ function grafPassi() {
     grafBarre("passi", dd.map((d) => ({ x: dataIt(d), y: S.diario[d].passi })), { rif: 8000, testo: (p) => `${it(p.y)} passi` }) + `</div>`;
 }
 function vDiario() {
+  if (vistaFoto) return vFoto();
   const d = oggi(), r = S.diario[d] || {};
   const m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7));
   let h = `<h1>Diario</h1><div class="card">
@@ -1097,27 +1237,29 @@ function vDiario() {
     <div class="g2"><div><label>Peso al mattino (kg)</label><input id="dPeso" inputmode="decimal" value="${esc(it(r.peso))}" placeholder="kg"></div>
     <div><label>Passi</label><input id="dPassi" inputmode="numeric" value="${esc(it(r.passi))}" placeholder="8000"></div></div>
     <div class="g2"><div><label>Sonno (1-5)</label><input id="dSonno" inputmode="numeric" value="${esc(it(r.sonno))}" placeholder="1-5"></div>
+    <div><label>Risvegli nella notte</label><input id="dRisv" inputmode="numeric" value="${esc(it(r.risvegli))}" placeholder="0-4"></div></div>
+    <div class="g2"><div><label>Giro vita (cm)</label><input id="dVita" inputmode="decimal" value="${esc(it(r.vita))}" placeholder="ogni 2 settimane"></div>
     <div><label>Note</label><input id="dNote" value="${esc(r.note)}" placeholder="ciclo, gonfiore, energia"></div></div>
     <button class="pri largo" onclick="salvaGiorno()">Salva</button></div>`;
   h += `<div class="card"><div class="nome">Media del peso</div>
     <p>Ultimi 7 giorni: <b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "—"}</b> ${m1 ? `<span class="muto">(${m1.n} pesate)</span>` : ""}</p>
     <p>7 giorni prima: <b>${m0 ? it(m0.m.toFixed(1)) + " kg" : "—"}</b>${m1 && m0 ? ` · variazione <b>${(m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2))} kg</b>` : ""}</p>
-    ${grafico()}<p class="muto">Al mattino a digiuno, 3-4 volte a settimana. Nelle prime 2-3 settimane può restare fermo o salire di poco; poi l'atteso è −0,25/−0,5 kg a settimana.</p></div>` + grafPassi();
+    ${grafico()}<p class="muto">Al mattino a digiuno, 3-4 volte a settimana. Nelle prime 2-3 settimane può restare fermo o salire di poco; poi l'atteso è −0,25/−0,5 kg a settimana.</p></div>` + grafVita() + grafPassi() +
+    `<button class="blocco" onclick="apriFoto()"><i><svg viewBox="0 0 24 24">${ICO.foto}</svg></i><span><b>Foto dei progressi</b><small>${(S.foto || []).length ? (S.foto || []).length + " foto · fronte, lato, retro a confronto" : "Fronte, lato e retro, ogni 4 settimane"}</small></span><em>›</em></button>`;
   const dd = Object.keys(S.diario).sort().reverse().slice(0, 30);
   if (dd.length) {
-    h += `<div class="card"><table><tr><th>Giorno</th><th>Peso</th><th>Passi</th><th>Sonno</th><th></th></tr>`;
-    for (const k of dd) { const x = S.diario[k]; h += `<tr><td>${nomeGiorno(k)} ${dataIt(k)}</td><td>${it(x.peso)}</td><td>${it(x.passi)}</td><td>${it(x.sonno)}</td><td style="text-align:right"><button class="pic" onclick="apriGiorno('${k}')">Modifica</button></td></tr>`; }
+    h += `<div class="card"><table><tr><th>Giorno</th><th>Peso</th><th>Passi</th><th>Sonno</th><th>Vita</th><th></th></tr>`;
+    for (const k of dd) { const x = S.diario[k]; h += `<tr><td>${nomeGiorno(k)} ${dataIt(k)}</td><td>${it(x.peso)}</td><td>${it(x.passi)}</td><td>${it(x.sonno)}${x.risvegli != null ? ' <span class="muto">· ' + x.risvegli + ' risv.</span>' : ''}</td><td>${it(x.vita)}</td><td style="text-align:right"><button class="pic" onclick="apriGiorno('${k}')">Modifica</button></td></tr>`; }
     h += `</table></div>`;
   }
   return h;
 }
-function caricaGiorno() { const r = S.diario[$("dData").value] || {}; $("dPeso").value = it(r.peso); $("dPassi").value = it(r.passi); $("dSonno").value = it(r.sonno); $("dNote").value = r.note || ""; }
+function caricaGiorno() { const r = S.diario[$("dData").value] || {}; $("dPeso").value = it(r.peso); $("dPassi").value = it(r.passi); $("dSonno").value = it(r.sonno); $("dNote").value = r.note || ""; $("dRisv").value = it(r.risvegli); $("dVita").value = it(r.vita); }
 function apriGiorno(k) { $("dData").value = k; caricaGiorno(); window.scrollTo(0, 0); }
 function salvaGiorno() {
   const d = $("dData").value; if (!d) return;
-  const r = { peso: num($("dPeso").value), passi: num($("dPassi").value), sonno: num($("dSonno").value), note: $("dNote").value.trim() };
-  if (r.peso == null && r.passi == null && r.sonno == null && !r.note) delete S.diario[d]; else S.diario[d] = r;
-  salva(); disegna(); avvisa("Salvato");
+  const r = Object.assign(giornoBase(d), { peso: num($("dPeso").value), passi: num($("dPassi").value), sonno: num($("dSonno").value), risvegli: num($("dRisv").value), vita: num($("dVita").value), note: $("dNote").value.trim() });
+  scriviGiorno(d, r); disegna(); avvisa("Salvato");
 }
 
 /* ============ STORICO ============ */
@@ -1270,9 +1412,11 @@ function testoCoach(da) {
   }
   const dd = Object.keys(S.diario).filter((d) => d > da).sort();
   if (dd.length) {
-    t += "Diario (data | peso kg | passi | sonno 1-5 | note)\n";
-    for (const d of dd) { const x = S.diario[d]; t += `${d} | ${it(x.peso)} | ${it(x.passi)} | ${it(x.sonno)} | ${x.note || ""}\n`; }
+    t += "Diario (data | peso kg | passi | sonno 1-5 | risvegli | giro vita cm | note)\n";
+    for (const d of dd) { const x = S.diario[d]; t += `${d} | ${it(x.peso)} | ${it(x.passi)} | ${it(x.sonno)} | ${it(x.risvegli)} | ${it(x.vita)} | ${x.note || ""}\n`; }
   }
+  const ff = (S.foto || []).filter((x) => x.d > da);
+  if (ff.length) t += "\nFoto dei progressi scattate nell'app (te le mando a parte): " + ff.map((x) => x.d + " " + x.posa).join(", ") + "\n";
   const cc = Object.keys(S.cibo || {}).filter((d) => d > da).sort().filter((d) => totali(d)[0] > 0 || S.cibo[d].acqua);
   if (cc.length) {
     t += "\nAlimentazione spuntata nell'app (data | giorno | kcal | proteine g | carboidrati g | grassi g | fibra g | acqua L)\n";
@@ -1299,7 +1443,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.2 · app v1</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.2 · app v2</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -1649,7 +1793,7 @@ function infoEs(id) {
   else if (REC[e.t]) r.push([`rec ${REC[e.t]}"`, `Recupero tra una serie e l'altra. Il timer parte da solo quando premi "Fatto" e vibra alla fine.`]);
   if (!e.u && !e.nokg) r.push(["↑ sali di carico", "Compare accanto al nome quando l'ultima volta hai raggiunto il massimo delle ripetizioni in tutte le serie."]);
   r.push([f.nome.split(" · ")[0], f.testo]);
-  let h = `<div class="riga tra"><div class="nome" style="font-size:21px;line-height:1.2">${esc(e.nome)}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>`;
+  let h = `<div class="riga tra"><div class="nome" style="font-size:21px;line-height:1.2">${esc(e.nome)}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>` + fotoEs(id);
   if (I) h += `<p><span class="pillola">${esc(I.m)}</span></p><p>${esc(I.p)}</p>`;
   else h += `<p class="muto">Esercizio aggiunto da te: non ho una scheda di spiegazione. Chiedila al coach in chat.</p>`;
   h += `<h2>Cosa vogliono dire i numeri</h2><div class="card spi">${r.map((x) => `<div><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join("")}</div>`;
@@ -1933,21 +2077,230 @@ function confAlimento() {
 }
 function togliExtra(id) { const r = recCibo(oggi(), true); r.extra = (r.extra || []).filter((x) => x.id !== id); salva(); tieni(disegna); }
 
+/* ============ v16: MISURE RAPIDE, SONNO, TRAZIONE, SPESA, FOTO ============
+   Il diario di un giorno (S.diario[data]) tiene: peso, passi, sonno 1-5, risvegli, vita (giro vita in cm), note. */
+const vuotoG = (r) => r.peso == null && r.passi == null && r.sonno == null && r.risvegli == null && r.vita == null && !r.note;
+const giornoBase = (d) => Object.assign({ peso: null, passi: null, sonno: null, note: "" }, S.diario[d] || {});
+function scriviGiorno(d, r) { if (vuotoG(r)) delete S.diario[d]; else S.diario[d] = r; salva(); }
+const ultimoCon = (k) => Object.keys(S.diario).filter((d) => S.diario[d][k] != null).sort().pop() || null;
+const giorniDa = (d) => giornoN(oggi()) - giornoN(d);
+const ICO = { metro: '<path d="M3 8h18v8H3zM7 8v3M11 8v4M15 8v3M19 8v4"/>', foto: '<path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  sbarra: '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>', carrello: '<path d="M3 4h2l2.5 11h10L20 7H6.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>' };
+
+// un numero e via: peso di oggi, passi (di ieri, o di oggi a fine giornata), giro vita
+const MIS = {
+  peso: { t: "Peso di stamattina", ph: "kg", min: 30, max: 250, modo: "decimal", nota: "Al mattino, a digiuno, dopo il bagno. Bastano 3-4 pesate a settimana." },
+  passi: { t: "Passi", ph: "8000", min: 0, max: 100000, modo: "numeric", nota: "Leggi il numero nell'app del telefono che conta i passi e scrivilo qui. Traguardo: 8.000 al giorno." },
+  vita: { t: "Giro vita (cm)", ph: "cm", min: 40, max: 200, modo: "decimal", nota: "Al mattino, metro all'altezza dell'ombelico, orizzontale, a fine espirazione e senza tirare in dentro la pancia. Una misura ogni 2 settimane." },
+};
+function segna(k, d) {
+  d = d || (k === "passi" ? meno(oggi(), 1) : oggi()); const M = MIS[k], r = S.diario[d] || {}, ieri = meno(oggi(), 1);
+  apri(testaFoglio(M.t) +
+    (k === "passi" ? `<div class="g2" style="margin-top:12px"><button class="${d === ieri ? "pri" : ""}" onclick="segna('passi','${ieri}')">Ieri</button><button class="${d === oggi() ? "pri" : ""}" onclick="segna('passi','${oggi()}')">Oggi</button></div>` : "") +
+    `<input id="qVal" class="numerone" inputmode="${M.modo}" value="${esc(it(r[k]))}" placeholder="${M.ph}" autocomplete="off" onkeydown="if(event.key==='Enter')salvaSegna('${k}','${d}')">
+    <p class="muto">${M.nota}</p><button class="pri largo grosso" onclick="salvaSegna('${k}','${d}')">Salva</button>`);
+  setTimeout(() => { const x = $("qVal"); if (x) { x.focus(); x.select(); } }, 50);
+}
+function salvaSegna(k, d) {
+  const M = MIS[k], t = $("qVal").value.trim(), v = t === "" ? null : k === "passi" ? num(t.replace(/\D/g, "")) : num(t);
+  if (t !== "" && (v == null || v < M.min || v > M.max)) { avvisa("Controlla il numero"); return; }
+  const r = giornoBase(d); r[k] = v; scriviGiorno(d, r); chiudi(); disegna(); avvisa(v == null ? "Tolto" : "Salvato");
+}
+
+/* ---- sonno: come hai dormito (1-5) e quante volte ti sei svegliato, sul giorno di oggi ---- */
+let SN = { v: null, r: null };
+function tileSonno() {
+  const d = oggi(), r = S.diario[d] || {}, v7 = Object.keys(S.diario).filter((x) => x > meno(d, 7) && x <= d && S.diario[x].sonno != null).map((x) => S.diario[x].sonno);
+  const m = v7.length ? v7.reduce((a, b) => a + b, 0) / v7.length : null;
+  return `<button class="dato" onclick="segnaSonno()"><span class="riga tra"><small>Sonno di stanotte</small>${anello((r.sonno || 0) / 5, "var(--verde)")}</span>
+    <b>${r.sonno != null ? r.sonno + " <u>su 5</u>" : "–"}</b>
+    <em class="${r.sonno == null ? "fai" : ""}">${r.sonno == null ? "＋ Segna la notte" : (r.risvegli != null ? (r.risvegli >= 4 ? "4 o più" : r.risvegli) + (r.risvegli === 1 ? " risveglio" : " risvegli") + " · " : "") + "media 7 giorni " + it(m.toFixed(1))}</em></button>`;
+}
+function segnaSonno(agg) {
+  if (!agg) { const r = S.diario[oggi()] || {}; SN = { v: r.sonno != null ? r.sonno : null, r: r.risvegli != null ? r.risvegli : null }; }
+  let h = testaFoglio("Com'è andata la notte?") + `<div class="voce"><div class="riga tra"><b>Come hai dormito</b><span class="muto">1 malissimo · 5 benissimo</span></div><div class="cinque">`;
+  for (let n = 1; n <= 5; n++) h += `<button class="${SN.v === n ? "on" : ""}" onclick="SN.v=${n};segnaSonno(1)">${n}</button>`;
+  h += `</div></div><div class="voce"><div class="riga tra"><b>Quante volte ti sei svegliato</b></div><div class="cinque">`;
+  for (let n = 0; n <= 4; n++) h += `<button class="${SN.r === n ? "on" : ""}" onclick="SN.r=${n};segnaSonno(1)">${n}${n === 4 ? "+" : ""}</button>`;
+  apri(h + `</div></div><button class="pri largo grosso" onclick="salvaSonno()">Salva</button>`);
+}
+function salvaSonno() {
+  if (SN.v == null) { avvisa("Tocca un numero da 1 a 5"); return; }
+  const d = oggi(), r = giornoBase(d); r.sonno = SN.v; r.risvegli = SN.r; scriviGiorno(d, r); chiudi(); disegna(); avvisa("Salvato");
+}
+
+function grafVita() {
+  const dd = Object.keys(S.diario).filter((d) => S.diario[d].vita != null).sort().slice(-20), n = dd.length, u = n ? S.diario[dd[n - 1]].vita : null, p = n ? S.diario[dd[0]].vita : null;
+  return `<div class="card"><div class="riga tra"><div class="nome">Giro vita</div><button class="pic" onclick="segna('vita')">+ Misura</button></div>
+    <p>${n ? `Ultima: <b>${it(u)} cm</b> <span class="muto">(${dataIt(dd[n - 1])})</span>` + (n > 1 ? ` · dalla prima <b>${(u - p >= 0 ? "+" : "") + it((u - p).toFixed(1))} cm</b>` : "") : "Nessuna misura ancora."}</p>` +
+    (n ? grafLinea("vita", dd.map((d) => ({ x: dataIt(d), t: giornoN(d), y: S.diario[d].vita })), { vuoto: "Il grafico compare dalla seconda misura.", testo: (q) => `${it(q.y)} cm` }) : "") +
+    `<p class="muto">All'ombelico, ogni 2 settimane. È il numero che dice se la pancia scende, anche quando la bilancia resta ferma.</p></div>`;
+}
+
+/* ---- lista della spesa: una settimana di piano. Le voci fisse si sommano da PASTI;
+        per quelle "a scelta" si dice quante volte a settimana (S.spesa.n), le spunte stanno in S.spesa.x ---- */
+const gruppoDi = (pid, k) => PASTI.find((p) => p.id === pid).g.find((g) => (k ? g.k === k : g.uno)).v;
+// le voci "a scelta" che entrano nella lista. Il pasto del sabato sera e il pranzo della domenica sono fuori casa o in famiglia: non si comprano
+const SPESA_G = [
+  { k: "col", t: "Colazione", n: 7, v: gruppoDi("col"), def: { whey: 7 } },
+  { k: "spu", t: "Spuntino", n: 7, v: gruppoDi("spu"), def: { "spu-yogurt": 4, "spu-gallette": 3 } },
+  { k: "prac", t: "Carboidrato del pranzo", n: 6, v: gruppoDi("pra", "carbo"), def: { "pra-riso": 2, "pra-legumi": 2, "pra-quinoa": 1, "pra-patate": 1 } },
+  { k: "mer", t: "Merenda", n: 7, v: gruppoDi("mer"), def: { "mer-frutto": 4, "mer-gallette": 3 } },
+  { k: "cenc", t: "Carboidrato della cena", n: 6, v: gruppoDi("cen", "carbo"), def: { "cen-patate": 3, "cen-pane": 2, "cen-riso": 1 } },
+  { k: "prot", t: "Proteina di pranzo e cena", n: 12, v: proteineDi("sp"), def: { "sp-pollo": 4, "sp-manzo": 1, "sp-maiale": 1, "sp-pesce": 2, "sp-gamberi": 1, "sp-tonno": 1, "sp-bresaola": 1, "sp-uova": 1 } },
+];
+const SPESA_NOME = { "pra-riso": "Riso, o pasta di riso o di mais", "cen-riso": "Riso, o pasta di riso o di mais", "pra-legumi": "Pasta di lenticchie o di ceci", "pra-quinoa": "Quinoa o grano saraceno",
+  "pra-patate": "Patate", "cen-patate": "Patate", "pra-pane": "Pane senza glutine", "cen-pane": "Pane senza glutine", "pra-gallette": "Gallette di riso o mais", "pra-verdura": "Verdura", "cen-verdura": "Verdura",
+  "pra-olio": "Olio extravergine", "cen-olio": "Olio extravergine", "col-yogurt": "Yogurt greco 0%", whey: "Whey isolate senza glutine", crema: "Crema keto", "latte-avena": "Latte d'avena senza glutine",
+  "spu-yogurt": "Yogurt greco e kiwi", "spu-gallette": "Gallette, bresaola e un frutto", "mer-frutto": "Frutto e mandorle", "mer-gallette": "Gallette e bresaola",
+  "sp-pollo": "Petto di pollo o di tacchino", "sp-manzo": "Manzo magro", "sp-maiale": "Lonza o filetto di maiale", "sp-pesce": "Orata o branzino", "sp-gamberi": "Gamberi o mazzancolle", "sp-tonno": "Tonno al naturale", "sp-bresaola": "Bresaola", "sp-uova": "Uova e albume" };
+// voci fatte di più alimenti: [nome in lista, quantità per volta, unità]
+const SPESA_COMP = { "spu-yogurt": [["Yogurt greco 0%", 150, "g"], ["Kiwi, pere o altra frutta", 150, "g"]], "spu-gallette": [["Gallette di riso o mais", 2, "pz"], ["Bresaola", 50, "g"], ["Kiwi, pere o altra frutta", 100, "g"]],
+  "mer-frutto": [["Kiwi, pere o altra frutta", 175, "g"], ["Mandorle", 15, "g"]], "mer-gallette": [["Gallette di riso o mais", 2, "pz"], ["Bresaola", 50, "g"]], "sp-uova": [["Uova", 2, "pz"], ["Albume", 150, "g"]] };
+const SPESA_REP = { "Frutta e verdura": ["Verdura", "Patate", "Kiwi, pere o altra frutta"], "Carne e pesce": ["Petto di pollo o di tacchino", "Manzo magro", "Lonza o filetto di maiale", "Orata o branzino", "Gamberi o mazzancolle", "Bresaola"],
+  "Frigo": ["Albume", "Yogurt greco 0%", "Uova", "Latte d'avena senza glutine"] };
+const spesaN = (G, id) => { const n = (S.spesa && S.spesa.n) || {}; return n[id] != null ? n[id] : G.def[id] || 0; };
+const spesaTot = (G) => G.v.reduce((t, v) => t + spesaN(G, v[0]), 0);
+function listaSpesa() {
+  const L = {};
+  const somma = (nome, n, u) => { const x = L[nome] || (L[nome] = { nome, rep: Object.keys(SPESA_REP).find((r) => SPESA_REP[r].includes(nome)) || "Dispensa", g: 0, ml: 0, pz: 0, altro: [] }); if (u === "altro") x.altro.push(n); else x[u] += n; };
+  const metti = (v, volte) => {
+    if (SPESA_COMP[v[0]]) { for (const c of SPESA_COMP[v[0]]) somma(c[0], c[1] * volte, c[2]); return; }
+    const nome = SPESA_NOME[v[0]] || v[1].split(",")[0], b = basePiano(v, true);
+    if (b.u === "porz.") somma(nome, volte + " × " + v[2], "altro"); else somma(nome, b.n * volte, b.u);
+  };
+  for (const p of PASTI) if (p.id !== "int") for (const g of p.g) if (!g.uno) for (const v of g.v) metti(v, 7);
+  for (const G of SPESA_G) for (const v of G.v) { const n = spesaN(G, v[0]); if (n) metti(v, n); }
+  const peso = (n, u) => (n >= 1000 ? it(parseFloat((n / 1000).toFixed(2))) + (u === "g" ? " kg" : " L") : Math.round(n / 5) * 5 + " " + u);
+  return Object.values(L).map((x) => Object.assign(x, { q: [x.g ? peso(x.g, "g") : "", x.ml ? peso(x.ml, "ml") : "", x.pz ? x.pz + " pezzi" : ""].concat(x.altro).filter(Boolean).join(" + ") }));
+}
+function piuSpesa(gk, id, dir) {
+  const G = SPESA_G.find((x) => x.k === gk), n = spesaN(G, id) + dir; if (n < 0) return;
+  if (dir > 0 && spesaTot(G) >= G.n) { avvisa("Sono già " + G.n + " pasti: prima togline uno"); return; }
+  S.spesa = S.spesa || {}; S.spesa.n = S.spesa.n || {}; S.spesa.n[id] = n; salva(); tieni(disegna);
+}
+function spuntaSpesa(nome) { S.spesa = S.spesa || {}; const x = (S.spesa.x = S.spesa.x || {}); if (x[nome]) delete x[nome]; else x[nome] = 1; salva(); tieni(disegna); }
+function svuotaSpesa() { if (S.spesa) S.spesa.x = {}; salva(); tieni(disegna); }
+let spesaAperta = false;
+function vSpesa() {
+  const L = listaSpesa(), X = (S.spesa && S.spesa.x) || {}, presi = L.filter((x) => X[x.nome]).length;
+  let h = `<div class="riga testata">${freccia("apriSub('cibo')")}<div><div class="sopra">Una settimana di piano</div><h1>Lista della spesa</h1></div></div>
+    <p class="muto conta">Sei giorni di piano più la domenica. Il pranzo della domenica in famiglia e il sabato sera non sono in lista. Pesi a crudo, frutta senza buccia: compra un po' di più per lo scarto.</p>
+    <div class="card"><details class="primo" ${spesaAperta ? "open" : ""} ontoggle="spesaAperta=this.open"><summary>Cosa mangi questa settimana</summary>
+      <p class="muto">Di' quante volte a settimana mangi ogni alimento "a scelta": la lista si ricalcola.</p>`;
+  for (const G of SPESA_G) {
+    const t = spesaTot(G);
+    h += `<div class="pasto"><h3>${G.t} · <span style="color:${t === G.n ? "var(--verde)" : "var(--arancio)"}">${t} di ${G.n}</span></h3><ul>` +
+      G.v.map((v) => `<li class="volte"><span>${esc(SPESA_NOME[v[0]] || v[1].split(",")[0])}</span><button class="tondo" aria-label="Meno" onclick="piuSpesa('${G.k}','${v[0]}',-1)">−</button><b>${spesaN(G, v[0])}</b><button class="tondo" aria-label="Più" onclick="piuSpesa('${G.k}','${v[0]}',1)">+</button></li>`).join("") + `</ul></div>`;
+  }
+  h += `</details></div><p class="muto conta">Presi <b>${presi} di ${L.length}</b>. Tocca una riga quando l'hai messa nel carrello.</p>`;
+  for (const rep of ["Frutta e verdura", "Carne e pesce", "Frigo", "Dispensa"]) {
+    const vv = L.filter((x) => x.rep === rep); if (!vv.length) continue;
+    h += `<div class="card pasto"><div class="nome">${rep}</div><ul>` + vv.map((x) => `<li class="sp ${X[x.nome] ? "on" : ""}" role="checkbox" aria-checked="${!!X[x.nome]}" data-k="${esc(x.nome)}" onclick="spuntaSpesa(this.dataset.k)"><i class="chk"></i><span>${esc(x.nome)}</span><b>${esc(x.q)}</b></li>`).join("") + `</ul></div>`;
+  }
+  return h + `<button class="largo" onclick="svuotaSpesa()">Togli tutte le spunte</button>
+    <p class="muto conta">Controlla anche il tuo integratore. Tutto senza glutine: guarda l'etichetta di gallette, pane, pasta e whey. Tonno: peso sgocciolato. Se in una settimana i pasti "a scelta" sono meno del totale, la lista copre solo quelli indicati.</p>`;
+}
+
+/* ---- foto dei progressi: restano sul telefono, in IndexedDB (troppo grandi per localStorage). S.foto = [{d, posa}] è l'indice ---- */
+const POSE = [["fronte", "Fronte"], ["lato", "Lato"], ["retro", "Retro"]];
+let vistaFoto = false, posaSel = "fronte", dbFoto = null; const urlFoto = {};
+function apriFoto() { chiudi(); tab = "diario"; vistaFoto = true; disegna(); window.scrollTo(0, 0); }
+function chiudiFoto() { vistaFoto = false; disegna(); window.scrollTo(0, 0); }
+function apriDb() {
+  return new Promise((ok, no) => {
+    if (dbFoto) { ok(dbFoto); return; }
+    const r = indexedDB.open("taccuino-rosa-foto", 1); r.onupgradeneeded = () => r.result.createObjectStore("foto");
+    r.onsuccess = () => ok((dbFoto = r.result)); r.onerror = () => no(r.error);
+  });
+}
+const dbOp = (modo, f) => apriDb().then((db) => new Promise((ok, no) => { const t = db.transaction("foto", modo), q = f(t.objectStore("foto")); t.oncomplete = () => ok(q.result); t.onerror = () => no(t.error); t.onabort = () => no(t.error); }));
+function vFoto() {
+  const nomePosa = POSE.find((p) => p[0] === posaSel)[1].toLowerCase(), L = (S.foto || []).filter((x) => x.posa === posaSel).sort((a, b) => (a.d < b.d ? -1 : 1)), ult = L[L.length - 1], pr = L.length > 1 ? L[0] : null;
+  const dataLunga = (d) => dataIt(d) + "/" + d.slice(2, 4), im = (x, eti) => `<div><img class="prog" data-k="${x.d}-${x.posa}" alt=""><b>${eti}</b>${dataLunga(x.d)}</div>`;
+  let h = `<div class="riga testata">${freccia("chiudiFoto()")}<div><div class="sopra">Diario</div><h1>Foto dei progressi</h1></div></div>
+    <div class="tre3c">${POSE.map((p) => `<button class="${p[0] === posaSel ? "pri" : ""}" onclick="posaSel='${p[0]}';disegna()">${p[1]}</button>`).join("")}</div>`;
+  h += ult ? `<div class="fig ${pr ? "" : "uno"}">${pr ? im(pr, "Prima") : ""}${im(ult, pr ? "Adesso" : "Prima foto")}</div>`
+    : `<div class="card vuoto"><b>Nessuna foto di ${nomePosa}</b>Stessa luce, stessa distanza, stesso punto della stanza. Al mattino, a digiuno, braccia rilassate.</div>`;
+  h += `<button class="pri largo grosso" onclick="$('fIn').click()">Aggiungi la foto di oggi · ${nomePosa}</button><input type="file" id="fIn" accept="image/*" style="display:none" onchange="nuovaFoto(this)">`;
+  if (L.length) h += `<h2>Tutte · ${nomePosa}</h2><div class="card">` + L.slice().reverse().map((x) => `<div class="rr"><span>${nomeGiorno(x.d)} ${dataLunga(x.d)}</span>
+      <span class="riga"><button class="pic" onclick="condividiFoto('${x.d}-${x.posa}')">Invia</button><button class="ico" aria-label="Elimina" onclick="togliFoto('${x.d}','${x.posa}')">✕</button></span></div>`).join("") + `</div>`;
+  return h + `<p class="muto">Le foto restano solo su questo telefono: non vanno su internet e non entrano nella copia di sicurezza. Per farle vedere al coach tocca "Invia" e mandale in chat. Le tre pose ogni 4 settimane.</p>`;
+}
+function caricaFoto() {
+  document.querySelectorAll("img[data-k]").forEach((el) => {
+    const k = el.dataset.k; if (urlFoto[k]) { el.src = urlFoto[k]; return; }
+    dbOp("readonly", (st) => st.get(k)).then((b) => { if (!b) { el.alt = "Foto non presente su questo telefono"; return; } urlFoto[k] = URL.createObjectURL(b); el.src = urlFoto[k]; }).catch(() => {});
+  });
+}
+function nuovaFoto(inp) {
+  const f = inp.files && inp.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image();
+  im.onload = () => {
+    const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+    c.toBlob((b) => { if (b) salvaFoto(b, posaSel, oggi()); else avvisa("Non riesco a leggere la foto"); }, "image/jpeg", 0.85);
+  };
+  im.onerror = () => { URL.revokeObjectURL(u); avvisa("Non riesco a leggere la foto"); }; im.src = u;
+}
+function salvaFoto(b, posa, d) {
+  const k = d + "-" + posa;
+  return dbOp("readwrite", (st) => st.put(b, k)).then(() => {
+    delete urlFoto[k]; S.foto = (S.foto || []).filter((x) => !(x.d === d && x.posa === posa)); S.foto.push({ d, posa }); salva(); disegna(); avvisa("Foto salvata");
+  }).catch(() => avvisa("Non riesco a salvare la foto"));
+}
+function togliFoto(d, posa) {
+  if (!confirm("Elimino la foto del " + dataIt(d) + "?")) return; const k = d + "-" + posa;
+  dbOp("readwrite", (st) => st.delete(k)).catch(() => {}).then(() => { delete urlFoto[k]; S.foto = (S.foto || []).filter((x) => !(x.d === d && x.posa === posa)); salva(); disegna(); });
+}
+async function condividiFoto(k) {
+  try {
+    const b = await dbOp("readonly", (st) => st.get(k)); if (!b) { avvisa("Foto non presente su questo telefono"); return; }
+    const f = new File([b], k + ".jpg", { type: "image/jpeg" });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: k }); return; }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = k + ".jpg"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  } catch (e) {}
+}
+
 /* ============ TASTO INDIETRO DEL TELEFONO ============
    Si tiene sempre una voce in più nella cronologia: il tasto indietro la consuma, l'app chiude ciò che è aperto
    e la rimette. Solo dalla home, senza nulla di aperto, il tasto esce dall'app. */
 function passoIndietro() {
   if ($("foglio").style.display === "block") { chiudi(); return true; }
+  if (tab === "allena" && S.corso && esAperto != null) { chiudiEs(); return true; }
   if (tab === "allena" && S.corso) { indietro(); return true; }
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
+  if (tab === "diario" && vistaFoto) { chiudiFoto(); return true; }
   if (tab !== "allena") { vai("allena"); return true; }
-  if (sub) { apriSub(null); return true; }
+  if (sub) { apriSub(sub === "spesa" ? "cibo" : null); return true; }
   return false;
 }
-try {
-  history.replaceState({ base: 1 }, ""); history.pushState({ app: 1 }, "");
-  window.addEventListener("popstate", () => { if (passoIndietro()) history.pushState({ app: 1 }, ""); else history.back(); });
-} catch (e) {}
+/* La cronologia del browser tiene una voce per ogni livello aperto (scheda della barra, pagina, foglio): le voci nascono
+   mentre tocchi lo schermo, perché Chrome su Android salta al tasto indietro quelle create senza un tocco.
+   livelli(): quanti livelli sono aperti adesso. allinea(): porta la cronologia a quel numero, dopo ogni disegno. */
+function livelli() {
+  let n = 0;
+  if (tab !== "allena") n++; else if (S.corso) n += esAperto != null ? 2 : 1; else if (sub) n += sub === "spesa" ? 2 : 1;
+  if (tab === "tecnica" && guida) n++;
+  if (tab === "diario" && vistaFoto) n++;
+  if ($("foglio").style.display === "block") n++;
+  return n;
+}
+let profondo = 0, saltaPop = 0, inCoda = false;
+function allinea() {
+  if (inCoda) return; inCoda = true;
+  Promise.resolve().then(() => {
+    inCoda = false; const n = livelli();
+    try {
+      while (profondo < n) history.pushState({ app: ++profondo }, "");
+      if (profondo > n) { const giu = profondo - n; profondo = n; saltaPop++; history.go(-giu); }
+    } catch (e) {}
+  });
+}
+window.addEventListener("popstate", () => {
+  if (saltaPop > 0) { saltaPop--; return; }        // passo indietro fatto dall'app stessa, per restare allineata
+  if (profondo > 0) profondo--;
+  passoIndietro(); allinea();
+});
 
 disegna(); sveglio();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
