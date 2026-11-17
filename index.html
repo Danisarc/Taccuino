@@ -405,7 +405,7 @@ body { overflow-x:clip; }
 .settimane div { height:44px; border-radius:12px; background:var(--card); border:1px solid var(--linea); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; color:var(--muto); }
 .settimane div.ok { background:var(--verde3); border-color:rgba(61,220,132,.4); color:var(--verde); }
 /* alimentazione v3: sezioni per macro, scelta della sezione, ricalcolo */
-.tg { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:7px; } .tg-p { background:#3ddc84; } .tg-c { background:#c9f7dd; } .tg-g { background:#1f8f55; }
+.tg { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:7px; } .tg-p { background:#3ddc84; } .tg-c { background:#c9f7dd; } .tg-g { background:#1f8f55; } .tg-v { background:#93a39a; }
 .ric { margin-left:6px; padding:2px 8px; border-radius:20px; background:var(--verde3); color:var(--verde); font-size:11px; letter-spacing:0; text-transform:none; white-space:nowrap; }
 .slot { display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-top:8px; padding:10px 12px; min-height:58px; border-radius:16px; border-style:dashed; background:transparent; }
 .slot span { flex:1; min-width:0; } .slot b { display:block; font-size:15px; color:var(--verde); } .slot small { color:var(--muto); font-size:12.5px; } .slot em { flex:none; font-style:normal; font-size:24px; color:var(--muto); line-height:1; padding-bottom:3px; }
@@ -1183,7 +1183,7 @@ function cercaCibi(q) {
   const voto = (n) => { n = n.toLowerCase(); return n === q ? 0 : n.startsWith(q) ? 1 : n.split(/[\s,()']+/).some((w) => w.startsWith(q)) ? 2 : n.includes(q) ? 3 : q.length >= 5 && n.includes(q.slice(0, 5)) ? 4 : 9; };
   return catalogoCibi().map((c, i) => ({ c, v: voto(c.nome), i })).filter((x) => x.v < 9).sort((a, b) => a.v - b.v || a.i - b.i).map((x) => x.c);
 }
-let DP = null, U = null, prepPasto = null, RIS = [], perPrep = false;
+let DP = null, U = null, prepPasto = null, RIS = [], perPrep = false, catPrep = null;
 const tieniFoglio = (f) => { const y = $("foglio").scrollTop; f(); $("foglio").scrollTop = y; };
 const momentoOra = () => { const h = new Date().getHours(), ids = MENU.map((p) => p.id); return [[10, "col"], [12, "spu"], [16, "pra"], [19, "mer"], [24, "cen"]].filter((x) => ids.includes(x[1])).find((x) => h < x[0])[1]; };
 const chipsPasto = (sel, js, vuoto) => `<div class="chips">${vuoto ? `<button class="chip ${sel ? "" : "ok"}" onclick="${js("")}">Solo salvare</button>` : ""}${MENU.filter((p) => p.id !== "int").map((p) => `<button class="chip ${sel === p.id ? "ok" : ""}" onclick="${js(p.id)}">${p.nome}</button>`).join("")}</div>`;
@@ -1199,24 +1199,25 @@ function vPrep() {
     `</ul></div><p class="muto conta">Toccane una per partire da lì: la trovi già compilata con i grammi del tuo piano, la correggi e la salvi tra i tuoi piatti.</p>`;
 }
 function nuovoPrep(n, idea) {
-  if (n != null) { const q = piatti()[n]; DP = { n, id: q.id, nome: q.nome, ing: q.ing.map((x) => ({ k: x.k, x: x.x, g: x.g })) }; }
+  if (n != null) { const q = piatti()[n]; DP = { n, id: q.id, nome: q.nome, ing: q.ing.map((x) => ({ k: x.k, x: x.x, g: x.g, s: x.s })) }; }
   else { DP = { n: null, id: 0, nome: "", ing: [] };
     if (idea != null) { const q = PREP_BASE[idea], p = pastoDi(q.per[0]); DP.nome = q.nome.split(" (")[0];
       for (const s in q.s) { const x = { k: q.s[s], g: 0 }, z = p && p.sez[s]; x.g = grammi(a100(x), SEZ[s][1], z ? z.t[0] : PREP_T[s], optA(x)) || ALIM[x.k][1]; DP.ing.push(x); } } }
   DP.pasto = prepPasto || ""; DP.veloce = ""; editPrep();
 }
 function editPrep() {
-  perPrep = false; const T = sommaIng(DP.ing), mom = DP.pasto ? pastoDi(DP.pasto).nome.toLowerCase() : "";
+  perPrep = false; catPrep = null; const T = sommaIng(DP.ing), mom = DP.pasto ? pastoDi(DP.pasto).nome.toLowerCase() : "";
   apri(testaFoglio(DP.n != null ? "Modifica il piatto" : "Aggiungi meal prep") + `
     <label>Nome del piatto</label><input id="prNome" value="${esc(DP.nome)}" placeholder="Es. Riso, pollo e broccoletti" autocomplete="off" oninput="DP.nome=this.value">
     <label>Ingredienti: scrivili con i grammi, a crudo</label>
     <div class="riga"><input id="prVeloce" value="${esc(DP.veloce)}" placeholder="100 riso, 150 pollo, 100 broccoletti" autocomplete="off" enterkeyhint="done" oninput="DP.veloce=this.value" onkeydown="if(event.key==='Enter')leggiVeloce()"><button class="pri" style="flex:none" onclick="leggiVeloce()">Metti</button></div>
-    <label>Oppure cercali uno alla volta</label><input id="prCerca" placeholder="Cerca: salmone, zucchine, pane…" autocomplete="off" oninput="listaPrep(this.value)">
-    <div class="card pasto" id="prBox" style="display:none"><ul id="prLista"></ul></div>
-    <button class="largo piuCibo" onclick="altroPrep()">+ Non lo trovo: codice a barre o valori a mano</button>
-    <h2>Nel piatto</h2>` + (DP.ing.length ? `<div class="card pasto"><ul>` + DP.ing.map((x, n) => `<li class="sp on"><span>${esc(cortoA(nomeA(x)))}<br><small class="muto">${macroA(vecA(x))}</small></span>
+    <p class="muto">L'app li mette da sola nella categoria giusta. Oppure aggiungili categoria per categoria, qui sotto.</p>` +
+    ["p", "c", "g", "v"].map((c) => `<h2><i class="tg tg-${c}"></i>${SEZ[c][0]}</h2>` +
+      (DP.ing.some((x) => catIng(x) === c) ? `<div class="card pasto"><ul>` + DP.ing.map((x, n) => (catIng(x) !== c ? "" : `<li class="sp on"><span>${esc(cortoA(nomeA(x)))}<br><small class="muto">${macroA(vecA(x))}</small></span>
         <input class="qta" inputmode="decimal" aria-label="Grammi di ${esc(nomeA(x))}" value="${it(Math.round(x.g * 10) / 10)}" onfocus="this.select()" onchange="DP.ing[${n}].g=Math.max(0,num(this.value)||0);tieniFoglio(editPrep)"><em>g</em>
-        <button class="ico" aria-label="Togli" onclick="DP.ing.splice(${n},1);tieniFoglio(editPrep)">✕</button></li>`).join("") + `</ul></div><p class="muto">In tutto: <b style="color:var(--testo)">${macroA(T)}</b></p>` : `<p class="muto">Ancora niente. Scrivi gli ingredienti qui sopra e tocca "Metti".</p>`) +
+        <button class="ico" aria-label="Togli" onclick="DP.ing.splice(${n},1);tieniFoglio(editPrep)">✕</button></li>`)).join("") + `</ul></div>` : "") +
+      `<button class="largo piuCibo" style="margin-top:6px" onclick="scegliIng('${c}')">+ Aggiungi ${SEZ[c][0].toLowerCase()}</button>`).join("") +
+    (DP.ing.length ? `<p class="muto" style="margin-top:14px">In tutto: <b style="color:var(--testo)">${macroA(T)}</b></p>` : "") +
     `<h2>Lo mangi oggi?</h2>` + chipsPasto(DP.pasto, (id) => `DP.pasto='${id}';tieniFoglio(editPrep)`, true) +
     `<button class="pri largo grosso" onclick="salvaDP()">${mom ? "Salva e inserisci a " + mom : "Salva nel ricettario"}</button><button class="largo" onclick="chiudi()">Annulla</button>`, true);
 }
@@ -1230,18 +1231,29 @@ function leggiVeloce() {
   DP.veloce = no.join(", "); tieniFoglio(editPrep);
   avvisa(no.length ? "Non trovo: " + no.join(", ") + ". Aggiungilo con \"Non lo trovo\"" : n + (n === 1 ? " ingrediente messo" : " ingredienti messi"));
 }
+// categoria di un ingrediente nel piatto: quella in cui l'hai messo tu, altrimenti quella del suo macro prevalente
+const catIng = (x) => x.s || sezDi(a100(x));
+function scegliIng(c) {
+  catPrep = c;
+  apri(testaFoglio(SEZ[c][0] + ": cosa metti") + `<input id="prCerca" placeholder="Cerca un alimento…" autocomplete="off" oninput="listaPrep(this.value)">
+    <div class="card pasto"><ul id="prLista"></ul></div>
+    <button class="largo piuCibo" onclick="altroPrep()">+ Non lo trovo: codice a barre o valori a mano</button><button class="largo" onclick="editPrep()">Indietro</button>`, true);
+  listaPrep("");
+}
+// senza ricerca: gli alimenti di quella categoria. Con la ricerca: tutto quello che corrisponde, prima quelli della categoria
 function listaPrep(q) {
-  RIS = cercaCibi(q).slice(0, 12); $("prBox").style.display = String(q).trim().length >= 2 ? "" : "none";
+  const cerca = String(q || "").trim().length >= 2, della = (c) => sezDi(a100(c.it)) === catPrep;
+  RIS = cerca ? cercaCibi(q).sort((a, b) => della(b) - della(a)).slice(0, 30) : catalogoCibi().filter(della);
   $("prLista").innerHTML = RIS.map((c, i) => `<li class="sp" onclick="piuIng(${i})"><span>${esc(c.nome)}</span><b>${Math.round(a100(c.it)[0])} kcal / 100 g</b></li>`).join("") || `<li class="muto" style="padding:10px 0">Non c'è: tocca "Non lo trovo" qui sotto.</li>`;
 }
-function piuIng(i) { const c = RIS[i]; if (!c) return; DP.ing.push(Object.assign({ g: c.g }, c.it)); tieniFoglio(editPrep); }
+function piuIng(i) { const c = RIS[i]; if (!c) return; DP.ing.push(Object.assign({ g: c.g, s: catPrep }, c.it)); editPrep(); }
 function altroPrep() {
   perPrep = true;
   apri(testaFoglio("Un altro ingrediente") + `<p class="muto">Per un alimento che l'app non conosce ancora: resta poi tra i tuoi alimenti.</p>
     <button class="pri largo" onclick="scansiona()">Scansiona il codice a barre</button>
     <label>Oppure scrivi il numero sotto il codice a barre</label>
     <div class="riga"><input id="cCod" inputmode="numeric" placeholder="8001234567890" autocomplete="off"><button onclick="cercaCodice($('cCod').value)">Cerca</button></div>
-    <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button><button class="largo" onclick="editPrep()">Indietro</button>`, true);
+    <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button><button class="largo" onclick="catPrep ? scegliIng(catPrep) : editPrep()">Indietro</button>`, true);
 }
 function salvaDP() {
   const ing = DP.ing.filter((x) => x.g > 0); if (!ing.length) { avvisa("Metti almeno un ingrediente"); return; }
@@ -1252,9 +1264,9 @@ function salvaDP() {
 }
 function usaPrep(n, tieniU) {
   const q = piatti()[n]; if (!q) return;
-  if (!tieniU) U = { n, ing: q.ing.map((x) => ({ k: x.k, x: x.x, g: x.g })), pasto: prepPasto || momentoOra() };
+  if (!tieniU) U = { n, ing: q.ing.map((x) => ({ k: x.k, x: x.x, g: x.g, s: x.s })), pasto: prepPasto || momentoOra() };
   apri(testaFoglio(esc(q.nome)) + `<p class="muto" style="margin:2px 0 4px">Metti i grammi che mangi oggi e scegli il momento: entra da solo nella dieta. La ricetta salvata non cambia.</p>
-    <div class="card pasto"><ul>` + U.ing.map((x, i) => `<li class="sp on"><span>${esc(cortoA(nomeA(x)))}<br><small class="muto">${macroA(vecA(x))}</small></span>
+    <div class="card pasto"><ul>` + U.ing.map((x, i) => `<li class="sp on"><span><i class="tg tg-${catIng(x)}"></i>${esc(cortoA(nomeA(x)))}<br><small class="muto">${SEZ[catIng(x)][0]} · ${macroA(vecA(x))}</small></span>
       <input class="qta" inputmode="decimal" aria-label="Grammi di ${esc(nomeA(x))}" value="${it(Math.round(x.g * 10) / 10)}" onfocus="this.select()" onchange="U.ing[${i}].g=Math.max(0,num(this.value)||0);tieniFoglio(()=>usaPrep(${n},1))"><em>g</em></li>`).join("") +
     `</ul></div><p class="muto">In tutto: <b style="color:var(--testo)">${macroA(sommaIng(U.ing))}</b></p>
     <h2>In che momento</h2>` + chipsPasto(U.pasto, (id) => `U.pasto='${id}';tieniFoglio(()=>usaPrep(${n},1))`) +
@@ -1264,7 +1276,7 @@ function usaPrep(n, tieniU) {
 // gli ingredienti entrano nelle sezioni del pasto, al posto di quello che c'era in quelle sezioni
 function inserisciPrep(pid, ing) {
   const r = recCibo(oggi(), true), gr = {}; r.s = r.s || {};
-  for (const x of ing) if (x.g > 0) { const s = sezDi(a100(x)); (gr[s] = gr[s] || []).push({ k: x.k, x: x.x, g: x.g, man: 1 }); }
+  for (const x of ing) if (x.g > 0) { const s = catIng(x); (gr[s] = gr[s] || []).push({ k: x.k, x: x.x, g: x.g, man: 1 }); }
   for (const s in gr) r.s[pid + "." + s] = gr[s];
   vib(); salva();
 }
@@ -1375,7 +1387,7 @@ function confAlimento() {
   ["aK", "aP", "aC", "aF", "aFi"].forEach((id, i) => (p[i] = Math.max(0, num($(id).value) || 0)));
   if (!p[0]) p[0] = Math.round(p[1] * 4 + p[2] * 4 + p[3] * 9);          // calorie mancanti: le ricava dai macro
   if (!p[0]) { avvisa("Scrivi almeno le calorie"); return; }
-  if (perPrep) DP.ing.push({ x: { nome, per100: p.slice() }, g });
+  if (perPrep) DP.ing.push({ x: { nome, per100: p.slice() }, g, s: catPrep || undefined });
   else mettiItem(dove.p, dove.s, { x: { nome, per100: p.slice(), codice: bozza.codice || undefined }, g, man: bozza.auto && Math.abs(g - bozza.auto) > 0.5 ? 1 : undefined });
   if ($("aSalva").checked) {
     S.alimenti = (S.alimenti || []).filter((x) => (bozza.codice ? x.codice !== bozza.codice : x.nome.toLowerCase() !== nome.toLowerCase()));
@@ -1983,7 +1995,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v3.0 · app v19</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v3.0 · app v20</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
