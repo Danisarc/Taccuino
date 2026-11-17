@@ -211,6 +211,17 @@ input.numerone { font-size:34px; font-weight:800; text-align:center; min-height:
 .pasto li.volte .tondo { width:38px; min-height:38px; font-size:20px; }
 .fig.uno { grid-template-columns:1fr; max-width:320px; margin-left:auto; margin-right:auto; }
 img.prog { aspect-ratio:3/4; object-fit:cover; background:#141b18; color:var(--muto); font-size:12px; }
+/* home v17: i due ingressi con la barra di avanzamento, e le liste dentro una sola scheda */
+.foto { height:176px; } .foto .barra { display:block; height:4px; margin:7px 0 5px; background:rgba(255,255,255,.22); } .foto .barra i { height:4px; }
+.foto small { display:block; }
+.lista { padding:2px 14px; }
+.voceH { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid rgba(255,255,255,.07); border-radius:0; padding:12px 0; min-height:62px; }
+.voceH:last-child { border-bottom:0; }
+.voceH > i { flex:none; width:38px; height:38px; border-radius:12px; background:var(--verde3); color:var(--verde); display:flex; align-items:center; justify-content:center; }
+.voceH svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.voceH span { flex:1; min-width:0; } .voceH b { display:block; font-size:15px; } .voceH small { color:var(--muto); font-size:12.5px; }
+.voceH em { flex:none; font-style:normal; font-size:24px; color:var(--muto); line-height:1; padding-bottom:3px; }
+.dato .tondo.piu { background:var(--verde); color:#04130a; }
 /* foglio dal basso e avvisi */
 #velo { position:fixed; inset:0; background:rgba(0,0,0,.6); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); z-index:8; display:none; }
 #foglio { position:fixed; left:0; right:0; bottom:0; z-index:9; display:none; max-height:85vh; overflow:auto; background:var(--solido); border-radius:28px 28px 0 0;
@@ -526,10 +537,11 @@ function disegna() {
   const di = daInviare(); $("nav").classList.toggle("nuovo", !!(di.s || di.g));      // pallino sulla voce Coach: c'è qualcosa da inviare
   if (tab === "diario" && vistaFoto) caricaFoto();
   $("pan").style.display = inSeduta && tInt ? "block" : "none";      // in basso resta solo il timer di recupero, quando gira
+  allinea();
 }
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
-function apri(html, pagina) { fermaCamera(); const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; }
-function chiudi() { fermaCamera(); $("foglio").style.display = "none"; $("velo").style.display = "none"; }
+function apri(html, pagina) { fermaCamera(); const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; allinea(); }
+function chiudi() { fermaCamera(); $("foglio").style.display = "none"; $("velo").style.display = "none"; if (typeof allinea === "function") allinea(); }
 
 /* ============ HOME ============ */
 /* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
@@ -576,36 +588,45 @@ function mediaPassi(a) {
 }
 const anello = (p, col) => { const c = 2 * Math.PI * 20; return `<svg class="anello" viewBox="0 0 48 48"><circle class="af" cx="24" cy="24" r="20"/><circle class="av" cx="24" cy="24" r="20" style="stroke:${col};stroke-dasharray:${c.toFixed(1)};stroke-dashoffset:${(c * (1 - Math.max(0, Math.min(1, p || 0)))).toFixed(1)}"/></svg>`; };
 function vHome() {
-  const q = quadro(), { d, f } = q, P = prof(), ieri = meno(d, 1), R = S.diario[d] || {};
+  const q = quadro(), { d } = q, P = prof(), ieri = meno(d, 1), R = S.diario[d] || {};
   const giornoLungo = new Date(d + "T12:00").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
   const m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7)), pes7 = m1 ? m1.n : 0, pIeri = (S.diario[ieri] || {}).passi, mp = mediaPassi(d);
   const on = modoOn(d), N = CIBO[on ? "on" : "off"], T = totali(d), aq = recCibo(d).acqua || 0, u = S.sedute[S.sedute.length - 1], di = daInviare();
   const k = prossima(), se = SEDUTE[k], oggiFatta = S.sedute.filter((s) => s.data === d && ["A", "B", "C"].includes(s.tipo)).pop();
-  const nS = se.es.reduce((n, e) => n + f.serie(e), 0), mini = se.es.filter((e) => FOTO[e.id]).slice(0, 5);
+  const V = "var(--verde)", riga = (js, ico, t, s) => `<button class="voceH" onclick="${js}"><i><svg viewBox="0 0 24 24">${ico}</svg></i><span><b>${t}</b><small>${s}</small></span><em>›</em></button>`;
+  /* 1 · il piano: i due ingressi principali, e sotto il tasto per allenarsi */
   let h = `<div class="riga tra saluto"><div style="min-width:0"><div class="sopra">${esc(giornoLungo)}</div><h1>Ciao${P.nome ? ", " + esc(P.nome) : ""}</h1></div>
       <i class="avatar" role="button" aria-label="Il mio profilo" onclick="profilo()">${esc((P.nome || "?").trim().charAt(0).toUpperCase())}</i></div>` + striscia(q) +
-    `<div class="hero" style="background-image:url(img/allenamento.jpg)"><div class="riga tra"><span class="eti">${oggiFatta ? "Seduta di oggi fatta ✓" : "Prossima seduta"}</span><span class="pillola">${esc(f.nome.split(" · ")[0])}</span></div>
-      <div class="grande">${esc(oggiFatta ? oggiFatta.corto || oggiFatta.nome : se.nome)}</div>
-      <div class="sotto">${oggiFatta ? `${oggiFatta.es.reduce((n, e) => n + e.serie.length, 0)} serie${oggiFatta.minuti ? " in " + oggiFatta.minuti + " minuti" : ""} · la prossima è la ${k}` : `${se.es.length} esercizi · ${nS} serie · RIR ${esc(f.rir({ t: "m" }))}`} · ${q.sett} di 3 questa settimana</div>
-      ${oggiFatta ? "" : `<div class="fila">${mini.map((e) => miniEs(e.id, "p")).join("")}${se.es.length > mini.length ? `<span>+${se.es.length - mini.length}</span>` : ""}</div>`}
-      <div class="riga">${oggiFatta ? `<button class="pri grosso" style="flex:1" onclick="riepilogo(${oggiFatta.id})">Vedi il riepilogo</button>` : `<button class="pri grosso" style="flex:1" onclick="inizia('${k}')">Inizia la seduta</button>`}<button class="grosso" onclick="apriSub('scheda')">Scheda</button></div></div>
-    <h2>Oggi</h2><div class="g2">
-      <button class="dato" onclick="segna('peso')"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, "var(--verde)")}</span>
+    `<h2>Il tuo piano</h2><div class="g2">
+      <button class="foto" style="background-image:url(img/allenamento.jpg)" onclick="apriSub('scheda')"><span><b>Allenamento</b><small>${oggiFatta ? "Oggi fatta ✓ · poi la " + k : "Prossima: " + esc(se.corto)}</small>
+        <i class="barra"><i style="width:${Math.min(100, Math.round((q.sett / 3) * 100))}%"></i></i><small>${q.sett} di 3 sedute in settimana</small></span></button>
+      <button class="foto" style="background-image:url(img/alimentazione.jpg)" onclick="apriSub('cibo')"><span><b>Alimentazione</b><small>Giorno ${on ? "ON" : "OFF"} · proteine ${Math.round(T[1])} di ${N.p} g</small>
+        <i class="barra"><i style="width:${Math.min(100, Math.round((T[0] / N.kcal) * 100))}%"></i></i><small>${mila(T[0])} di ${mila(N.kcal)} kcal</small></span></button></div>` +
+    (oggiFatta ? `<button class="largo grosso" onclick="riepilogo(${oggiFatta.id})">Seduta di oggi fatta ✓ · vedi il riepilogo</button>` : `<button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta ${esc(se.corto)}</button>`) +
+    /* 2 · le quattro cose da segnare ogni giorno */
+    `<h2>Da segnare oggi</h2><div class="g2">
+      <button class="dato" onclick="segna('peso')"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, V)}</span>
         <b>${R.peso != null ? it(R.peso) : m1 ? it(m1.m.toFixed(1)) : "–"} <u>kg</u></b>
-        <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso di oggi" : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
-      <button class="dato" onclick="segna('passi')"><span class="riga tra"><small>Passi di ieri</small>${anello((pIeri || 0) / PASSI_MIN, pIeri >= PASSI_MIN ? "var(--verde)" : "var(--arancio)")}</span>
+        <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
+      <button class="dato" onclick="segna('passi')"><span class="riga tra"><small>Passi di ieri</small>${anello((pIeri || 0) / PASSI_MIN, V)}</span>
         <b>${pIeri != null ? mila(pIeri) : "–"}</b>
-        <em class="${pIeri == null ? "fai" : ""}">${pIeri == null ? "＋ Segna i passi" : "media 7 giorni " + mila(mp.m)}</em></button>
-      <button class="dato" onclick="apriSub('cibo')"><span class="riga tra"><small>Calorie · ${on ? "ON" : "OFF"}</small>${anello(T[0] / N.kcal, "var(--verde)")}</span>
-        <b>${mila(T[0])} <u>/ ${N.kcal}</u></b><em>proteine ${Math.round(T[1])} di ${N.p} g</em></button>
-      <div class="dato"><span class="riga tra"><small>Acqua</small>${anello(aq / ACQUA_ML, "#7cc4f5")}</span>
+        <em class="${pIeri == null ? "fai" : ""}">${pIeri == null ? "＋ Segna i passi" : "media 7 giorni " + mila(mp.m)}</em></button>` + tileSonno() +
+      `<div class="dato"><span class="riga tra"><small>Acqua</small>${anello(aq / ACQUA_ML, V)}</span>
         <b>${litri(aq)} <u>/ ${litri(ACQUA_ML)} L</u></b>
-        <span class="riga"><button class="tondo" aria-label="Togli un bicchiere" onclick="acqua(${-BICCHIERE})">−</button><button class="tondo piu" aria-label="Aggiungi un bicchiere da ${BICCHIERE} ml" onclick="acqua(${BICCHIERE})">+</button><em>${BICCHIERE} ml</em></span></div>${tileSonno()}</div>` + daFare();
-  if (di.s || di.g) h += `<button class="blocco avv" onclick="vai('esporta')"><i><svg viewBox="0 0 24 24"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg></i>
-      <span><b>Da inviare al coach</b><small>${[di.s ? di.s + (di.s === 1 ? " seduta" : " sedute") : "", di.g ? di.g + (di.g === 1 ? " giorno" : " giorni") + " di misure" : ""].filter(Boolean).join(" · ")}</small></span><em>›</em></button>`;
-  h += rigaTrazione() + `<h2>Storico</h2><button class="blocco" onclick="vai('storico')"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></i>
-      <span><b>${u ? "Ultima seduta: " + esc(u.corto || u.nome) : "Nessuna seduta ancora"}</b><small>${u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie · " + S.sedute.length + " in tutto" : "la prima la trovi qui sopra"}</small></span><em>›</em></button>`;
-  return h;
+        <span class="riga"><button class="tondo" aria-label="Togli un bicchiere" onclick="acqua(${-BICCHIERE})">−</button><button class="tondo piu" aria-label="Aggiungi un bicchiere da ${BICCHIERE} ml" onclick="acqua(${BICCHIERE})">+</button><em>${BICCHIERE} ml</em></span></div></div>`;
+  /* 3 · le cose in scadenza: giro vita ogni 14 giorni, foto ogni 28, test della trazione ogni 14, dati da inviare */
+  const fare = [], uv = ultimoCon("vita"), uf = (S.foto || []).map((x) => x.d).sort().pop(), z = statoTrazione();
+  if (!uv || giorniDa(uv) >= 14) fare.push(riga("segna('vita')", ICO.metro, "Misura il giro vita", uv ? "l'ultima misura è di " + giorniDa(uv) + " giorni fa" : "la prima misura, poi una ogni 2 settimane"));
+  if (!uf || giorniDa(uf) >= 28) fare.push(riga("apriFoto()", ICO.foto, "Foto dei progressi", uf ? "le ultime sono di " + giorniDa(uf) + " giorni fa" : "fronte, lato e retro, poi ogni 4 settimane"));
+  if (z.daFare) fare.push(riga("vai('tecnica');apriGuida('trazioni')", ICO.sbarra, "Test della trazione", "sono passate 2 settimane: provane una vera"));
+  if (di.s || di.g) fare.push(riga("vai('esporta')", '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>', "Invia i dati al coach", [di.s ? di.s + (di.s === 1 ? " seduta" : " sedute") : "", di.g ? di.g + (di.g === 1 ? " giorno" : " giorni") + " di misure" : ""].filter(Boolean).join(" · ")));
+  if (fare.length) h += `<h2>Da fare</h2><div class="card lista">${fare.join("")}</div>`;
+  /* 4 · il percorso */
+  return h + `<h2>Il tuo percorso</h2><div class="card lista">` +
+    riga("vai('tecnica');apriGuida('trazioni')", ICO.sbarra, z.best >= 1 ? z.best + (z.best === 1 ? " trazione da solo ✓" : " trazioni di fila ✓") : "Traguardo: la prima trazione",
+      "sbarra " + z.sett + " di 3 questa settimana · " + (z.daFare ? "test da fare" : z.pross ? "test " + nomeGiorno(z.pross) + " " + dataIt(z.pross) : "primo test tra 2 settimane")) +
+    riga("vai('storico')", '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', u ? "Ultima seduta: " + esc(u.corto || u.nome) : "Storico delle sedute",
+      u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie · " + S.sedute.length + " in tutto" : "nessuna seduta ancora") + `</div>`;
 }
 /* Profilo: nome e altezza si scrivono qui e restano sul telefono; il resto si ricava da pesate e sedute */
 function profilo() {
@@ -1406,7 +1427,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.3 · app v16</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.3 · app v17</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -2093,9 +2114,9 @@ let SN = { v: null, r: null };
 function tileSonno() {
   const d = oggi(), r = S.diario[d] || {}, v7 = Object.keys(S.diario).filter((x) => x > meno(d, 7) && x <= d && S.diario[x].sonno != null).map((x) => S.diario[x].sonno);
   const m = v7.length ? v7.reduce((a, b) => a + b, 0) / v7.length : null;
-  return `<button class="dato largo2" onclick="segnaSonno()"><span class="riga tra"><small>Sonno di stanotte</small>${anello((r.sonno || 0) / 5, r.sonno != null && r.sonno <= 2 ? "var(--arancio)" : "var(--verde)")}</span>
+  return `<button class="dato" onclick="segnaSonno()"><span class="riga tra"><small>Sonno di stanotte</small>${anello((r.sonno || 0) / 5, "var(--verde)")}</span>
     <b>${r.sonno != null ? r.sonno + " <u>su 5</u>" : "–"}</b>
-    <em class="${r.sonno == null ? "fai" : ""}">${r.sonno == null ? "＋ Segna com'è andata la notte" : (r.risvegli != null ? (r.risvegli >= 4 ? "4 o più" : r.risvegli) + (r.risvegli === 1 ? " risveglio" : " risvegli") + " · " : "") + "media 7 giorni " + it(m.toFixed(1))}</em></button>`;
+    <em class="${r.sonno == null ? "fai" : ""}">${r.sonno == null ? "＋ Segna la notte" : (r.risvegli != null ? (r.risvegli >= 4 ? "4 o più" : r.risvegli) + (r.risvegli === 1 ? " risveglio" : " risvegli") + " · " : "") + "media 7 giorni " + it(m.toFixed(1))}</em></button>`;
 }
 function segnaSonno(agg) {
   if (!agg) { const r = S.diario[oggi()] || {}; SN = { v: r.sonno != null ? r.sonno : null, r: r.risvegli != null ? r.risvegli : null }; }
@@ -2110,15 +2131,6 @@ function salvaSonno() {
   const d = oggi(), r = giornoBase(d); r.sonno = SN.v; r.risvegli = SN.r; scriviGiorno(d, r); chiudi(); disegna(); avvisa("Salvato");
 }
 
-/* ---- home: le cose in scadenza (giro vita ogni 14 giorni, foto ogni 28, test della trazione ogni 14) ---- */
-function daFare() {
-  const r = [], uv = ultimoCon("vita"), uf = (S.foto || []).map((x) => x.d).sort().pop(), tz = statoTrazione();
-  const riga = (js, ico, t, s) => `<button class="blocco avv" onclick="${js}"><i><svg viewBox="0 0 24 24">${ico}</svg></i><span><b>${t}</b><small>${s}</small></span><em>›</em></button>`;
-  if (!uv || giorniDa(uv) >= 14) r.push(riga("segna('vita')", ICO.metro, "Misura il giro vita", uv ? "l'ultima misura è di " + giorniDa(uv) + " giorni fa" : "la prima misura, poi una ogni 2 settimane"));
-  if (!uf || giorniDa(uf) >= 28) r.push(riga("apriFoto()", ICO.foto, "Foto dei progressi", uf ? "le ultime sono di " + giorniDa(uf) + " giorni fa" : "fronte, lato e retro, poi ogni 4 settimane"));
-  if (tz.daFare) r.push(riga("vai('tecnica');apriGuida('trazioni')", ICO.sbarra, "Test della trazione", "sono passate 2 settimane: provane una vera"));
-  return r.length ? `<h2>Da fare</h2>` + r.join("") : "";
-}
 function grafVita() {
   const dd = Object.keys(S.diario).filter((d) => S.diario[d].vita != null).sort().slice(-20), n = dd.length, u = n ? S.diario[dd[n - 1]].vita : null, p = n ? S.diario[dd[0]].vita : null;
   return `<div class="card"><div class="riga tra"><div class="nome">Giro vita</div><button class="pic" onclick="segna('vita')">+ Misura</button></div>
@@ -2150,11 +2162,6 @@ function boxTrazione() {
     <button class="pri largo" onclick="segnaTest()">Segna il test</button>`;
   if (z.T.length) h += `<details><summary>I test fatti</summary><table><tr><th>Giorno</th><th>Trazioni</th><th>Discesa</th><th></th></tr>${z.T.slice().reverse().map((x) => `<tr><td>${dataIt(x.d)}</td><td>${it(x.n)}</td><td>${x.s != null ? it(x.s) + '"' : ""}</td><td style="text-align:right"><button class="ico" aria-label="Elimina" onclick="togliTest('${x.d}')">✕</button></td></tr>`).join("")}</table></details>`;
   return h + `</div>`;
-}
-function rigaTrazione() {
-  const z = statoTrazione();
-  return `<h2>Il tuo traguardo</h2><button class="blocco" onclick="vai('tecnica');apriGuida('trazioni')"><i><svg viewBox="0 0 24 24">${ICO.sbarra}</svg></i>
-    <span><b>${z.best >= 1 ? z.best + (z.best === 1 ? " trazione da solo ✓" : " trazioni di fila ✓") : "La prima trazione da solo"}</b><small>sbarra ${z.sett} di 3 questa settimana · ${z.daFare ? "test da fare" : z.pross ? "test " + nomeGiorno(z.pross) + " " + dataIt(z.pross) : "primo test tra 2 settimane"}</small></span><em>›</em></button>`;
 }
 function segnaTest() {
   apri(testaFoglio("Test della trazione") + `<p class="muto">Da fresco, prima delle negative. Vale solo la trazione completa: da braccia distese al mento sopra la sbarra.</p>
@@ -2306,10 +2313,33 @@ function passoIndietro() {
   if (sub) { apriSub(sub === "spesa" ? "cibo" : null); return true; }
   return false;
 }
-try {
-  history.replaceState({ base: 1 }, ""); history.pushState({ app: 1 }, "");
-  window.addEventListener("popstate", () => { if (passoIndietro()) history.pushState({ app: 1 }, ""); else history.back(); });
-} catch (e) {}
+/* La cronologia del browser tiene una voce per ogni livello aperto (scheda della barra, pagina, foglio): le voci nascono
+   mentre tocchi lo schermo, perché Chrome su Android salta al tasto indietro quelle create senza un tocco.
+   livelli(): quanti livelli sono aperti adesso. allinea(): porta la cronologia a quel numero, dopo ogni disegno. */
+function livelli() {
+  let n = 0;
+  if (tab !== "allena") n++; else if (S.corso) n += esAperto != null ? 2 : 1; else if (sub) n += sub === "spesa" ? 2 : 1;
+  if (tab === "tecnica" && guida) n++;
+  if (tab === "diario" && vistaFoto) n++;
+  if ($("foglio").style.display === "block") n++;
+  return n;
+}
+let profondo = 0, saltaPop = 0, inCoda = false;
+function allinea() {
+  if (inCoda) return; inCoda = true;
+  Promise.resolve().then(() => {
+    inCoda = false; const n = livelli();
+    try {
+      while (profondo < n) history.pushState({ app: ++profondo }, "");
+      if (profondo > n) { const giu = profondo - n; profondo = n; saltaPop++; history.go(-giu); }
+    } catch (e) {}
+  });
+}
+window.addEventListener("popstate", () => {
+  if (saltaPop > 0) { saltaPop--; return; }        // passo indietro fatto dall'app stessa, per restare allineata
+  if (profondo > 0) profondo--;
+  passoIndietro(); allinea();
+});
 
 disegna(); sveglio();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
