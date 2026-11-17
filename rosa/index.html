@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#070b09">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Taccuino Rosa</title>
 <style>
 :root { --bg:#070b09; --solido:#111815; --card:rgba(255,255,255,.055); --card2:rgba(255,255,255,.09); --linea:rgba(255,255,255,.10);
@@ -362,10 +363,61 @@ svg .testa { fill:#eef4f0; } svg .mano { fill:#3ddc84; }
 svg .freccia { stroke:#f7a94f; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; fill:none; }
 svg .livello { stroke:#5d6c63; stroke-width:1.5; stroke-dasharray:4 4; }
 svg text { font:700 11px system-ui,sans-serif; fill:#f7a94f; }
-@media (prefers-reduced-motion:reduce) { button, .barra i { transition:none; } }
+/* v18: movimento (pagine, fogli, anelli), schermata di avvio, grafici di dettaglio, torta dei macro, fine seduta */
+body { overflow-x:clip; }
+.av { transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1); }
+@keyframes daDx { from { opacity:0; transform:translateX(36px); } }
+@keyframes daSx { from { opacity:0; transform:translateX(-36px); } }
+@keyframes daSotto { from { opacity:0; transform:translateY(10px); } }
+@keyframes viaSx { to { opacity:0; transform:translateX(-36px); } }
+@keyframes viaDx { to { opacity:0; transform:translateX(36px); } }
+@keyframes viaSf { to { opacity:0; } }
+@keyframes su { from { transform:translateY(100%); } }
+@keyframes giu { to { transform:translateY(100%); } }
+@keyframes compare { from { opacity:0; } }
+#vista.v-av { animation:daDx .28s cubic-bezier(.2,.8,.2,1); } #vista.v-di { animation:daSx .28s cubic-bezier(.2,.8,.2,1); } #vista.v-ca { animation:daSotto .24s ease-out; }
+.fantasma { position:fixed; top:0; bottom:0; left:0; right:0; margin:0 auto; max-width:560px; padding:calc(18px + env(safe-area-inset-top)) 16px 0; overflow:hidden; pointer-events:none; z-index:3; }
+.fantasma.v-av { animation:viaSx .2s ease-in forwards; } .fantasma.v-di { animation:viaDx .2s ease-in forwards; } .fantasma.v-ca { animation:viaSf .14s ease-in forwards; }
+#foglio { animation:su .3s cubic-bezier(.2,.8,.2,1); } #velo { animation:compare .2s; }
+#foglio.via { animation:giu .18s ease-in forwards; } #velo.via { animation:viaSf .18s ease-in forwards; }
+#avvio { position:fixed; inset:0; z-index:20; pointer-events:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+         background:radial-gradient(70% 50% at 30% 18%, #1c4a33, #0c1712 55%, #070b09); animation:avvioVia .35s ease-in .65s forwards; }
+#avvio svg { width:112px; height:112px; animation:avvioLogo .5s cubic-bezier(.2,1.3,.4,1); }
+#avvio b { font-size:22px; font-weight:800; letter-spacing:-.4px; animation:compare .5s .1s backwards; }
+@keyframes avvioVia { to { opacity:0; visibility:hidden; } }
+@keyframes avvioLogo { from { opacity:0; transform:scale(.7) rotate(-12deg); } }
+.dato[role=button] { cursor:pointer; }
+.graf .br.sp { opacity:.38; }
+.tess.tre { grid-template-columns:repeat(3,1fr); }
+.tess.grande { grid-template-columns:1fr 1fr; gap:10px; } .tess.grande div { padding:16px 8px 14px; border-radius:22px; font-size:12.5px; }
+.tess.grande b { font-size:38px; letter-spacing:-1px; line-height:1.1; margin-bottom:2px; } .tess.grande b u { text-decoration:none; font-size:15px; color:var(--muto); letter-spacing:0; font-weight:600; }
+.tess div.oro { background:var(--verde3); border-color:rgba(61,220,132,.45); color:var(--verde); } .tess div.oro b { color:var(--verde); }
+.macro { display:flex; align-items:center; gap:16px; margin-top:14px; padding-top:14px; border-top:1px solid var(--linea); }
+.torta { flex:none; width:96px; height:96px; transform:rotate(-90deg); } .torta circle { fill:none; stroke-width:5.2; }
+.legm { flex:1; min-width:0; font-size:14px; } .legm div { display:flex; align-items:center; gap:8px; padding:3px 0; } .legm i { flex:none; width:10px; height:10px; border-radius:3px; }
+.legm span { flex:1; } .legm b { font-variant-numeric:tabular-nums; } .legm small { color:var(--muto); font-size:12px; min-width:62px; text-align:right; }
+.festa { display:flex; justify-content:center; margin:6px 0 2px; } .festa svg { width:84px; height:84px; }
+.festa .fc { fill:var(--verde3); stroke:var(--verde); stroke-width:4; stroke-dasharray:214; animation:traccia .55s ease-out backwards; transform-origin:center; }
+.festa .fk { fill:none; stroke:var(--verde); stroke-width:6; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:46; animation:traccia .35s ease-out .45s backwards; }
+@keyframes traccia { from { stroke-dashoffset:214; fill-opacity:0; } }
+.festa.rec svg { animation:salto .6s cubic-bezier(.2,1.4,.4,1) .75s backwards; } @keyframes salto { 50% { transform:scale(1.18); } }
+.settimane { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; margin:10px 0 4px; }
+.settimane div { height:44px; border-radius:12px; background:var(--card); border:1px solid var(--linea); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; color:var(--muto); }
+.settimane div.ok { background:var(--verde3); border-color:rgba(61,220,132,.4); color:var(--verde); }
+/* alimentazione v3: sezioni per macro, scelta della sezione, ricalcolo */
+.tg { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:7px; } .tg-p { background:#3ddc84; } .tg-c { background:#c9f7dd; } .tg-g { background:#1f8f55; }
+.ric { margin-left:6px; padding:2px 8px; border-radius:20px; background:var(--verde3); color:var(--verde); font-size:11px; letter-spacing:0; text-transform:none; white-space:nowrap; }
+.slot { display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-top:8px; padding:10px 12px; min-height:58px; border-radius:16px; border-style:dashed; background:transparent; }
+.slot span { flex:1; min-width:0; } .slot b { display:block; font-size:15px; color:var(--verde); } .slot small { color:var(--muto); font-size:12.5px; } .slot em { flex:none; font-style:normal; font-size:24px; color:var(--muto); line-height:1; padding-bottom:3px; }
+.pasto li.sp small { font-size:12px; } .pillola.oltre { background:rgba(247,169,79,.16); color:var(--arancio); }
+.tile b { letter-spacing:-.2px; }
+@media (prefers-reduced-motion:reduce) { button, .barra i, .av { transition:none; } #avvio { display:none; }
+  #vista, #foglio, #velo, .fantasma, .festa *, .festa svg { animation:none !important; } }
 </style>
 </head>
 <body>
+<div id="avvio" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="avA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8af5ba"/><stop offset="1" stop-color="#2fc673"/></linearGradient><linearGradient id="avB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#52e696"/><stop offset="1" stop-color="#1f8f55"/></linearGradient></defs>
+  <g transform="rotate(-32 256 256)"><rect x="150" y="238" width="212" height="36" rx="18" fill="url(#avB)"/><rect x="98" y="214" width="34" height="84" rx="15" fill="url(#avB)"/><rect x="380" y="214" width="34" height="84" rx="15" fill="url(#avB)"/><rect x="124" y="186" width="44" height="140" rx="19" fill="url(#avA)"/><rect x="344" y="186" width="44" height="140" rx="19" fill="url(#avA)"/></g></svg><b>Il tuo taccuino</b></div>
 <div id="vista"></div>
 
 <div id="pan"><div class="dentro">
@@ -491,6 +543,40 @@ function daSalire(e, u) {
   return u.serie.length >= 2 && u.serie.every((x) => x.rip >= max);
 }
 
+/* ============ v18: MOVIMENTO ============
+   CALMO: il telefono chiede meno animazioni, e allora non si muove niente. vib: vibrazione breve sui tasti principali.
+   cnt: un numero che conta fino al suo valore. fotografa/muovi: anelli, barre e numeri partono da dov'erano (o da zero su una pagina nuova). */
+const CALMO = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const vib = (p) => { try { if (navigator.vibrate) navigator.vibrate(p || 12); } catch (e) {} };
+const cnt = (v, testo, dec, mil) => `<span class="cnt" data-v="${v}" data-d="${dec || 0}"${mil ? ' data-m="1"' : ""}>${testo}</span>`;
+const pezzi = (r) => ({ an: [...r.querySelectorAll(".av")], ba: [...r.querySelectorAll(".barra > i")], nu: [...r.querySelectorAll(".cnt")] });
+function fotografa(r) { const p = pezzi(r); return { an: p.an.map((x) => x.style.strokeDashoffset), ba: p.ba.map((x) => x.style.width), nu: p.nu.map((x) => +x.dataset.v) }; }
+function muovi(r, prima) {
+  if (CALMO) return;
+  const p = pezzi(r), fin = [];
+  if (prima && (prima.an.length !== p.an.length || prima.ba.length !== p.ba.length || prima.nu.length !== p.nu.length)) return;     // la pagina ha cambiato forma: niente movimento
+  const parti = (x, k, da) => { const a = x.style[k]; if (!a || da === a) return; fin.push([x, k, a]); x.style.transition = "none"; x.style[k] = da; };
+  p.an.forEach((x, i) => parti(x, "strokeDashoffset", prima ? prima.an[i] : x.style.strokeDasharray));
+  p.ba.forEach((x, i) => parti(x, "width", prima ? prima.ba[i] : "0%"));
+  if (fin.length) { void r.offsetWidth; for (const [x, k, a] of fin) { x.style.transition = ""; x.style[k] = a; } }
+  p.nu.forEach((x, i) => {
+    const a = +x.dataset.v, da = prima ? prima.nu[i] : 0; if (!isFinite(a) || !isFinite(da) || da === a) return;
+    const d = +x.dataset.d, m = x.dataset.m, fine = x.innerHTML, t0 = performance.now();
+    const f = (t) => { if (!x.isConnected) return; const k = Math.min(1, (t - t0) / 650), v = da + (a - da) * (1 - Math.pow(1 - k, 3));
+      if (k >= 1) { x.innerHTML = fine; return; } x.textContent = d ? it(v.toFixed(d)) : m ? mila(v) : String(Math.round(v)); requestAnimationFrame(f); };
+    requestAnimationFrame(f);
+  });
+}
+// la pagina che esce: una copia ferma che scivola via mentre entra quella nuova
+function fantasma(v, dir) {
+  const g = document.createElement("div"); g.className = "fantasma v-" + dir; g.setAttribute("aria-hidden", "true");
+  g.innerHTML = `<div style="transform:translateY(${-window.scrollY}px)">${v.innerHTML}</div>`;
+  g.querySelectorAll("[id]").forEach((x) => x.removeAttribute("id"));
+  document.body.appendChild(g); setTimeout(() => g.remove(), 260);
+}
+let vistaPrima = null;
+const chiaveVista = () => [tab, S.corso ? "s" + (esAperto == null ? "" : esAperto) : sub || "", guida || "", vistaFoto ? "f" : ""].join("|");
+
 /* ============ NAVIGAZIONE ============ */
 let tab = "allena";
 function vai(t) { chiudi(); tab = t; vistaFoto = false; sub = null; schedaSel = null; guida = null; disegna(); window.scrollTo(0, 0); }
@@ -529,7 +615,7 @@ function grafBarre(id, pts, o) {
   if (!pts.length) return `<p class="muto">${o.vuoto || "Ancora nessun dato."}</p>`;
   const a = assi(pts, true, o.rif), passo = (a.W - a.L - a.R) / pts.length, lw = Math.min(22, passo * 0.62), base = a.Y(0);
   const cx = (i) => a.L + passo * (i + 0.5); a.X = (p, i) => cx(i);
-  let c = pts.map((p, i) => { const y = a.Y(p.y), h = base - y; return h > 0.5 ? `<path class="br" d="M${(cx(i) - lw / 2).toFixed(1)} ${base.toFixed(1)}v${(-h + Math.min(4, h)).toFixed(1)}q0 ${-Math.min(4, h)} ${Math.min(4, lw / 2)} ${-Math.min(4, h)}h${(lw - 2 * Math.min(4, lw / 2)).toFixed(1)}q${Math.min(4, lw / 2)} 0 ${Math.min(4, lw / 2)} ${Math.min(4, h)}v${(h - Math.min(4, h)).toFixed(1)}z"/>` : ""; }).join("");
+  let c = pts.map((p, i) => { const y = a.Y(p.y), h = base - y; return h > 0.5 ? `<path class="br${o.spento && o.rif != null && p.y < o.rif ? " sp" : ""}" d="M${(cx(i) - lw / 2).toFixed(1)} ${base.toFixed(1)}v${(-h + Math.min(4, h)).toFixed(1)}q0 ${-Math.min(4, h)} ${Math.min(4, lw / 2)} ${-Math.min(4, h)}h${(lw - 2 * Math.min(4, lw / 2)).toFixed(1)}q${Math.min(4, lw / 2)} 0 ${Math.min(4, lw / 2)} ${Math.min(4, h)}v${(h - Math.min(4, h)).toFixed(1)}z"/>` : ""; }).join("");
   if (o.rif != null) c += `<line class="rif" x1="${a.L}" x2="${a.W - a.R}" y1="${a.Y(o.rif).toFixed(1)}" y2="${a.Y(o.rif).toFixed(1)}"/>`;
   return chiudiGraf(id, a, pts, c, o.testo);
 }
@@ -543,7 +629,16 @@ function toccaGraf(ev, id) {
 const giornoN = (d) => Math.round(new Date(d + "T12:00").getTime() / 864e5);
 function disegna() {
   navVetro.attiva(tab);
-  $("vista").innerHTML = { allena: vAllena, diario: vDiario, storico: vStorico, tecnica: vTecnica, esporta: vEsporta }[tab]();
+  const v = $("vista"), ch = chiaveVista(), pf = livelli() - (foglioSu ? 1 : 0), stessa = !!vistaPrima && vistaPrima.ch === ch, prima = stessa ? fotografa(v) : null;
+  let dir = "";       // pagina nuova: avanti se si scende di un livello o si va a destra nella barra, indietro al contrario
+  if (vistaPrima && !stessa && !CALMO) {
+    const i0 = TABS.findIndex((x) => x.id === vistaPrima.tab), i1 = TABS.findIndex((x) => x.id === tab);
+    dir = i1 !== i0 ? (i1 > i0 ? "av" : "di") : pf > vistaPrima.pf ? "av" : pf < vistaPrima.pf ? "di" : "ca";
+    fantasma(v, dir);
+  }
+  v.innerHTML = { allena: vAllena, diario: vDiario, storico: vStorico, tecnica: vTecnica, esporta: vEsporta }[tab]();
+  if (dir) { v.classList.remove("v-av", "v-di", "v-ca"); void v.offsetWidth; v.classList.add("v-" + dir); }
+  muovi(v, prima); vistaPrima = { ch, pf, tab };
   const inSeduta = tab === "allena" && !!S.corso;
   document.body.classList.toggle("inseduta", inSeduta);
   const di = daInviare(); $("nav").classList.toggle("nuovo", !!(di.s || di.g));      // pallino sulla voce Coach: c'è qualcosa da inviare
@@ -552,8 +647,17 @@ function disegna() {
   allinea();
 }
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
-function apri(html, pagina) { fermaCamera(); const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; allinea(); }
-function chiudi() { fermaCamera(); $("foglio").style.display = "none"; $("velo").style.display = "none"; if (typeof allinea === "function") allinea(); }
+// foglioSu dice se il foglio è aperto: quando si chiude scivola giù per un attimo, ma per l'app è già chiuso
+let foglioSu = false, tChiudi = null;
+function apri(html, pagina) {
+  fermaCamera(); clearTimeout(tChiudi); const f = $("foglio"), w = $("velo"); f.classList.remove("via"); w.classList.remove("via");
+  f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; w.style.display = "block"; foglioSu = true; allinea();
+}
+function chiudi() {
+  fermaCamera(); const f = $("foglio"), w = $("velo"), spegni = () => { f.style.display = "none"; w.style.display = "none"; f.classList.remove("via"); w.classList.remove("via"); };
+  if (foglioSu) { foglioSu = false; clearTimeout(tChiudi); if (CALMO) spegni(); else { f.classList.add("via"); w.classList.add("via"); tChiudi = setTimeout(spegni, 180); } }
+  if (typeof allinea === "function") allinea();
+}
 
 /* ============ HOME ============ */
 /* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
@@ -621,22 +725,26 @@ function vHome() {
     /* 2 · le quattro cose da segnare ogni giorno */
     `<h2>Da segnare oggi</h2><div class="g2">
       <button class="dato" onclick="segna('peso')"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, V)}</span>
-        <b>${R.peso != null ? it(R.peso) : m1 ? it(m1.m.toFixed(1)) : "–"} <u>kg</u></b>
+        <b>${R.peso != null ? cnt(R.peso, it(R.peso), 1) : m1 ? cnt(m1.m.toFixed(1), it(m1.m.toFixed(1)), 1) : "–"} <u>kg</u></b>
         <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
-      <button class="dato" onclick="segna('passi')"><span class="riga tra"><small>Passi di ieri</small>${anello((pIeri || 0) / PASSI_MIN, V)}</span>
-        <b>${pIeri != null ? mila(pIeri) : "–"}</b>
+      <button class="dato" onclick="${pIeri == null ? "segna('passi')" : "dettaglio('passi')"}"><span class="riga tra"><small>Passi di ieri</small>${anello((pIeri || 0) / PASSI_MIN, V)}</span>
+        <b>${pIeri != null ? cnt(pIeri, mila(pIeri), 0, 1) : "–"}</b>
         <em class="${pIeri == null ? "fai" : ""}">${pIeri == null ? "＋ Segna i passi" : "media 7 giorni " + mila(mp.m)}</em></button>` + tileSonno() +
-      `<div class="dato"><span class="riga tra"><small>Acqua</small>${anello(aq / ACQUA_ML, V)}</span>
-        <b>${litri(aq)} <u>/ ${litri(ACQUA_ML)} L</u></b>
-        <span class="riga"><button class="tondo" aria-label="Togli un bicchiere" onclick="acqua(${-BICCHIERE})">−</button><button class="tondo piu" aria-label="Aggiungi un bicchiere da ${BICCHIERE} ml" onclick="acqua(${BICCHIERE})">+</button><em>${BICCHIERE} ml</em></span></div></div>`;
+      `<div class="dato" role="button" aria-label="Acqua: vedi l'andamento" onclick="dettaglio('acqua')"><span class="riga tra"><small>Acqua</small>${anello(aq / ACQUA_ML, V)}</span>
+        <b>${cnt(aq / 1000, litri(aq), 2)} <u>/ ${litri(ACQUA_ML)} L</u></b>
+        <span class="riga"><button class="tondo" aria-label="Togli un bicchiere" onclick="event.stopPropagation();acqua(${-BICCHIERE})">−</button><button class="tondo piu" aria-label="Aggiungi un bicchiere da ${BICCHIERE} ml" onclick="event.stopPropagation();acqua(${BICCHIERE})">+</button><em>${BICCHIERE} ml</em></span></div></div>`;
   /* 3 · le cose in scadenza: giro vita ogni 14 giorni, foto ogni 28, dati da inviare */
   const fare = [], uv = ultimoCon("vita"), uf = (S.foto || []).map((x) => x.d).sort().pop();
   if (!uv || giorniDa(uv) >= 14) fare.push(riga("segna('vita')", ICO.metro, "Misura il giro vita", uv ? "l'ultima misura è di " + giorniDa(uv) + " giorni fa" : "la prima misura, poi una ogni 2 settimane"));
   if (!uf || giorniDa(uf) >= 28) fare.push(riga("apriFoto()", ICO.foto, "Foto dei progressi", uf ? "le ultime sono di " + giorniDa(uf) + " giorni fa" : "fronte, lato e retro, poi ogni 4 settimane"));
+  if (new Date(d + "T12:00").getDay() === 0 && S.riepSett !== q.lun) fare.push(riga("riepSett()", ICO.sett, "Riepilogo della settimana", "sedute, peso, passi, sonno e alimentazione: da mandare al coach"));
   if (di.s || di.g) fare.push(riga("vai('esporta')", '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>', "Invia i dati al coach", [di.s ? di.s + (di.s === 1 ? " seduta" : " sedute") : "", di.g ? di.g + (di.g === 1 ? " giorno" : " giorni") + " di misure" : ""].filter(Boolean).join(" · ")));
   if (fare.length) h += `<h2>Da fare</h2><div class="card lista">${fare.join("")}</div>`;
   /* 4 · il percorso */
+  const K = costanza();
   return h + `<h2>Il tuo percorso</h2><div class="card lista">` +
+    riga("apriCostanza()", ICO.fiamma, K.sett ? K.sett + (K.sett === 1 ? " settimana" : " settimane") + " di fila con " + APP.nSett + " sedute" : "Costanza: " + K.questa + " di " + APP.nSett + " sedute questa settimana",
+      K.peso ? "peso segnato " + K.peso + (K.peso === 1 ? " giorno" : " giorni") + " di fila" : "segna il peso per far partire la serie") +
     riga("apriSub('scheda')", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', esc(q.f.nome), esc(q.f.testo)) +
     riga("vai('storico')", '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', u ? "Ultima seduta: " + esc(u.corto || u.nome) : "Storico delle sedute",
       u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie · " + S.sedute.length + " in tutto" : "nessuna seduta ancora") + `</div>`;
@@ -790,7 +898,7 @@ function fattore(v, r, on) {
   const off = !on && v[4] && v[4].off ? v[4].off[1] : 1;
   return r.pers && r.q && r.q[v[0]] != null ? (r.q[v[0]] / basePiano(v, on).n) * off : off;
 }
-function totali(d) {
+function totaliV2(d) {
   const r = recCibo(d), on = modoOn(d), t = new Array(10).fill(0);
   for (const p of PASTI) for (const g of p.g) for (const v of g.v) {
     if (!r.x[v[0]] || !visibile(v, on)) continue;
@@ -799,25 +907,8 @@ function totali(d) {
   for (const e of r.extra || []) e.v.forEach((n, i) => (t[i] += n || 0));      // alimenti aggiunti a mano o con lo scanner
   return t;
 }
-function spunta(id) {
-  const r = recCibo(oggi(), true);
-  for (const p of PASTI) for (const g of p.g) if (g.v.some((v) => v[0] === id)) {
-    if (r.x[id]) { delete r.x[id]; if (r.q) delete r.q[id]; }
-    else { if (g.uno && !r.pers) for (const o of g.v) delete r.x[o[0]]; r.x[id] = 1; }     // "uno a scelta": ne resta uno solo, tranne nel giorno personalizzato
-  }
-  salva(); tieni(disegna);
-}
-function tuttoPasto(pid) {      // spunta in un colpo le voci fisse del pasto; le scelte vanno toccate a mano
-  const r = recCibo(oggi(), true), on = modoOn(oggi()), p = PASTI.find((x) => x.id === pid);
-  const fisse = p.g.filter((g) => !g.uno).flatMap((g) => g.v).filter((v) => visibile(v, on)), tutte = fisse.every((v) => r.x[v[0]]);
-  for (const v of fisse) { if (tutte) delete r.x[v[0]]; else r.x[v[0]] = 1; }
-  salva(); tieni(disegna);
-}
-// giorno personalizzato: stessi traguardi, ma si spunta quello che si vuole e le quantità si scrivono a mano
-function mettiPers(v) { const r = recCibo(oggi(), true); r.pers = !!v; if (!v) r.q = {}; salva(); tieni(disegna); }
-function mettiQ(id, val) { const r = recCibo(oggi(), true), n = num(val); r.q = r.q || {}; if (n != null && n >= 0) r.q[id] = n; else delete r.q[id]; salva(); tieni(disegna); }
-function mettiOn(v) { recCibo(oggi(), true).on = v; salva(); tieni(disegna); }
-function acqua(ml) { const r = recCibo(oggi(), true); r.acqua = Math.max(0, (r.acqua || 0) + ml); salva(); tieni(disegna); }
+function mettiOn(v) { recCibo(oggi(), true).on = v; vib(); salva(); tieni(disegna); }
+function acqua(ml) { const r = recCibo(oggi(), true); r.acqua = Math.max(0, (r.acqua || 0) + ml); vib(); salva(); tieni(disegna); }
 const litri = (ml) => it(parseFloat((ml / 1000).toFixed(2)));
 function boxAcqua() {
   const a = recCibo(oggi()).acqua || 0, ok = a >= ACQUA_ML;
@@ -829,55 +920,419 @@ function boxAcqua() {
 }
 const misura = (nome, val, tgt, un, dec) => `<div class="mt"><div class="riga tra"><span>${nome}</span><b>${it(val.toFixed(dec || 0))} <small>/ ${it(tgt)} ${un}</small></b></div>
   <div class="barra"><i style="width:${Math.min(100, Math.round((val / tgt) * 100))}%"></i></div></div>`;
-const CAT = { carbo: "Carboidrato", prot: "Proteina", legumi: "Legumi", altro: "Altro" };
-function vCibo() {
-  const d = oggi(), auto = giornoOn(d), on = modoOn(d), N = CIBO[on ? "on" : "off"], r = recCibo(d), pers = !!r.pers, T = totali(d), resta = Math.round(N.kcal - T[0]);
-  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 1.2 · 5 pasti, senza glutine</div><h1>Alimentazione</h1></div></div>
-    <button class="blocco" onclick="apriSub('spesa')"><i><svg viewBox="0 0 24 24">${ICO.carrello}</svg></i><span><b>Lista della spesa</b><small>La settimana del piano, con le quantità già sommate</small></span><em>›</em></button>
-    <div class="card interr ${pers ? "on" : ""}" role="switch" aria-checked="${pers}" onclick="mettiPers(${!pers})"><span><b>Giorno personalizzato</b><small>Stessi traguardi, ma alimenti e grammature li decidi tu</small></span><i class="leva"></i></div>
-    <div class="card conto"><div class="riga tra"><div><div class="sopra">Mangiato oggi</div><div class="kc"><b>${Math.round(T[0])}</b> di ${N.kcal} kcal</div></div>
-        <span class="pillola">${resta >= 0 ? "restano " + resta : "oltre di " + -resta}</span></div>
-      <div class="barra"><i style="width:${Math.min(100, Math.round((T[0] / N.kcal) * 100))}%"></i></div>
-      ${misura("Proteine", T[1], N.p, "g")}${misura("Carboidrati", T[2], N.c, "g")}${misura("Grassi", T[3], N.g, "g")}
-      <details><summary>Fibra, vitamine e minerali</summary>${MICRO.map((m) => misura(m[0], T[m[3]], m[0] === "Fibra" && !on ? 28 : m[2], m[1], m[1] === "g" || m[0] === "Ferro" ? 1 : 0)).join("")}
-        <p class="muto">Sono stime da tabelle medie: marca, cottura e tipo di frutta e verdura spostano i valori. Il traguardo è il fabbisogno giornaliero di una donna adulta.</p></details></div>
-    <p class="muto conta">${pers ? "Giorno personalizzato: spunta quello che mangi, anche più alimenti per gruppo, e <b>correggi la quantità</b> nel campo a destra. Gli alimenti del piano restano come suggerimento." : "Spunta quello che hai mangiato: il conto si aggiorna da solo. Pesi a crudo, frutta senza buccia, olio sempre pesato."}</p>`;
-  const kEx = (e) => `${e.sost ? "al posto di " + esc(e.sost) + " · " : ""}${CAT[e.cat] ? CAT[e.cat] + " · " : ""}${Math.round(e.v[0])} kcal · P ${Math.round(e.v[1])} · C ${Math.round(e.v[2])} · G ${Math.round(e.v[3])}`;
-  const rigaEx = (e) => `<li class="sp on"><i class="chk"></i><span>${esc(e.nome)}<br><small class="muto">${kEx(e)}</small></span><b>${esc(e.q)}</b><button class="ico" aria-label="Togli" onclick="togliExtra(${e.id})">✕</button></li>`;
-  for (const p of PASTI) {
-    const voci = p.g.flatMap((g) => g.v).filter((v) => visibile(v, on)), ex = (r.extra || []).filter((e) => e.pasto === p.id);
-    const k = voci.reduce((n, v) => n + (r.x[v[0]] ? v[3][0] * fattore(v, r, on) : 0), 0) + ex.reduce((n, e) => n + (e.v[0] || 0), 0);
-    if (p.id === "int") h += `<h2>Integratori</h2>`;
-    h += `<div class="card pasto" id="pasto-${p.id}"><div class="riga tra"><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div>
-      <div class="riga"><span class="pillola">${Math.round(k)} kcal</span><button class="pic" onclick="tuttoPasto('${p.id}')">Tutto</button></div></div>`;
-    for (const g of p.g) {
-      const vv = g.v.filter((v) => visibile(v, on)); if (!vv.length) continue;
-      h += `${g.t ? `<h3>${pers ? g.t.split(",")[0] : g.t}</h3>` : ""}<ul>` + vv.map((v) => {
-        const sel = !!r.x[v[0]], b = basePiano(v, on);
-        const q = pers && sel ? `<input class="qta" inputmode="decimal" aria-label="Quantità di ${v[1]}" value="${it(r.q && r.q[v[0]] != null ? r.q[v[0]] : b.n)}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="mettiQ('${v[0]}',this.value)"><em>${b.u}</em>`
-          : `<b>${!on && v[4] && v[4].off ? v[4].off[0] : v[2]}</b>`;
-        return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spunta('${v[0]}')"><i class="chk ${g.uno && !pers ? "tondo1" : ""}"></i><span>${v[1]}</span>${q}</li>`;
-      }).join("") + `</ul>`;
+/* ============ ALIMENTAZIONE v3: PASTI PER MACRO, RICALCOLO DELLA GIORNATA, MEAL PREP ============
+   Ogni pasto ha fino a tre sezioni (p proteine, c carboidrati, g grassi). Ogni sezione ha un obiettivo in grammi del suo macro
+   (t: [giorno ON, giorno OFF]) e un elenco di alternative: l'app calcola i grammi dell'alimento che coprono l'obiettivo.
+   piano: quanti grammi di [proteine, carboidrati, grassi] il piano si aspetta in tutto da quella sezione (un carboidrato porta anche proteine).
+   Quando una sezione è riempita, la differenza tra quello che c'è davvero e il piano viene recuperata sulle sezioni ancora aperte:
+   prima nello stesso pasto, poi nel resto della giornata (ricalcolo). I traguardi della giornata restano quelli di CIBO.
+   ALIM: id → [nome, grammi di riferimento, valori in quei grammi (come in PASTI), opzioni { pz: grammi di un pezzo, un: nome del pezzo }]
+   Registro del giorno (S.cibo[data]): s = { "pasto.sezione": [{ k: id di ALIM oppure x: { nome, per100 }, g: grammi, man: 1 se corretti a mano }] },
+   f = { "pasto:voce": 1 } per le voci fisse. I giorni segnati prima della v3 restano in x/extra e si contano con totaliV2. */
+const ALIM = {
+  whey: ["Whey isolate senza glutine, nell'impasto", 15, [57, 13.5, 0.5, 0, 0, 70, 0.1, 12, 70, 0]],
+  greco: ["Yogurt greco 0%", 150, [85, 15, 6, 0, 0, 165, 0.1, 16, 210, 0]],
+  skyr: ["Skyr bianco", 150, [95, 16, 6, 0, 0, 225, 0, 17, 230, 0]],
+  fiocchi: ["Fiocchi di latte", 100, [90, 11, 3, 4, 0, 80, 0.1, 8, 100, 0]],
+  bresaola: ["Bresaola", 90, [135, 29, 0, 2, 0, 6, 2.2, 25, 450, 0]],
+  tonno: ["Tonno al naturale sgocciolato", 120, [130, 30, 0, 1, 0, 7, 1.2, 33, 290, 0]],
+  pollo: ["Petto di pollo o di tacchino", 140, [155, 32, 0, 2, 0, 14, 0.6, 39, 520, 0]],
+  manzo: ["Manzo magro (fesa, girello, macinato 5%)", 140, [170, 30, 0, 5, 0, 7, 2.5, 31, 460, 0]],
+  maiale: ["Lonza o filetto di maiale", 140, [175, 30, 0, 6, 0, 10, 1.1, 30, 500, 0]],
+  pesce: ["Orata o branzino", 180, [180, 32, 0, 5.5, 0, 40, 0.6, 50, 600, 0]],
+  gamberi: ["Gamberi o mazzancolle", 200, [145, 30, 2, 1.5, 0, 150, 3, 70, 440, 0]],
+  uova: ["Albume con 2 uova intere (peso totale)", 270, [220, 29, 1, 11, 0, 60, 2, 28, 380, 0]],
+  farina: ["Farina di riso", 35, [127, 2, 28, 0.5, 0.8, 4, 0.1, 12, 27, 0]],
+  saraceno: ["Farina di grano saraceno", 100, [335, 12, 62, 3, 10, 20, 3, 230, 450, 0]],
+  gallette: ["Gallette di riso o di mais", 50, [192, 4, 40.5, 1.4, 1.7, 5, 0.4, 35, 70, 0]],
+  panesg: ["Pane senza glutine", 75, [195, 3, 38, 3.5, 4, 20, 0.6, 12, 60, 0]],
+  riso: ["Riso, o pasta di riso o di mais", 55, [198, 4, 44, 0.4, 0.6, 5, 0.3, 14, 50, 0]],
+  legumi: ["Pasta di lenticchie o di ceci", 55, [190, 14, 28, 1.2, 4.5, 30, 3.5, 40, 400, 0]],
+  quinoa: ["Quinoa o grano saraceno", 55, [198, 7.5, 36, 3, 4, 25, 2.2, 105, 300, 0]],
+  patate: ["Patate", 250, [200, 5, 45, 0.3, 4, 25, 1.5, 55, 1400, 22]],
+  kiwi: ["Kiwi (2) o 1 pera", 150, [75, 1.5, 14, 0.6, 3.5, 40, 0.4, 22, 400, 100]],
+  mela: ["Mela", 150, [78, 0.4, 19, 0.3, 3, 9, 0.2, 8, 165, 7]],
+  banana: ["Banana", 120, [105, 1, 27, 0, 3, 6, 0.3, 32, 430, 10]],
+  crema: ["Crema keto, pesata", 12, [59, 3, 4, 4, 1, 10, 0.3, 15, 50, 0]],
+  mandorle: ["Mandorle o noci", 15, [90, 3, 1, 8, 1.9, 40, 0.6, 40, 110, 0]],
+  arachidi: ["Burro di arachidi 100%", 100, [610, 26, 12, 50, 7, 50, 2, 170, 650, 0]],
+  olio: ["Olio extravergine, pesato", 10, [90, 0, 0, 10, 0, 0, 0, 0, 0, 0]],
+  avocado: ["Avocado", 100, [160, 2, 2, 15, 7, 12, 0.5, 29, 485, 10]],
+  olive: ["Olive", 100, [145, 1, 1, 15, 3, 60, 1.5, 10, 50, 0]],
+};
+const SEZ = { p: ["Proteine", 1, "proteine", "la proteina"], c: ["Carboidrati", 2, "carboidrati", "il carboidrato"], g: ["Grassi", 3, "grassi", "il grasso"] };
+const PROT_PASTO = ["pollo", "manzo", "maiale", "pesce", "gamberi", "tonno", "bresaola", "uova"], GRASSI_PASTO = ["olio", "avocado", "olive", "mandorle"];
+// Qui non ci sono giorni ON e OFF: i due obiettivi di ogni sezione sono uguali. Le voci "libere" sono il sabato sera e la domenica.
+const MENU = [
+  { id: "col", ora: "8:30", nome: "Colazione",
+    sempre: [["albume", "Albume, per i pancake", "150 g", [78, 16, 1, 0, 0, 10, 0.1, 16, 245, 0]], ["latte-avena", "Latte d'avena senza glutine", "40 g", [16, 0.5, 2.5, 0.5, 0.3, 5, 0, 2, 15, 0]]],
+    sez: { p: { t: [13.5, 13.5], piano: [[13.5, 0.5, 0], [13.5, 0.5, 0]], v: ["whey", "greco", "skyr", "fiocchi"] },
+           c: { t: [28, 28], piano: [[2, 28, 0.5], [2, 28, 0.5]], v: ["farina", "saraceno", "gallette", "panesg"] },
+           g: { t: [4, 4], piano: [[3, 4, 4], [3, 4, 4]], v: ["crema", "mandorle", "arachidi"] } } },
+  { id: "spu", ora: "~11:00", nome: "Spuntino",
+    sez: { p: { t: [15, 15], piano: [[15, 6, 0], [15, 6, 0]], nota: "Mai solo frutta", v: ["greco", "skyr", "fiocchi", "bresaola", "tonno"] },
+           c: { t: [14, 14], piano: [[1.5, 14, 0.6], [1.5, 14, 0.6]], v: ["kiwi", "mela", "banana", "gallette", "panesg"] } } },
+  { id: "pra", ora: "~13:30", nome: "Pranzo",
+    sempre: [["verdura", "Verdura, meglio cotta", "250 g", [60, 5, 8, 0.5, 7, 100, 2, 50, 650, 50]]],
+    libereT: "La domenica, in famiglia",
+    libere: [["dom-primo", "Primo in famiglia, porzione normale (stima)", "1 piatto", [450, 14, 65, 14, 3, 40, 1.5, 40, 300, 5]], ["dom-dolce", "Dolce, una porzione a fine pranzo (stima)", "1 porzione", [300, 4, 40, 14, 1, 50, 0.8, 15, 120, 0]]],
+    sez: { c: { t: [44, 44], piano: [[4, 44, 0.5], [4, 44, 0.5]], v: ["riso", "legumi", "quinoa", "patate", "panesg", "gallette"] },
+           p: { t: [30, 30], piano: [[30, 0, 3], [30, 0, 3]], v: PROT_PASTO },
+           g: { t: [15, 15], piano: [[0, 0, 15], [0, 0, 15]], v: GRASSI_PASTO } } },
+  { id: "mer", ora: "~16:30", nome: "Merenda",
+    sez: { c: { t: [17, 17], piano: [[1.5, 17, 0.6], [1.5, 17, 0.6]], v: ["kiwi", "mela", "banana", "gallette", "panesg"] },
+           g: { t: [8, 8], piano: [[3, 1, 8], [3, 1, 8]], v: ["mandorle", "arachidi", "avocado"] } } },
+  { id: "cen", ora: "~20:30", nome: "Cena",
+    sempre: [["verdura", "Verdura", "250 g", [60, 5, 8, 0.5, 7, 100, 2, 50, 650, 50]]],
+    libereT: "Il sabato sera, al posto della cena",
+    libere: [["sab-pizza", "Pizza senza glutine, le tue 2-3 fette (stima)", "2-3 fette", [600, 24, 80, 20, 4, 250, 1.5, 40, 350, 8]], ["sab-panino", "Panino con hamburger e provola (stima)", "1 panino", [650, 35, 45, 35, 3, 250, 3, 40, 450, 2]],
+      ["sab-patatine", "Patatine fritte, solo se le vuoi davvero (stima)", "1 porzione", [350, 4, 40, 18, 4, 15, 0.8, 35, 600, 10]]],
+    sez: { c: { t: [24, 24], piano: [[2.5, 24, 0.3], [2.5, 24, 0.3]], v: ["riso", "patate", "panesg", "quinoa", "gallette"] },
+           p: { t: [30, 30], piano: [[30, 0, 3], [30, 0, 3]], v: PROT_PASTO },
+           g: { t: [10, 10], piano: [[0, 0, 10], [0, 0, 10]], v: ["olio", "avocado", "olive"] } } },
+  { id: "int", ora: "Ogni giorno", nome: "Integratori", sez: {},
+    sempre: [["integratore", "Il tuo integratore, a pranzo · 0 kcal", "come ora", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]] },
+];
+// idee pronte del coach: gli alimenti entrano nelle sezioni con i grammi calcolati sul pasto di oggi
+const PREP_BASE = [
+  { nome: "Pollo, riso e verdure", per: ["pra", "cen"], s: { c: "riso", p: "pollo", g: "olio" } },
+  { nome: "Pasta di lenticchie con i gamberi", per: ["pra"], s: { c: "legumi", p: "gamberi", g: "olio" } },
+  { nome: "Orata con patate", per: ["pra", "cen"], s: { c: "patate", p: "pesce", g: "olio" } },
+  { nome: "Manzo con quinoa e verdure", per: ["pra", "cen"], s: { c: "quinoa", p: "manzo", g: "olio" } },
+  { nome: "Yogurt greco e kiwi", per: ["spu", "mer"], s: { p: "greco", c: "kiwi" } },
+  { nome: "Gallette e bresaola", per: ["spu", "mer"], s: { c: "gallette", p: "bresaola" } },
+  { nome: "Frutto e mandorle", per: ["mer"], s: { c: "kiwi", g: "mandorle" } },
+];
+// APP: quello che cambia da un atleta all'altro nei testi e nei conti del motore (sedute di pesi a settimana, giorni ON/OFF, promemoria)
+const APP = { nSett: 2, pesi: PESI, onoff: false, versione: "Versione 2.0 · 5 pasti, senza glutine", adulto: "una donna adulta",
+  notaInt: "Le whey sono cibo e si contano nella colazione. Le voci con \"stima\" sono valori indicativi: servono a non lasciare vuota la giornata.",
+  ricorda: ["<b>Non saltare nessuno dei 5 pasti</b>: lo spuntino e la merenda contano quanto gli altri.", "<b>Acqua</b> 2 litri: la segni nella home.",
+    "<b>Olio e crema sempre pesati.</b>",
+    "<b>Sabato sera</b>: pizza senza glutine o panino al posto della cena. La domenica mattina non compensare.",
+    "<b>Domenica</b>: pranzo in famiglia e una porzione di dolce. A cena proteina, verdure e olio, senza carboidrato.",
+    "<b>Cena</b> almeno 2-3 ore prima di andare a letto.", "<b>Prima dei pesi</b>: mai a digiuno, e almeno 2 ore dopo un pasto principale.",
+    "<b>Senza glutine</b>: controlla la spiga barrata su whey, latte d'avena, gallette, pane e pasta."] };
+const TOL = [7, 10, 5], GIU = [0.5, 0.5, 1], SU = 0.5;      // sotto TOL grammi non si ricalcola; una sezione scende al massimo di GIU e sale al massimo di SU (in frazione del suo obiettivo)
+const pastoDi = (pid) => MENU.find((p) => p.id === pid);
+const a100 = (x) => (x.x ? x.x.per100 : ALIM[x.k] ? ALIM[x.k][2].map((n) => (n / ALIM[x.k][1]) * 100) : new Array(10).fill(0));
+const nomeA = (x) => (x.x ? x.x.nome : ALIM[x.k] ? ALIM[x.k][0] : x.k);
+const optA = (x) => (!x.x && ALIM[x.k] && ALIM[x.k][3]) || null;
+const vecA = (x) => a100(x).map((n) => (n * x.g) / 100);
+// grammi di un alimento che portano T grammi del macro i (1 proteine, 2 carboidrati, 3 grassi)
+function grammi(v, i, T, o) {
+  if (!(v[i] > 0) || !(T > 0)) return 0;
+  const g = (T / v[i]) * 100;
+  return o && o.pz ? Math.max(1, Math.round(g / o.pz)) * o.pz : g >= 50 ? Math.round(g / 5) * 5 : Math.max(1, Math.round(g));
+}
+const qtaA = (x) => { const o = optA(x); if (!o) return it(Math.round(x.g * 10) / 10) + " g"; const n = Math.round((x.g / o.pz) * 10) / 10; return it(n) + " " + (n === 1 ? o.un : o.uni) + " (" + Math.round(x.g) + " g)"; };
+const macroA = (v) => `${Math.round(v[0])} kcal · P ${Math.round(v[1])} · C ${Math.round(v[2])} · G ${Math.round(v[3])}`;
+const slotDi = (r, key) => (r.s && r.s[key]) || [];
+const fissaOn = (f, on) => !(f[4] && f[4].on && !on);
+
+function totali(d) {
+  const t = totaliV2(d), r = recCibo(d), on = modoOn(d);
+  for (const k in r.s || {}) for (const x of r.s[k]) vecA(x).forEach((n, i) => (t[i] += n || 0));
+  for (const p of MENU) for (const f of (p.sempre || []).concat(p.libere || [])) if (r.f && r.f[p.id + ":" + f[0]] && fissaOn(f, on)) f[3].forEach((n, i) => (t[i] += n));
+  return t;
+}
+/* Ricalcolo: t = obiettivo di ogni sezione adesso, agg = di quanto è cambiato rispetto al piano, scarto = [p, c, g] che oggi non si recuperano */
+function ricalcolo(d) {
+  const r = recCibo(d), k = modoOn(d) ? 0 : 1, out = { t: {}, agg: {}, scarto: [0, 0, 0], base: {} }, dev = {}, aperti = [];
+  for (const p of MENU) {
+    dev[p.id] = [0, 0, 0];
+    for (const s of ["p", "c", "g"]) {
+      const z = p.sez[s], key = p.id + "." + s, vv = slotDi(r, key), T = z ? z.t[k] : 0, a = [0, 0, 0];
+      for (const x of vv) { const v = vecA(x); a[0] += v[1]; a[1] += v[2]; a[2] += v[3]; }
+      if (T) { out.t[key] = out.base[key] = T; if (vv.length) z.piano[k].forEach((n, i) => (dev[p.id][i] += a[i] - n)); else aperti.push({ key, p: p.id, s, T, a: 0 }); }
+      else a.forEach((n, i) => (dev[p.id][i] += n));        // sezione non prevista oggi: quello che c'è dentro è tutto in più
     }
-    if (ex.length) h += `<h3>Aggiunti da te</h3><ul>${ex.map(rigaEx).join("")}</ul>`;
-    if (p.id !== "int") h += `<button class="largo piuCibo" onclick="aggiungiCibo('${p.id}')">+ Aggiungi a ${p.nome.toLowerCase()}</button><button class="largo piuCibo" onclick="sostituisciCibo('${p.id}')">⇄ Non ho un alimento: sostituiscilo</button>`;
-    h += `</div>`;
   }
-  const orfani = (r.extra || []).filter((e) => !PASTI.some((p) => p.id === e.pasto));       // aggiunti prima che ogni alimento avesse il suo pasto
-  if (orfani.length) h += `<h2>Altri aggiunti oggi</h2><div class="card pasto"><ul>${orfani.map(rigaEx).join("")}</ul></div>`;
-  h += `<p class="muto conta">Le whey sono cibo e sono già contate nella colazione. Le voci con "stima" sono valori indicativi: servono a non lasciare vuota la giornata.</p>
-    <h2>Da ricordare</h2><div class="card"><ul>
-      <li><b>Non saltare nessuno dei 5 pasti</b>: lo spuntino e la merenda contano quanto gli altri.</li>
-      <li><b>Acqua</b> 2 litri: la segni nella home.</li>
-      <li><b>Olio e crema sempre pesati</b>: 15 g di olio a pranzo, 10 g a cena, 12 g di crema a colazione.</li>
-      <li><b>Sabato sera</b>: pizza senza glutine o panino al posto della cena. La domenica mattina non compensare.</li>
-      <li><b>Domenica</b>: pranzo in famiglia e una porzione di dolce. A cena proteina, verdure e olio, senza carboidrato.</li>
-      <li><b>Cena</b> almeno 2-3 ore prima di andare a letto.</li>
-      <li><b>Prima dei pesi</b>: mai a digiuno, e almeno 2 ore dopo un pasto principale.</li>
-      <li><b>Senza glutine</b>: controlla la spiga barrata su whey, latte d'avena, gallette e pasta.</li>
-      <li><b>Ti manca un alimento?</b> Tocca "Non ho un alimento" sotto il pasto: l'app ti dice quanti grammi servono di quello che hai, anche per carne, legumi e formaggi senza codice a barre. La tabella completa è in Guide → Sostituzioni.</li>
-      <li><b>Giorno personalizzato</b>: va bene ogni tanto. Tieni le proteine vicine al traguardo e resta nelle calorie.</li></ul></div>`;
+  ["p", "c", "g"].forEach((s, i) => {
+    const tot = MENU.reduce((n, p) => n + dev[p.id][i], 0); if (Math.abs(tot) < TOL[i]) return;
+    let resto = 0;
+    for (const p of MENU) {                               // prima nello stesso pasto
+      let sv = dev[p.id][i]; const o = aperti.find((x) => x.p === p.id && x.s === s);
+      if (o && sv) { o.a = Math.max(-o.T * GIU[i], Math.min(o.T * SU, -sv)); sv += o.a; }
+      resto += sv;
+    }
+    // poi nel resto della giornata, una sezione alla volta partendo dalle più grandi: così cambiano pochi numeri, e in modo chiaro
+    for (const o of aperti.filter((x) => x.s === s).sort((x, y) => y.T - x.T)) {
+      if (Math.abs(resto) < 1) break;
+      const sp = resto > 0 ? o.T * GIU[i] + o.a : o.T * SU - o.a, q = Math.min(sp, Math.abs(resto)); if (q <= 0.01) continue;
+      o.a += resto > 0 ? -q : q; resto += resto > 0 ? -q : q;
+    }
+    if (Math.abs(resto) >= TOL[i]) out.scarto[i] = resto;
+  });
+  for (const o of aperti) { out.t[o.key] = Math.max(0, o.T + o.a); if (Math.abs(o.a) >= 1) out.agg[o.key] = o.a; }
+  return out;
+}
+// quanto manca a una sezione: l'obiettivo ricalcolato se è vuota, altrimenti quello che resta dopo ciò che c'è già
+function manca(pid, s, R) {
+  const r = recCibo(oggi()), key = pid + "." + s, vv = slotDi(r, key), i = SEZ[s][1]; R = R || ricalcolo(oggi());
+  const T = R.t[key] || 0; return vv.length ? Math.max(0, T - vv.reduce((n, x) => n + vecA(x)[i], 0)) : T;
+}
+// mette un alimento in una sezione: prende il posto di quello che c'era, a meno che le quantità siano state corrette a mano (allora si aggiunge)
+function mettiItem(pid, s, x) {
+  const r = recCibo(oggi(), true), key = pid + "." + s; r.s = r.s || {};
+  const vv = r.s[key] || []; r.s[key] = vv.some((y) => y.man) ? vv.concat([x]) : [x];
+}
+// obiettivo di una sezione per chi sta scegliendo: se è piena e non corretta a mano, quello che avrebbe da vuota
+function bersaglioSlot(pid, s) {
+  const r = recCibo(oggi()), key = pid + "." + s, vv = slotDi(r, key);
+  if (!vv.length || vv.some((y) => y.man)) return manca(pid, s);
+  const tmp = r.s[key]; delete r.s[key]; const T = ricalcolo(oggi()).t[key] || 0; r.s[key] = tmp; return T;
+}
+function mettiSlot(pid, s, id) {
+  const i = SEZ[s][1]; let T = bersaglioSlot(pid, s);
+  if (!T) T = (pastoDi(pid).sez[s] || { t: [0, 0] }).t[0] || 10;
+  const x = { k: id, g: 0 }; x.g = grammi(a100(x), i, T, optA(x)) || ALIM[id][1];
+  mettiItem(pid, s, x); vib(); salva(); chiudi(); tieni(disegna);
+}
+function qtaSlot(pid, s, n, val) {
+  const r = recCibo(oggi(), true), vv = slotDi(r, pid + "." + s), x = vv[n], v = num(val); if (!x) return;
+  const o = optA(x); if (v == null || v <= 0) vv.splice(n, 1); else { x.g = o ? v * o.pz : v; x.man = 1; }
+  if (!vv.length && r.s) delete r.s[pid + "." + s]; salva(); tieni(disegna);
+}
+function togliSlot(pid, s, n) { const r = recCibo(oggi(), true), key = pid + "." + s, vv = slotDi(r, key); vv.splice(n, 1); if (!vv.length && r.s) delete r.s[key]; vib(); salva(); tieni(disegna); }
+function spuntaF(key) { const r = recCibo(oggi(), true); r.f = r.f || {}; if (r.f[key]) delete r.f[key]; else r.f[key] = 1; vib(); salva(); tieni(disegna); }
+// "Come da piano": riempie le sezioni ancora vuote con la prima scelta e spunta le voci fisse
+function comePiano(pid) {
+  const p = pastoDi(pid), r = recCibo(oggi(), true), on = modoOn(oggi()); r.s = r.s || {}; r.f = r.f || {};
+  for (const s of ["p", "c", "g"]) { const z = p.sez[s]; if (!z || slotDi(r, pid + "." + s).length) continue;
+    const T = ricalcolo(oggi()).t[pid + "." + s] || 0; if (T < z.t[on ? 0 : 1] * 0.15) continue;
+    const x = { k: z.v[0], g: 0 }; x.g = grammi(a100(x), SEZ[s][1], T, optA(x)); if (x.g) r.s[pid + "." + s] = [x]; }
+  for (const f of p.sempre || []) if (fissaOn(f, on)) r.f[pid + ":" + f[0]] = 1;
+  vib(); salva(); tieni(disegna);
+}
+function togliVecchio() { const r = recCibo(oggi(), true); r.x = {}; r.extra = []; r.q = {}; r.pers = false; salva(); tieni(disegna); }
+
+function avvisiCibo(R) {
+  const su = [], kc = R.scarto[0] * 4 + R.scarto[1] * 4 + R.scarto[2] * 9; let h = "";
+  for (const key in R.agg) { const [pid, s] = key.split("."), a = R.agg[key]; if (pid === "col" && s === "g") continue;      // i grassi della colazione stanno già nei pancake: lo dice la sezione
+    su.push(`<strong>${pastoDi(pid).nome}</strong>: ${R.t[key] < R.base[key] * 0.15 ? "niente " + SEZ[s][2] + " da aggiungere" : SEZ[s][2] + " " + (a > 0 ? "+" : "−") + Math.round(Math.abs(a)) + " g"}`); }
+  if (su.length) h += `<div class="card esito verde"><b>Giornata ricalcolata</b>Per chiudere nei numeri di oggi: ${su.join(" · ")}. Le grammature qui sotto sono già aggiornate.</div>`;
+  if (R.scarto.some((n) => n)) {
+    const pezzi = R.scarto.map((n, i) => (n ? ["proteine", "carboidrati", "grassi"][i] + " " + (n > 0 ? "+" : "−") + Math.round(Math.abs(n)) + " g" : "")).filter(Boolean).join(", ");
+    h += `<div class="card esito arancione"><b>Oggi non si recupera tutto</b>Con queste scelte la giornata chiude a circa ${kc > 0 ? "+" : "−"}${Math.round(Math.abs(kc) / 10) * 10} kcal (${pezzi}). Va bene così: domani riparti dal piano, senza compensare.</div>`;
+  }
   return h;
+}
+function vCibo() {
+  const d = oggi(), auto = giornoOn(d), on = modoOn(d), k = on ? 0 : 1, N = CIBO[on ? "on" : "off"], r = recCibo(d), T = totali(d), resta = Math.round(N.kcal - T[0]), R = ricalcolo(d), vecchio = totaliV2(d)[0];
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">${APP.versione}</div><h1>Alimentazione</h1></div></div>
+    <div class="g2"><button class="tile" onclick="apriPrep()"><small>Piatti pronti</small><b>MEAL PREP</b><span>${(S.prep || []).length ? (S.prep || []).length + " tuoi · " : ""}${PREP_BASE.length} idee</span></button>
+      <button class="tile" onclick="apriSub('spesa')"><small>La scrivi tu</small><b>Lista della spesa</b><span>${listaS().filter((x) => !x.x).length ? listaS().filter((x) => !x.x).length + " da prendere" : "vuota: aggiungi con il +"}</span></button></div>
+    ${APP.onoff ? `<div class="g2" style="margin-top:12px"><button class="${on ? "pri" : ""}" onclick="mettiOn(true)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="mettiOn(false)">Giorno OFF · riposo</button></div>
+    <p class="muto conta">${auto ? "Oggi hai segnato una seduta di pesi: <b>giorno ON</b>." : "Oggi non risultano pesi: <b>giorno OFF</b>. Se ti alleni più tardi, tocca Giorno ON."} Tra ON e OFF cambiano i carboidrati di spuntino e pranzo.</p>` : ""}
+    <div class="card conto"><div class="riga tra"><div><div class="sopra">Mangiato oggi</div><div class="kc"><b>${cnt(Math.round(T[0]), Math.round(T[0]))}</b> di ${N.kcal} kcal</div></div>
+        <span class="pillola ${resta < -N.kcal * 0.03 ? "oltre" : ""}">${resta >= 0 ? "restano " + resta : "oltre di " + -resta}</span></div>
+      <div class="barra"><i style="width:${Math.min(100, Math.round((T[0] / N.kcal) * 100))}%"></i></div>
+      ${misura("Proteine", T[1], N.p, "g")}${misura("Carboidrati", T[2], N.c, "g")}${misura("Grassi", T[3], N.g, "g")}${torta(T, N)}
+      <details><summary>Fibra, vitamine e minerali</summary>${MICRO.map((m) => misura(m[0], T[m[3]], m[0] === "Fibra" && !on ? 28 : m[2], m[1], m[1] === "g" || m[0] === "Ferro" ? 1 : 0)).join("")}
+        <p class="muto">Sono stime da tabelle medie: marca, cottura e tipo di frutta e verdura spostano i valori. Il traguardo è il fabbisogno giornaliero di ${APP.adulto}.</p></details></div>` +
+    avvisiCibo(R) + (vecchio > 0 ? `<div class="card"><div class="riga tra"><span>Segnato oggi prima dell'aggiornamento: <b>${Math.round(vecchio)} kcal</b>, già nel conto.</span><button class="pic" onclick="togliVecchio()">Togli</button></div></div>` : "") +
+    `<p class="muto conta">In ogni pasto scegli <b>una proteina, un carboidrato e un grasso</b>: i grammi sono già calcolati. Se ne mangi di più o di meno, correggi il numero: l'app aggiorna i macro e ricalcola il resto della giornata. Pesi a crudo.</p>`;
+  for (const p of MENU) {
+    let kc = 0, pieno = false, corpo = "";
+    for (const s of ["p", "c", "g"]) {
+      const z = p.sez[s], key = p.id + "." + s, vv = slotDi(r, key), base = z ? z.t[k] : 0; if (!base && !vv.length) continue;
+      const Ts = R.t[key] || 0, a = R.agg[key], i = SEZ[s][1], coperto = !vv.length && base && Ts < base * 0.15;
+      corpo += `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base ? " · " + Math.round(vv.length ? base : Ts) + " g" : " · fuori piano oggi"}${a ? ` <span class="ric">ricalcolato ${a > 0 ? "+" : "−"}${Math.round(Math.abs(a))}</span>` : ""}</h3>`;
+      if (vv.length) {
+        pieno = true;
+        corpo += `<ul>` + vv.map((x, n) => { const v = vecA(x), o = optA(x); kc += v[0];
+          return `<li class="sp on" onclick="togliSlot('${p.id}','${s}',${n})"><i class="chk"></i><span>${esc(nomeA(x))}<br><small class="muto">${macroA(v)}</small></span>
+            <input class="qta" inputmode="decimal" aria-label="Quantità di ${esc(nomeA(x))}" value="${it(Math.round((o ? x.g / o.pz : x.g) * 10) / 10)}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="qtaSlot('${p.id}','${s}',${n},this.value)"><em>${o ? "pz" : "g"}</em></li>`; }).join("") +
+          `</ul><button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Cambia o aggiungi</button>`;
+      } else if (coperto) corpo += `<p class="muto" style="margin:4px 0 0">Già coperti dalle altre scelte di oggi: qui non serve aggiungere niente.</p><button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Aggiungi lo stesso</button>`;
+      else { const x0 = { k: z.v[0], g: 0 }; x0.g = grammi(a100(x0), i, Ts, optA(x0));
+        corpo += `<button class="slot" onclick="scegliSlot('${p.id}','${s}')"><span><b>Scegli ${SEZ[s][3]}</b><small>${z.v.length} alternative · es. ${esc(nomeA(x0).split(",")[0].split(" (")[0])} ${qtaA(x0)}</small></span><em>›</em></button>`; }
+    }
+    const fisse = (p.sempre || []).filter((f) => fissaOn(f, on));
+    if (fisse.length) corpo += `${p.id === "int" ? "" : "<h3>Sempre</h3>"}<ul>` + fisse.map((f) => { const sel = !!(r.f && r.f[p.id + ":" + f[0]]); if (sel) { kc += f[3][0]; pieno = true; }
+      return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b></li>`; }).join("") + `</ul>`;
+    // voci libere (pasti fuori casa, in famiglia): si spuntano quando capitano, entrano nel conto e non fanno scattare il ricalcolo
+    if ((p.libere || []).length) corpo += `<h3>${p.libereT || "Quando capita"}</h3><ul>` + p.libere.map((f) => { const sel = !!(r.f && r.f[p.id + ":" + f[0]]); if (sel) { kc += f[3][0]; pieno = true; }
+      return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b></li>`; }).join("") + `</ul>`;
+    if (p.id === "int") h += `<h2>Integratori</h2>`;
+    h += `<div class="card pasto" id="pasto-${p.id}"><div class="riga tra"><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div><span class="pillola">${Math.round(kc)} kcal</span></div>${corpo}` +
+      (p.id !== "int" ? `<div class="g2" style="margin-top:14px"><button class="pic" onclick="comePiano('${p.id}')">Come da piano</button><button class="pic" onclick="apriPrep('${p.id}')">Meal prep</button></div>` : "") + `</div>`;
+  }
+  h += `<p class="muto conta">${APP.notaInt}</p>
+    <h2>Da ricordare</h2><div class="card"><ul>
+      <li><b>Ricalcolo</b>: vale dentro la giornata. Se una sezione dovrebbe crescere di oltre la metà, l'app si ferma e ti dice di quanto chiudi sopra o sotto. Il giorno dopo non si compensa.</li>
+      <li><b>Un alimento che non è in elenco</b>: in ogni sezione tocca "Scegli", poi "Un altro alimento". Con il codice a barre, dall'elenco o a mano: i grammi li calcola l'app.</li>
+      ${APP.ricorda.map((x) => "<li>" + x + "</li>").join("")}</ul></div>`;
+  return h;
+}
+// foglio con le alternative di una sezione: ogni riga ha già i suoi grammi
+function scegliSlot(pid, s) {
+  const p = pastoDi(pid), z = p.sez[s] || { v: [], t: [0, 0] }, r = recCibo(oggi()), vv = slotDi(r, pid + "." + s), parz = vv.some((y) => y.man), i = SEZ[s][1];
+  const T = bersaglioSlot(pid, s), Tv = T || z.t[0] || 10;
+  apri(testaFoglio(p.nome + " · " + SEZ[s][2]) + `<p class="muto" style="margin:2px 0 4px">${parz ? "Hai corretto le quantità a mano: quello che scegli si aggiunge, per i <b>" + Math.round(T) + " g di " + SEZ[s][2] + "</b> che mancano." : "Obiettivo: <b>" + Math.round(Tv) + " g di " + SEZ[s][2] + "</b>. Tocca quello che mangi: i grammi sono già calcolati, poi li puoi correggere."}${z.nota ? " " + z.nota + "." : ""}</p>
+    <div class="card pasto"><ul>` + z.v.map((id) => { const x = { k: id, g: 0 }; x.g = grammi(a100(x), i, Tv, optA(x)); const sel = vv.some((y) => y.k === id);
+      return `<li class="sp ${sel ? "on" : ""}" onclick="mettiSlot('${pid}','${s}','${id}')"><i class="chk tondo1"></i><span>${esc(ALIM[id][0])}<br><small class="muto">${macroA(vecA(x))}</small></span><b>${qtaA(x)}</b></li>`; }).join("") +
+    `</ul></div><button class="largo piuCibo" onclick="aggiungiCibo('${pid}','${s}')">+ Un altro alimento: codice a barre, elenco o a mano</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+
+/* ---- MEAL PREP: piatti già composti. Quelli del coach (PREP_BASE) si calcolano sul pasto di oggi; i tuoi (S.prep) tengono i grammi salvati ---- */
+const sommaPrep = (q) => { const t = [0, 0, 0, 0]; for (const s in q.s) for (const x of q.s[s]) vecA(x).slice(0, 4).forEach((n, i) => (t[i] += n)); return t; };
+function apriPrep(pid) {
+  const miei = S.prep || [], r = recCibo(oggi()), haRoba = pid && ["p", "c", "g"].some((s) => slotDi(r, pid + "." + s).length), p = pid ? pastoDi(pid) : null;
+  const idee = PREP_BASE.map((q, n) => ({ q, n })).filter((x) => !pid || x.q.per.includes(pid));
+  apri(testaFoglio("MEAL PREP") + `<p class="muto" style="margin:2px 0 4px">${pid ? "Piatti pronti per " + p.nome.toLowerCase() + ": un tocco e entrano nel pasto, con i macro già contati." : "Piatti già composti, con i macro salvati. Tocca un piatto e scegli in che pasto metterlo."}</p>` +
+    (haRoba ? `<button class="pri largo" onclick="nomePrep('${pid}')">Salva ${p.nome.toLowerCase()} di adesso come piatto</button>` : pid ? `<p class="muto">Per salvare un piatto tuo: componi il pasto con i tuoi grammi, poi torna qui.</p>` : "") +
+    `<h2>I tuoi piatti</h2>` + (miei.length ? `<div class="card pasto"><ul>` + miei.map((q, n) => `<li class="sp" onclick="${pid ? `mettiPrep('${pid}','m',${n})` : `dovePrep('m',${n})`}"><span>${esc(q.nome)}<br><small class="muto">${macroA(sommaPrep(q))}</small></span><button class="ico" aria-label="Elimina" onclick="event.stopPropagation();togliPrep(${n},'${pid || ""}')">✕</button></li>`).join("") + `</ul></div>`
+      : `<p class="muto">Ancora nessuno. Componi un pasto come lo mangi di solito, poi tocca "Meal prep" sotto quel pasto e salvalo: la volta dopo lo inserisci con un tocco.</p>`) +
+    `<h2>Idee del coach</h2>` + (idee.length ? `<div class="card pasto"><ul>` + idee.map(({ q, n }) => `<li class="sp" onclick="${pid ? `mettiPrep('${pid}','b',${n})` : `dovePrep('b',${n})`}"><span>${esc(q.nome)}<br><small class="muto">${Object.values(q.s).map((id) => ALIM[id][0].split(",")[0].split(" (")[0]).join(" · ")}</small></span><em>›</em></li>`).join("") + `</ul></div><p class="muto">Le idee del coach prendono i grammi dal pasto di oggi, ricalcolo compreso.</p>` : `<p class="muto">Nessuna idea pronta per questo pasto.</p>`) +
+    `<button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+function dovePrep(tipo, n) {
+  const q = tipo === "m" ? S.prep[n] : PREP_BASE[n];
+  apri(testaFoglio("Dove lo metto?") + `<p class="muto">${esc(q.nome)}</p>` + MENU.filter((p) => p.id !== "int").map((p) => `<button class="largo" onclick="mettiPrep('${p.id}','${tipo}',${n})">${p.nome}</button>`).join("") + `<button class="largo" onclick="apriPrep()">Indietro</button>`);
+}
+function mettiPrep(pid, tipo, n) {
+  const r = recCibo(oggi(), true), q = tipo === "m" ? S.prep[n] : PREP_BASE[n]; if (!q) return; r.s = r.s || {};
+  for (const s in q.s) delete r.s[pid + "." + s];
+  if (tipo === "m") for (const s in q.s) r.s[pid + "." + s] = q.s[s].map((x) => ({ k: x.k, x: x.x, g: x.g }));
+  else for (const s in q.s) { const z = pastoDi(pid).sez[s], k = modoOn(oggi()) ? 0 : 1, base = z ? z.t[k] : 0, T = base ? ricalcolo(oggi()).t[pid + "." + s] || 0 : PREP_T[s], x = { k: q.s[s], g: 0 };
+    if (base && T < base * 0.15) continue;        // sezione già coperta dalle altre scelte di oggi: quell'ingrediente non serve
+    x.g = grammi(a100(x), SEZ[s][1], T, optA(x)) || ALIM[x.k][1]; r.s[pid + "." + s] = [x]; }
+  vib(); salva(); chiudi(); tieni(disegna); avvisa("Inserito in " + pastoDi(pid).nome.toLowerCase());
+}
+const PREP_T = { p: 20, c: 25, g: 8 };
+function nomePrep(pid) {
+  apri(testaFoglio("Salva il piatto") + `<label>Come lo chiami</label><input id="pNomePrep" placeholder="Es. Pasta, broccoletti e Philadelphia" autocomplete="off" onkeydown="if(event.key==='Enter')salvaPrep('${pid}')">
+    <p class="muto">Salvo gli alimenti di ${pastoDi(pid).nome.toLowerCase()} con i grammi di adesso. Lo ritrovi in Meal prep.</p><button class="pri largo" onclick="salvaPrep('${pid}')">Salva</button><button class="largo" onclick="apriPrep('${pid}')">Indietro</button>`);
+  setTimeout(() => { const x = $("pNomePrep"); if (x) x.focus(); }, 60);
+}
+function salvaPrep(pid) {
+  const nome = $("pNomePrep").value.trim(), r = recCibo(oggi()), q = { id: Date.now(), nome, da: pid, s: {} }; if (!nome) { avvisa("Scrivi un nome"); return; }
+  for (const s of ["p", "c", "g"]) { const vv = slotDi(r, pid + "." + s); if (vv.length) q.s[s] = vv.map((x) => ({ k: x.k, x: x.x, g: x.g })); }
+  S.prep = (S.prep || []).filter((x) => x.nome.toLowerCase() !== nome.toLowerCase()); S.prep.unshift(q); salva(); chiudi(); tieni(disegna); avvisa("Piatto salvato in Meal prep");
+}
+function togliPrep(n, pid) { if (!confirm("Elimino questo piatto dal Meal prep?")) return; S.prep.splice(n, 1); salva(); apriPrep(pid || undefined); }
+
+/* ---- un alimento che non è in elenco: codice a barre (BarcodeDetector + Open Food Facts), elenco senza codice (BASE) o valori a mano.
+        Entra nella sezione da cui si è partiti (dove), con i grammi che coprono quello che manca a quella sezione ---- */
+const CAT = { carbo: "Carboidrato", prot: "Proteina", legumi: "Legumi", altro: "Altro" };
+const nomeDove = () => pastoDi(dove.p).nome.toLowerCase() + ", " + SEZ[dove.s][2];
+const bersaglio = () => { const T = manca(dove.p, dove.s); return T || (pastoDi(dove.p).sez[dove.s] || { t: [0] }).t[0] || PREP_T[dove.s]; };
+function listaBase(q) {
+  q = String(q || "").toLowerCase().trim(); let h = "", ult = ""; const i = SEZ[dove.s][1], T = bersaglio();
+  const adatti = { p: ["prot"], c: ["carbo", "legumi"], g: ["altro"] }[dove.s], ord = (c) => (adatti.includes(c) ? 0 : 1);      // prima gli alimenti adatti alla sezione, con i grammi; gli altri restano in elenco senza
+  for (const { b, i: n } of baseVisibili().sort((x, y) => ord(x.b[1]) - ord(y.b[1]))) {
+    if (q && !b[0].toLowerCase().includes(q)) continue;
+    if (b[1] !== ult) { ult = b[1]; h += `<li style="padding:12px 0 4px"><b class="sopra">${GRUPPI_BASE[ult]}</b></li>`; }
+    const g = adatti.includes(b[1]) ? grammi(b[2], i, T) : 0;
+    h += `<li class="sp" onclick="formAlimento(baseCibo(${n}))"><span>${b[0]}</span><b>${g && g <= 700 ? it(g) + " g" : b[2][0] + " kcal / 100 g"}</b></li>`;
+  }
+  return h || `<li class="muto" style="padding:10px 0">Non c'è: tocca "Scrivi i valori a mano" e copia quelli dell'etichetta.</li>`;
+}
+function aggiungiCibo(pid, s) {
+  if (pid) dove = { p: pid, s }; const miei = S.alimenti || [];
+  apri(testaFoglio("Un altro alimento") + `<p class="muto">Entra in <b>${nomeDove()}</b>. L'app calcola i grammi che servono per i ${Math.round(bersaglio())} g di ${SEZ[dove.s][2]} di questa sezione.</p>
+    <button class="pri largo" onclick="scansiona()">Scansiona il codice a barre</button>
+    <label>Oppure scrivi il numero sotto il codice a barre</label>
+    <div class="riga"><input id="cCod" inputmode="numeric" placeholder="8001234567890" autocomplete="off"><button onclick="cercaCodice($('cCod').value)">Cerca</button></div>
+    <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button>` +
+    (miei.length ? `<h2>I tuoi alimenti</h2><div class="card pasto"><ul>` + miei.map((a, n) => { const g = grammi(a.per100, SEZ[dove.s][1], bersaglio()); return `<li class="sp" onclick="formAlimento(S.alimenti[${n}])"><span>${esc(a.nome)}</span><b>${g && g <= 700 ? it(g) + " g" : Math.round(a.per100[0]) + " kcal / 100 g"}</b></li>`; }).join("") + `</ul></div>` : "") +
+    `<h2>Senza codice: carne, pesce, legumi, formaggi…</h2>
+    <input id="cBase" placeholder="Cerca: ceci, mozzarella, patate…" autocomplete="off" oninput="$('lBase').innerHTML=listaBase(this.value)">
+    <p class="muto">A destra i grammi che servono in questa sezione, a crudo.</p>
+    <div class="card pasto"><ul id="lBase">${listaBase("")}</ul></div>
+    <button class="largo" onclick="scegliSlot(dove.p,dove.s)">Indietro</button>`, true);
+}
+async function scansiona() {
+  if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { avvisa("Questo browser non legge i codici: scrivi il numero"); return; }
+  apri(testaFoglio("Inquadra il codice a barre") + `<video id="cam" playsinline muted></video>
+    <p class="muto">Tieni il codice ben illuminato, a 10-15 cm dalla fotocamera.</p><button class="largo" onclick="aggiungiCibo()">Annulla</button>`, true);
+  try {
+    const f = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+    const v = $("cam"); if (!v) { f.getTracks().forEach((t) => t.stop()); return; }       // foglio chiuso nel frattempo
+    flusso = f; v.srcObject = f; await v.play();
+    const det = new BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] }); let occupato = false;
+    tScan = setInterval(async () => {
+      if (occupato || !$("cam")) return; occupato = true;
+      try { const r = await det.detect(v); if (r.length) { const c = r[0].rawValue; fermaCamera(); if (navigator.vibrate) navigator.vibrate(80); cercaCodice(c); } } catch (e) {}
+      occupato = false;
+    }, 300);
+  } catch (e) { fermaCamera(); aggiungiCibo(); avvisa("Fotocamera non disponibile: scrivi il numero"); }
+}
+async function cercaCodice(cod) {
+  cod = String(cod || "").replace(/\D/g, ""); if (cod.length < 8) { avvisa("Codice non valido"); return; }
+  const mio = (S.alimenti || []).find((a) => a.codice === cod); if (mio) { formAlimento(mio); return; }
+  avvisa("Cerco il prodotto…");
+  try {
+    const r = await fetch("https://world.openfoodfacts.org/api/v2/product/" + cod + ".json?fields=product_name,product_name_it,brands,serving_quantity,nutriments");
+    const j = await r.json(), p = j.product, n = p && p.nutriments;
+    if (!n || n["energy-kcal_100g"] == null) { formAlimento({ codice: cod }); avvisa("Prodotto non trovato: scrivi i valori dell'etichetta"); return; }
+    const g = (k) => +n[k] || 0, mg = (k) => (+n[k] || 0) * 1000;
+    const per100 = [g("energy-kcal_100g"), g("proteins_100g"), g("carbohydrates_100g"), g("fat_100g"), g("fiber_100g"), mg("calcium_100g"), mg("iron_100g"), mg("magnesium_100g"), mg("potassium_100g"), mg("vitamin-c_100g")];
+    formAlimento({ codice: cod, trovato: 1, porz: +p.serving_quantity || null, per100,
+      nome: [p.brands ? p.brands.split(",")[0].trim() : "", p.product_name_it || p.product_name || ""].filter(Boolean).join(" · ") });
+  } catch (e) { formAlimento({ codice: cod }); avvisa("Serve la rete per cercare: scrivi i valori a mano"); }
+}
+// rilegge i valori scritti e ricalcola i grammi, finché non li correggi tu
+function aggiornaG() {
+  const p = bozza.per100, m = $("sostMsg"), i = SEZ[dove.s][1], T = bersaglio();
+  ["aK", "aP", "aC", "aF", "aFi"].forEach((id, n) => (p[n] = Math.max(0, num($(id).value) || 0)));
+  const g = grammi(p, i, T), v = p.map((n) => (n * g) / 100);
+  m.innerHTML = !p[0] && !p[1] && !p[2] && !p[3] ? `Scrivi i valori per 100 g dell'etichetta: i grammi li calcolo io.`
+    : !g ? `Questo alimento non ha ${SEZ[dove.s][2]}: non può coprire questa sezione. Scrivi tu i grammi, entra comunque nel conto.`
+    : g > 700 ? `Per ${Math.round(T)} g di ${SEZ[dove.s][2]} ne servirebbero ${it(g)} g: non è l'alimento giusto per questa sezione. Scrivi tu i grammi.`
+    : `Per i <strong>${Math.round(T)} g di ${SEZ[dove.s][2]}</strong> di ${pastoDi(dove.p).nome.toLowerCase()} servono <strong>${it(g)} g</strong> (${macroA(v)}). Se ne mangi una quantità diversa, scrivila: il resto della giornata si ricalcola.`;
+  if (g && g <= 700 && !bozza.toccato) $("aG").value = it(g);
+  bozza.auto = g;
+}
+function formAlimento(a) {
+  bozza = { codice: a.codice || "", per100: (a.per100 || new Array(10).fill(0)).slice(), toccato: 0, auto: 0 }; while (bozza.per100.length < 10) bozza.per100.push(0);
+  const v = bozza.per100, campo = (id, et, val, ph, extra) => `<div><label>${et}</label><input id="${id}" inputmode="decimal" autocomplete="off" value="${val ? esc(it(Math.round(val * 10) / 10)) : ""}" placeholder="${ph || "0"}" ${extra || 'oninput="aggiornaG()"'}></div>`;
+  apri(testaFoglio("Un altro alimento") + `<div class="card esito verde" id="sostMsg"></div>` + (a.trovato ? `<p class="muto">Trovato su Open Food Facts: controlla che i valori siano quelli dell'etichetta.</p>` : "") +
+    `<label>Nome</label><input id="aNome" value="${esc(a.nome || "")}" placeholder="Es. Philadelphia light" autocomplete="off">
+    ${campo("aG", "Quanti grammi ne mangi", 0, "100", 'oninput="bozza.toccato=1"')}
+    <h2>Valori per 100 g, dall'etichetta</h2>
+    <div class="g2">${campo("aK", "Calorie (kcal)", v[0])}${campo("aP", "Proteine (g)", v[1])}${campo("aC", "Carboidrati (g)", v[2])}${campo("aF", "Grassi (g)", v[3])}</div>
+    ${campo("aFi", "Fibra (g), se c'è", v[4])}
+    <p class="muto">Se conosci solo i valori della porzione intera (una pizza, un piatto al ristorante), scrivi quelli e metti 100 nei grammi.</p>
+    <label class="riga" style="gap:10px;color:var(--testo)"><input type="checkbox" id="aSalva" ${a.base ? "" : "checked"} style="width:24px;min-height:24px;flex:none"> Tienilo tra i miei alimenti</label>
+    <button class="pri largo" onclick="confAlimento()">Aggiungi a ${nomeDove()}</button><button class="largo" onclick="aggiungiCibo()">Indietro</button>`, true);
+  aggiornaG();
+  if (!bozza.auto && a.porz) $("aG").value = it(a.porz);
+}
+function confAlimento() {
+  const nome = $("aNome").value.trim(), g = num($("aG").value), p = bozza.per100;
+  if (!nome) { avvisa("Scrivi il nome"); return; }
+  if (!g || g <= 0) { avvisa("Scrivi quanti grammi"); return; }
+  ["aK", "aP", "aC", "aF", "aFi"].forEach((id, i) => (p[i] = Math.max(0, num($(id).value) || 0)));
+  if (!p[0]) p[0] = Math.round(p[1] * 4 + p[2] * 4 + p[3] * 9);          // calorie mancanti: le ricava dai macro
+  if (!p[0]) { avvisa("Scrivi almeno le calorie"); return; }
+  mettiItem(dove.p, dove.s, { x: { nome, per100: p.slice(), codice: bozza.codice || undefined }, g, man: bozza.auto && Math.abs(g - bozza.auto) > 0.5 ? 1 : undefined });
+  if ($("aSalva").checked) {
+    S.alimenti = (S.alimenti || []).filter((x) => (bozza.codice ? x.codice !== bozza.codice : x.nome.toLowerCase() !== nome.toLowerCase()));
+    S.alimenti.unshift({ nome, per100: p.slice(), porz: g, codice: bozza.codice, cat: { p: "prot", c: "carbo", g: "altro" }[dove.s] }); S.alimenti = S.alimenti.slice(0, 40);
+  }
+  vib(); salva(); chiudi(); tieni(disegna); avvisa("Aggiunto a " + nomeDove());
+}
+/* Guida "Sostituzioni": quanti grammi di un alimento comune coprono il carboidrato o la proteina di pranzo e cena, sul piano di oggi */
+function vCambi() {
+  const k = modoOn(oggi()) ? 0 : 1, pasti = ["pra", "cen"].map(pastoDi);
+  let h = testaGuida("Sostituzioni") + `
+  <p class="muto">Nel piano c'è un alimento, in casa ne hai un altro: ecco quanto metterne. Pesi a crudo; per i prodotti in scatola, sgocciolati.</p>
+  <div class="card"><ul>
+    <li>Un <b>carboidrato</b> si cambia con un altro carboidrato, a parità di carboidrati.</li>
+    <li>Una <b>proteina</b> con un'altra proteina, a parità di proteine. Se è più grassa (formaggi, salmone, uova), l'app toglie quei grassi dall'olio e dal resto della giornata.</li>
+    <li>I <b>legumi</b> vanno nella sezione dei carboidrati: portano anche proteine, e l'app riduce la proteina di quel pasto.</li>
+    <li>La <b>verdura</b> si cambia liberamente con altra verdura, stessa quantità.</li>
+    <li>Nel piano alimentare, in ogni sezione, <b>"Un altro alimento"</b> fa lo stesso conto e ricalcola la giornata. Vale anche per i prodotti con il codice a barre.</li></ul></div>`;
+  for (const cat of ["carbo", "legumi", "prot"]) {
+    const s = cat === "prot" ? "p" : "c";
+    h += `<h2>${GRUPPI_BASE[cat]}${cat === "legumi" ? " · nella sezione dei carboidrati" : ""}</h2><div class="card"><table><tr><th>A crudo</th>${pasti.map((p) => `<th style="text-align:right">${p.nome}</th>`).join("")}</tr>`;
+    for (const { b } of baseVisibili().filter((x) => x.b[1] === cat))
+      h += `<tr><td>${b[0]}</td>` + pasti.map((p) => { const g = grammi(b[2], SEZ[s][1], p.sez[s].t[k]); return `<td style="text-align:right;white-space:nowrap">${g && g <= 700 ? it(g) + " g" : "–"}</td>`; }).join("") + `</tr>`;
+    h += `</table></div>`;
+  }
+  return h + `<p class="muto">Quantità calcolate sul piano di oggi (giorno ${k ? "OFF" : "ON"}), da valori medi di composizione: marca e taglio spostano un po' i numeri.</p>`;
 }
 // freccia indietro nella seduta: se non hai ancora segnato nulla torna subito alla home, altrimenti chiede conferma
 function indietro() {
@@ -1068,7 +1523,7 @@ function fatto() {
   const c = S.corso, e = cE(), r = cS(); if (!r) return;
   if (document.activeElement && document.activeElement.tagName === "INPUT") document.activeElement.blur();
   if (r.rip == null || r.rip <= 0) { avvisa("Inserisci " + (e.u ? "la durata" : "le ripetizioni")); return; }
-  const era = r.ok; r.ok = true;
+  const era = r.ok; r.ok = true; vib(18);
   if (!era && REC[e.t]) timerVia(REC[e.t]);
   const prima = c.cur.e; avanza(); prepara(); salva();
   // superserie: la pagina passa da sola al compagno. Negli altri casi resta sull'esercizio, che mostra il tasto "Prossimo"
@@ -1178,12 +1633,14 @@ function riepilogo(id, appena) {
     righe += `<div class="rr"><span>${esc(e.nome)}<small>${esc(testoSerie(e, e.serie))}</small></span><b class="${st}">${tx}</b></div>`;
   }
   apri(`<div class="riga tra"><div><div class="sopra">${appena ? "Seduta salvata" : "Riepilogo"}</div><div class="nome" style="font-size:21px">${esc(s.corto || s.nome)} · ${nomeGiorno(s.data)} ${dataIt(s.data)}</div></div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>
-    <div class="tess"><div><b>${s.minuti || "–"}</b>minuti</div><div><b>${serie}</b>serie</div><div><b>${it(Math.round(vol))}</b>kg sollevati</div><div><b>${rec}</b>record</div></div>
+    ${appena ? `<div class="festa ${rec ? "rec" : ""}"><svg viewBox="0 0 80 80"><circle class="fc" cx="40" cy="40" r="34"/><path class="fk" d="M25 41l10 10 20-22"/></svg></div>` : ""}
+    <div class="tess grande"><div><b>${s.minuti ? cnt(s.minuti, s.minuti) : "–"}</b>minuti</div><div><b>${cnt(serie, serie)}</b>serie</div><div><b>${cnt(Math.round(vol), mila(vol), 0, 1)} <u>kg</u></b>sollevati in tutto</div><div class="${rec ? "oro" : ""}"><b>${rec ? "★ " : ""}${cnt(rec, rec)}</b>record</div></div>
     <p>${conf ? `<b>${su} ${su === 1 ? "esercizio" : "esercizi"} su ${conf}</b> meglio dell'ultima volta.` : "Prima seduta registrata: dalla prossima vedrai qui i confronti."}</p>
     ${s.pronto ? `<p class="muto">Come stavi: ${s.pronto.tot}/25, ${livello(s.pronto.tot).nome.toLowerCase()}${s.pronto.piena ? " (hai scelto la seduta piena)" : ""}.</p>` : ""}
     <h2>Esercizio per esercizio</h2><div class="card">${righe}</div>
     <p class="muto">Il confronto è sulla serie più pesante: prima conta il carico, a parità di carico le ripetizioni.</p>
     <button class="pri largo" onclick="chiudi();vai('esporta')">Invia al coach</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+  muovi($("foglio"), null); if (appena) vib(rec ? [30, 70, 30, 70, 120] : 30);
 }
 function annulla() { if (confirm(S.corso.sid ? "Chiudo senza salvare le modifiche?" : "Cancello la seduta in corso senza salvarla?")) { S.corso = null; esAperto = null; salva(); timerStop(); disegna(); } }
 function riapri(id) {
@@ -1420,7 +1877,12 @@ function testoCoach(da) {
   const cc = Object.keys(S.cibo || {}).filter((d) => d > da).sort().filter((d) => totali(d)[0] > 0 || S.cibo[d].acqua);
   if (cc.length) {
     t += "\nAlimentazione spuntata nell'app (data | giorno | kcal | proteine g | carboidrati g | grassi g | fibra g | acqua L)\n";
-    for (const d of cc) { const x = totali(d); t += `${d} | ${S.cibo[d].pers ? "personalizzato" : "piano"} | ${Math.round(x[0])} | ${Math.round(x[1])} | ${Math.round(x[2])} | ${Math.round(x[3])} | ${Math.round(x[4])} | ${litri(S.cibo[d].acqua || 0)}\n`;
+    for (const d of cc) { const x = totali(d); t += `${d} | ${APP.onoff ? (modoOn(d) ? "ON" : "OFF") : "piano"}${S.cibo[d].pers ? " personalizzato" : ""} | ${Math.round(x[0])} | ${Math.round(x[1])} | ${Math.round(x[2])} | ${Math.round(x[3])} | ${Math.round(x[4])} | ${litri(S.cibo[d].acqua || 0)}\n`;
+      const sc = [], fuori = [];
+      for (const p of MENU) { const vv = ["p", "c", "g"].flatMap((z) => slotDi(S.cibo[d], p.id + "." + z)); if (vv.length) sc.push(p.nome + ": " + vv.map((y) => nomeA(y).split(",")[0].split(" (")[0] + " " + qtaA(y) + (y.x ? "*" : "")).join(", "));
+        for (const y of vv) if (y.x) fuori.push(y.x.nome + " " + qtaA(y) + " (" + Math.round(vecA(y)[0]) + " kcal, " + p.nome.toLowerCase() + ")"); }
+      if (sc.length) t += "  scelte: " + sc.join("; ") + "\n";
+      if (fuori.length) t += "  fuori piano: " + fuori.join("; ") + "\n";
       if ((S.cibo[d].extra || []).length) t += `  fuori piano: ${S.cibo[d].extra.map((e) => e.nome + " " + e.q + " (" + Math.round(e.v[0]) + " kcal" + (PASTI.some((p) => p.id === e.pasto) ? ", " + PASTI.find((p) => p.id === e.pasto).nome.toLowerCase() : "") + (e.sost ? ", al posto di " + e.sost : "") + ")").join("; ")}\n`; }
   }
   return t.trim();
@@ -1439,11 +1901,12 @@ function vEsporta() {
   <pre id="testo">${t ? esc(t) : "Niente di nuovo da inviare."}</pre>
   <div class="g2"><button class="pri" onclick="condividi()">Condividi</button><button onclick="copia()">Copia</button></div>
   <button class="largo" onclick="segnaInviato()">Segna come inviato</button>
+  <button class="blocco" style="margin-top:16px" onclick="riepSett()"><i><svg viewBox="0 0 24 24">${ICO.sett}</svg></i><span><b>Riepilogo della settimana</b><small>Sedute, peso, passi, sonno e alimentazione in una pagina</small></span><em>›</em></button>
   <h2>Copia di sicurezza</h2>
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.2 · app v2</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v3</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -1812,10 +2275,9 @@ function infoEs(id) {
    Lo scanner usa la fotocamera e il lettore di codici del browser (BarcodeDetector, presente in Chrome su Android);
    i valori arrivano da Open Food Facts, a cui si manda solo il codice a barre.
    Gli aggiunti del giorno stanno in S.cibo[giorno].extra, gli alimenti da riusare in S.alimenti. */
-let bozza = null, flusso = null, tScan = null, dove = "pra";      // sost (più sotto): la voce del piano che si sta sostituendo
+let bozza = null, flusso = null, tScan = null, dove = { p: "pra", s: "p" };      // dove: pasto e sezione in cui entra l'alimento che si sta aggiungendo
 function fermaCamera() { clearInterval(tScan); tScan = null; if (flusso) { flusso.getTracks().forEach((t) => t.stop()); flusso = null; } }
 const testaFoglio = (t) => `<div class="riga tra"><div class="nome" style="font-size:21px">${t}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>`;
-const nomePasto = () => (PASTI.find((p) => p.id === dove) || PASTI[2]).nome.toLowerCase();
 /* ============ SOSTITUZIONI E ALIMENTI SENZA CODICE ============
    "Nel piano ho X ma in casa ho Y": l'app calcola i grammi di Y che pareggiano X.
    Si pareggiano i carboidrati se X è un carboidrato, le proteine se è una proteina, i grassi se è quasi solo grasso
@@ -1870,213 +2332,6 @@ const BASE = [
 const GRUPPI_BASE = { carbo: "Carboidrati", legumi: "Legumi", prot: "Carne, pesce, uova, latticini", altro: "Grassi, frutta e verdura" };
 const baseVisibili = () => BASE.map((b, i) => ({ b, i })).filter((x) => !(SENZA_GLUTINE && x.b[4]));
 const baseCibo = (i) => ({ nome: BASE[i][0], cat: BASE[i][1], per100: BASE[i][2].concat([0, 0, 0, 0, 0]), porz: BASE[i][3], base: 1 });
-let sost = null;
-function vociPasto(pid) {
-  const on = modoOn(oggi()), r = recCibo(oggi()), p = PASTI.find((x) => x.id === pid), out = [];
-  for (const g of p.g) for (const v of g.v) if (visibile(v, on)) out.push({ v, g, f: fattore(v, r, on), q: !on && v[4] && v[4].off ? v[4].off[0] : v[2] });
-  return out;
-}
-const olioPasto = (pid) => vociPasto(pid).filter((x) => /-olio$/.test(x.v[0])).reduce((n, x) => n + x.v[3][0] * x.f, 0);      // kcal dell'olio previsto nel pasto
-function macroDi(x) {
-  if (x.g.k === "carbo") return [2, "carboidrati"];
-  if (x.g.k === "prot") return [1, "proteine"];
-  const v = x.v[3], k = v[0] || 1;
-  return (v[1] * 4) / k >= 0.6 ? [1, "proteine"] : (v[2] * 4) / k >= 0.6 ? [2, "carboidrati"] : (v[3] * 9) / k >= 0.6 ? [3, "grassi"] : [0, "calorie"];
-}
-// riferimento scelto dall'app: la voce del piano che un alimento di questo tipo va a sostituire in quel pasto.
-// piano = true: la prima riga del piano; altrimenti la voce spuntata oggi, se c'è
-function rifAuto(cat, pid, piano) {
-  const voci = vociPasto(pid), r = recCibo(oggi()), olio = olioPasto(pid);
-  const scelta = (k) => { const vv = voci.filter((x) => x.g.k === k); return (!piano && vv.find((x) => r.x[x.v[0]])) || vv[0]; };
-  const val = (x) => x.v[3].map((n) => n * (piano ? (x.v[4] && x.v[4].off && !modoOn(oggi()) ? x.v[4].off[1] : 1) : x.f));
-  if (cat === "carbo" || cat === "prot") { const x = scelta(cat); return x ? { ids: [x.v[0]], nome: x.v[1], q: x.q, ks: [cat], m: macroDi(x), v: val(x), olio, auto: 1 } : null; }
-  if (cat === "legumi") {
-    const a = scelta("carbo"), b = scelta("prot"); if (!a || !b) return null;
-    const va = val(a), vb = val(b);
-    return { ids: [a.v[0], b.v[0]], nome: "carboidrato e proteina", q: a.v[1] + " " + a.q + " + " + b.v[1] + " " + b.q, ks: ["carbo", "prot"], m: [0, "calorie"], v: va.map((n, i) => n + vb[i]), auto: 1 };
-  }
-  return null;
-}
-// a cosa pareggiare un alimento di questo tipo: la voce scelta a mano, oppure quella che trova l'app
-function rifPer(cat) {
-  if (sost && !sost.auto) return cat === "legumi" && sost.ks.length ? rifAuto("legumi", dove) || sost : sost;
-  return rifAuto(cat, dove);
-}
-function grammiSost(p, s) {
-  s = s || sost; const d = p[s.m[0]] || 0; if (d <= 0) return null;
-  let g = (s.v[s.m[0]] / d) * 100;
-  // proteina più grassa di quella del piano (formaggi, salmone, uova): si toglie l'olio e ci si ferma alle calorie di proteina + olio
-  if (s.m[0] === 1 && p[0] > 0 && (p[3] * g) / 100 - s.v[3] > 5) g = Math.min(g, ((s.v[0] + (s.olio || 0)) / p[0]) * 100);
-  return g >= 50 ? Math.round(g / 5) * 5 : Math.max(1, Math.round(g));
-}
-const piuGrassi = (p, g, s) => (p[3] * g) / 100 - s.v[3];
-function testoSost(p) {
-  const g = grammiSost(p), i = sost.m[0], leg = sost.ks.length > 1;
-  const base = leg ? `I legumi fanno da <b>carboidrato e da proteina insieme</b> (al posto di ${esc(sost.q)}): ` : `Al posto di <b>${esc(sost.nome)}</b> (${esc(sost.q)}): `;
-  if (!g) return base + `scrivi qui sotto i valori per 100 g di quello che hai, poi tocca "Calcola i grammi".`;
-  let t = base + `per avere ${i ? "gli stessi " + Math.round(sost.v[i]) + " g di " + sost.m[1] : "le stesse " + Math.round(sost.v[0]) + " kcal"} servono <b>${it(g)} g</b>` +
-    (i ? ` (${Math.round((p[0] * g) / 100)} kcal invece di ${Math.round(sost.v[0])})` : "") + ".";
-  if (leg) t += ` Proteine: ${Math.round((p[1] * g) / 100)} g invece di ${Math.round(sost.v[1])}.`;
-  if (g > 600) t += " È una quantità molto alta: questo alimento non è un buon sostituto.";
-  else if (i === 1 && piuGrassi(p, g, sost) > 5) {
-    const pr = Math.round((p[1] * g) / 100);
-    t = base + `servono <b>${it(g)} g</b>, e <b>niente olio</b> in questo pasto: è più grasso della proteina del piano (${Math.round((p[0] * g) / 100)} kcal, contro ${Math.round(sost.v[0] + (sost.olio || 0))} di proteina e olio).` +
-      (pr < sost.v[1] * 0.9 ? ` Proteine: ${pr} g invece di ${Math.round(sost.v[1])}, va bene ogni tanto.` : "");
-  }
-  return t;
-}
-function aggiornaSost() {       // rilegge i valori scritti nel modulo e aggiorna messaggio e grammi
-  const p = bozza.per100, m = $("sostMsg");
-  ["aK", "aP", "aC", "aF", "aFi"].forEach((id, i) => (p[i] = Math.max(0, num($(id).value) || 0)));
-  if (!sost) { m.style.display = "none"; return false; }
-  const g = grammiSost(p); m.style.display = ""; m.innerHTML = testoSost(p);
-  if (g) $("aG").value = it(g);
-  return !!g;
-}
-function calcolaSost() {
-  sost = rifPer(bozza.cat);
-  if (!sost) { aggiornaSost(); avvisa("In questo pasto non c'è una voce del piano da pareggiare: scrivi tu i grammi"); return; }
-  if (!aggiornaSost()) avvisa("Mancano i valori per 100 g");
-}
-function sostituisciCibo(pid) {
-  dove = pid; sost = null;
-  apri(testaFoglio("Cosa non hai in casa?") + `<p class="muto">Scegli l'alimento del piano da sostituire. Poi indichi cosa hai, e l'app calcola quanti grammi ne servono.</p>
-    <div class="card pasto"><ul>` + vociPasto(pid).filter((x) => x.v[3][0] > 0).map((x) => `<li class="sp" onclick="scegliSost('${x.v[0]}')"><span>${x.v[1]}</span><b>${x.q}</b></li>`).join("") +
-    `</ul></div><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
-}
-function scegliSost(id) {
-  const x = vociPasto(dove).find((y) => y.v[0] === id); if (!x) return;
-  sost = { ids: [id], nome: x.v[1], q: x.q, ks: x.g.k ? [x.g.k] : [], m: macroDi(x), v: x.v[3].map((n) => n * x.f), olio: olioPasto(dove) };
-  aggiungiCibo();
-}
-// elenco degli alimenti senza codice: a destra i grammi che servono in questo pasto, quando c'è qualcosa da pareggiare
-function listaBase(q) {
-  q = String(q || "").toLowerCase().trim(); let h = "", ult = "";
-  for (const { b, i } of baseVisibili()) {
-    if (q && !b[0].toLowerCase().includes(q)) continue;
-    if (b[1] !== ult) { ult = b[1]; h += `<li style="padding:12px 0 4px"><b class="sopra">${GRUPPI_BASE[ult]}</b></li>`; }
-    const rif = rifPer(b[1]), g = rif ? grammiSost(b[2], rif) : null;
-    h += `<li class="sp" onclick="formAlimento(baseCibo(${i}))"><span>${b[0]}</span><b>${g ? it(g) + " g" : b[2][0] + " kcal / 100 g"}</b></li>`;
-  }
-  return h || `<li class="muto" style="padding:10px 0">Non c'è: tocca "Scrivi i valori a mano" e copia quelli dell'etichetta.</li>`;
-}
-/* Guida "Sostituzioni": le stesse grammature in tabella, per i pasti che hanno carboidrato e proteina a scelta */
-function vCambi() {
-  const pasti = PASTI.filter((p) => p.g.some((g) => g.k));
-  let h = testaGuida("Sostituzioni") + `
-  <p class="muto">Nel piano c'è un alimento, in casa ne hai un altro: ecco quanto metterne. Pesi a crudo; per i prodotti in scatola, sgocciolati.</p>
-  <div class="card"><ul>
-    <li>Un <b>carboidrato</b> si cambia con un altro carboidrato, a parità di carboidrati.</li>
-    <li>Una <b>proteina</b> con un'altra proteina, a parità di proteine. Se è più grassa (formaggi, salmone, uova) se ne mette meno e in quel pasto <b>niente olio</b>: così le calorie restano quelle.</li>
-    <li>I <b>legumi</b> fanno da carboidrato e da proteina insieme: prendono il posto di tutti e due, a parità di calorie.</li>
-    <li>La <b>verdura</b> si cambia liberamente con altra verdura, stessa quantità.</li>
-    <li>Sotto ogni pasto del piano, <b>"Non ho un alimento"</b> fa lo stesso conto e aggiorna la giornata. Vale anche per i prodotti con il codice a barre.</li></ul></div>`;
-  for (const cat of ["carbo", "legumi", "prot"]) {
-    h += `<h2>${GRUPPI_BASE[cat]}${cat === "legumi" ? " · al posto di carboidrato e proteina" : ""}</h2><div class="card"><table><tr><th>A crudo</th>${pasti.map((p) => `<th style="text-align:right">${p.nome}</th>`).join("")}</tr>`;
-    for (const { b } of baseVisibili().filter((x) => x.b[1] === cat)) {
-      h += `<tr><td>${b[0]}</td>` + pasti.map((p) => {
-        const r = rifAuto(cat, p.id, true), g = r ? grammiSost(b[2], r) : null;
-        return `<td style="text-align:right;white-space:nowrap">${g ? it(g) + " g" + (cat === "prot" && piuGrassi(b[2], g, r) > 5 ? "*" : "") : "–"}</td>`;
-      }).join("") + `</tr>`;
-    }
-    h += `</table>${cat === "prot" ? `<p class="muto">* più grasso della proteina del piano: la quantità è già ridotta, e in quel pasto niente olio.</p>` : ""}</div>`;
-  }
-  return h + `<p class="muto">Quantità calcolate sul piano di oggi, da valori medi di composizione: marca e taglio spostano un po' i numeri.</p>`;
-}
-function aggiungiCibo(pid) {
-  if (pid) { dove = pid; sost = null; } else if (sost && sost.auto) sost = null;
-  const miei = S.alimenti || [];
-  apri(testaFoglio(sost ? "Cosa hai in casa?" : "Aggiungi a " + nomePasto()) + `<p class="muto">${sost ? "Prende il posto di <b>" + esc(sost.nome) + "</b> (" + esc(sost.q) + ") a " + nomePasto() + "." : "Entra nel conto di oggi, dentro questo pasto."}</p>
-    <button class="pri largo" onclick="scansiona()">Scansiona il codice a barre</button>
-    <label>Oppure scrivi il numero sotto il codice a barre</label>
-    <div class="riga"><input id="cCod" inputmode="numeric" placeholder="8001234567890" autocomplete="off"><button onclick="cercaCodice($('cCod').value)">Cerca</button></div>
-    <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button>` +
-    (miei.length ? `<h2>I tuoi alimenti</h2><div class="card pasto"><ul>` + miei.map((a, i) => `<li class="sp" onclick="formAlimento(S.alimenti[${i}])"><span>${esc(a.nome)}<br><small class="muto">${CAT[a.cat] || "Altro"}</small></span><b>${Math.round(a.per100[0])} kcal / 100 g</b></li>`).join("") + `</ul></div>` : "") +
-    `<h2>Senza codice: carne, pesce, legumi, formaggi…</h2>
-    <input id="cBase" placeholder="Cerca: ceci, mozzarella, patate…" autocomplete="off" oninput="$('lBase').innerHTML=listaBase(this.value)">
-    <p class="muto">A destra i grammi che servono ${sost ? "per questa sostituzione" : "in questo pasto"}, a crudo.</p>
-    <div class="card pasto"><ul id="lBase">${listaBase("")}</ul></div>
-    <button class="largo" onclick="chiudi()">Chiudi</button>`, true);
-}
-async function scansiona() {
-  if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { avvisa("Questo browser non legge i codici: scrivi il numero"); return; }
-  apri(testaFoglio("Inquadra il codice a barre") + `<video id="cam" playsinline muted></video>
-    <p class="muto">Tieni il codice ben illuminato, a 10-15 cm dalla fotocamera.</p><button class="largo" onclick="aggiungiCibo()">Annulla</button>`, true);
-  try {
-    const f = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
-    const v = $("cam"); if (!v) { f.getTracks().forEach((t) => t.stop()); return; }       // foglio chiuso nel frattempo
-    flusso = f; v.srcObject = f; await v.play();
-    const det = new BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] }); let occupato = false;
-    tScan = setInterval(async () => {
-      if (occupato || !$("cam")) return; occupato = true;
-      try { const r = await det.detect(v); if (r.length) { const c = r[0].rawValue; fermaCamera(); if (navigator.vibrate) navigator.vibrate(80); cercaCodice(c); } } catch (e) {}
-      occupato = false;
-    }, 300);
-  } catch (e) { fermaCamera(); aggiungiCibo(); avvisa("Fotocamera non disponibile: scrivi il numero"); }
-}
-// indovina il tipo dai valori: si può sempre cambiare con un tocco
-const indovinaCat = (v) => (v[1] >= 12 && v[1] * 4 >= v[2] * 4 ? "prot" : v[2] >= 30 ? "carbo" : "altro");
-async function cercaCodice(cod) {
-  cod = String(cod || "").replace(/\D/g, ""); if (cod.length < 8) { avvisa("Codice non valido"); return; }
-  const mio = (S.alimenti || []).find((a) => a.codice === cod); if (mio) { formAlimento(mio); return; }
-  avvisa("Cerco il prodotto…");
-  try {
-    const r = await fetch("https://world.openfoodfacts.org/api/v2/product/" + cod + ".json?fields=product_name,product_name_it,brands,serving_quantity,nutriments");
-    const j = await r.json(), p = j.product, n = p && p.nutriments;
-    if (!n || n["energy-kcal_100g"] == null) { formAlimento({ codice: cod }); avvisa("Prodotto non trovato: scrivi i valori dell'etichetta"); return; }
-    const g = (k) => +n[k] || 0, mg = (k) => (+n[k] || 0) * 1000;
-    const per100 = [g("energy-kcal_100g"), g("proteins_100g"), g("carbohydrates_100g"), g("fat_100g"), g("fiber_100g"), mg("calcium_100g"), mg("iron_100g"), mg("magnesium_100g"), mg("potassium_100g"), mg("vitamin-c_100g")];
-    formAlimento({ codice: cod, trovato: 1, porz: +p.serving_quantity || null, per100, cat: indovinaCat(per100),
-      nome: [p.brands ? p.brands.split(",")[0].trim() : "", p.product_name_it || p.product_name || ""].filter(Boolean).join(" · ") });
-  } catch (e) { formAlimento({ codice: cod }); avvisa("Serve la rete per cercare: scrivi i valori a mano"); }
-}
-function scegliCat(c) {
-  bozza.cat = c; for (const k in CAT) { const b = $("cat-" + k); if (b) { b.classList.toggle("pri", k === c); b.setAttribute("aria-pressed", k === c); } }
-  if (!sost || sost.auto || c === "legumi") { sost = rifPer(c); aggiornaSost(); }      // cambia il tipo: cambia anche a cosa si pareggia
-}
-function formAlimento(a) {
-  bozza = { codice: a.codice || "", per100: (a.per100 || new Array(10).fill(0)).slice(), cat: a.cat || "altro" };
-  if (sost && !sost.auto && sost.ks.length === 1 && a.cat !== "legumi") bozza.cat = sost.ks[0];
-  if (a.per100) sost = rifPer(bozza.cat);        // alimento con i valori già noti: l'app trova da sola a cosa pareggiarlo
-  const gs = sost ? grammiSost(bozza.per100) : null;
-  const v = bozza.per100, campo = (id, et, val, ph) => `<div><label>${et}</label><input id="${id}" inputmode="decimal" autocomplete="off" value="${val ? esc(it(Math.round(val * 10) / 10)) : ""}" placeholder="${ph || "0"}"></div>`;
-  apri(testaFoglio(sost && !sost.auto ? "Sostituzione" : "Aggiungi a " + nomePasto()) + `<div class="card esito verde" id="sostMsg" style="${sost ? "" : "display:none"}">${sost ? testoSost(bozza.per100) : ""}</div>` + (a.trovato ? `<p class="muto">Trovato su Open Food Facts. Bastano i grammi e il tipo; controlla che i valori siano quelli dell'etichetta.</p>` : "") +
-    `<label>Nome</label><input id="aNome" value="${esc(a.nome || "")}" placeholder="Es. Mozzarella proteica" autocomplete="off">
-    ${campo("aG", "Quanti grammi", gs || a.porz, "100")}
-    <label>Che cos'è</label><div class="tre3c" style="grid-template-columns:1fr 1fr">${Object.keys(CAT).map((k) => `<button type="button" id="cat-${k}" class="${k === bozza.cat ? "pri" : ""}" aria-pressed="${k === bozza.cat}" onclick="scegliCat('${k}')">${CAT[k]}</button>`).join("")}</div>
-    <p class="muto">Carboidrato e proteina prendono il posto della scelta del piano in quel pasto; i legumi di tutte e due.</p>
-    <h2>Valori per 100 g, dall'etichetta</h2>
-    <div class="g2">${campo("aK", "Calorie (kcal)", v[0])}${campo("aP", "Proteine (g)", v[1])}${campo("aC", "Carboidrati (g)", v[2])}${campo("aF", "Grassi (g)", v[3])}</div>
-    ${campo("aFi", "Fibra (g), se c'è", v[4])}
-    <button type="button" class="largo" onclick="calcolaSost()">Calcola i grammi per questo pasto</button>
-    <p class="muto">Se conosci solo i valori della porzione intera (una pizza, un piatto al ristorante), scrivi quelli e metti 100 nei grammi.</p>
-    <label class="riga" style="gap:10px;color:var(--testo)"><input type="checkbox" id="aSalva" ${a.base ? "" : "checked"} style="width:24px;min-height:24px;flex:none"> Tienilo tra i miei alimenti</label>
-    <button class="pri largo" onclick="confAlimento()">Aggiungi a ${nomePasto()}</button><button class="largo" onclick="aggiungiCibo()">Indietro</button>`, true);
-  if (a.nome) setTimeout(() => { const g = $("aG"); if (g && !g.value) g.focus(); }, 60);       // alimento già noto: si parte dai grammi
-}
-function confAlimento() {
-  const nome = $("aNome").value.trim(), g = num($("aG").value), p = bozza.per100, cat = bozza.cat;
-  if (!nome) { avvisa("Scrivi il nome"); return; }
-  if (!g || g <= 0) { avvisa("Scrivi quanti grammi"); return; }
-  ["aK", "aP", "aC", "aF", "aFi"].forEach((id, i) => (p[i] = Math.max(0, num($(id).value) || 0)));
-  if (!p[0]) p[0] = Math.round(p[1] * 4 + p[2] * 4 + p[3] * 9);          // calorie mancanti: le ricava dai macro
-  if (!p[0]) { avvisa("Scrivi almeno le calorie"); return; }
-  const r = recCibo(oggi(), true), pasto = PASTI.find((x) => x.id === dove) || PASTI[2];
-  (r.extra = r.extra || []).push({ id: Date.now(), nome, q: it(g) + " g", v: p.map((x) => (x * g) / 100), pasto: pasto.id, cat, sost: sost ? sost.nome : undefined });
-  // carboidrato o proteina: prende il posto della scelta del piano in quel pasto (non nel giorno personalizzato)
-  // una sostituzione toglie la voce sostituita (e, se era una scelta "uno a scelta", le altre del suo gruppo)
-  const ks = sost ? sost.ks : cat === "legumi" ? ["carbo", "prot"] : [cat];
-  if (sost) for (const id of sost.ids) { delete r.x[id]; if (r.q) delete r.q[id]; }
-  if (!r.pers) for (const gr of pasto.g) if (gr.k && ks.includes(gr.k)) for (const o of gr.v) delete r.x[o[0]];
-  const era = sost && !sost.auto ? sost.nome : ""; sost = null;
-  if ($("aSalva").checked) {
-    S.alimenti = (S.alimenti || []).filter((x) => (bozza.codice ? x.codice !== bozza.codice : x.nome.toLowerCase() !== nome.toLowerCase()));
-    S.alimenti.unshift({ nome, per100: p.slice(), porz: g, codice: bozza.codice, cat }); S.alimenti = S.alimenti.slice(0, 40);
-  }
-  salva(); chiudi(); tieni(disegna); avvisa(era ? "Sostituito: " + era : "Aggiunto a " + pasto.nome.toLowerCase());
-}
-function togliExtra(id) { const r = recCibo(oggi(), true); r.extra = (r.extra || []).filter((x) => x.id !== id); salva(); tieni(disegna); }
-
 /* ============ v16: MISURE RAPIDE, SONNO, TRAZIONE, SPESA, FOTO ============
    Il diario di un giorno (S.diario[data]) tiene: peso, passi, sonno 1-5, risvegli, vita (giro vita in cm), note. */
 const vuotoG = (r) => r.peso == null && r.passi == null && r.sonno == null && r.risvegli == null && r.vita == null && !r.note;
@@ -2085,7 +2340,8 @@ function scriviGiorno(d, r) { if (vuotoG(r)) delete S.diario[d]; else S.diario[d
 const ultimoCon = (k) => Object.keys(S.diario).filter((d) => S.diario[d][k] != null).sort().pop() || null;
 const giorniDa = (d) => giornoN(oggi()) - giornoN(d);
 const ICO = { metro: '<path d="M3 8h18v8H3zM7 8v3M11 8v4M15 8v3M19 8v4"/>', foto: '<path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
-  sbarra: '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>', carrello: '<path d="M3 4h2l2.5 11h10L20 7H6.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>' };
+  sbarra: '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>', carrello: '<path d="M3 4h2l2.5 11h10L20 7H6.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+  fiamma: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 01-10 0c0-1.8.8-3.2 2-4.2.2 1.6 1 2.4 2 2.7-.5-3-1.500-5.500 1-8.500z"/>', sett: '<path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h3M8 17h6"/>' };
 
 // un numero e via: peso di oggi, passi (di ieri, o di oggi a fine giornata), giro vita
 const MIS = {
@@ -2098,13 +2354,13 @@ function segna(k, d) {
   apri(testaFoglio(M.t) +
     (k === "passi" ? `<div class="g2" style="margin-top:12px"><button class="${d === ieri ? "pri" : ""}" onclick="segna('passi','${ieri}')">Ieri</button><button class="${d === oggi() ? "pri" : ""}" onclick="segna('passi','${oggi()}')">Oggi</button></div>` : "") +
     `<input id="qVal" class="numerone" inputmode="${M.modo}" value="${esc(it(r[k]))}" placeholder="${M.ph}" autocomplete="off" onkeydown="if(event.key==='Enter')salvaSegna('${k}','${d}')">
-    <p class="muto">${M.nota}</p><button class="pri largo grosso" onclick="salvaSegna('${k}','${d}')">Salva</button>`);
+    <p class="muto">${M.nota}</p><button class="pri largo grosso" onclick="salvaSegna('${k}','${d}')">Salva</button>` + (k === "passi" ? `<button class="largo" onclick="dettaglio('passi')">Vedi l'andamento</button>` : ""));
   setTimeout(() => { const x = $("qVal"); if (x) { x.focus(); x.select(); } }, 50);
 }
 function salvaSegna(k, d) {
   const M = MIS[k], t = $("qVal").value.trim(), v = t === "" ? null : k === "passi" ? num(t.replace(/\D/g, "")) : num(t);
   if (t !== "" && (v == null || v < M.min || v > M.max)) { avvisa("Controlla il numero"); return; }
-  const r = giornoBase(d); r[k] = v; scriviGiorno(d, r); chiudi(); disegna(); avvisa(v == null ? "Tolto" : "Salvato");
+  const r = giornoBase(d); r[k] = v; scriviGiorno(d, r); vib(); chiudi(); disegna(); avvisa(v == null ? "Tolto" : "Salvato");
 }
 
 /* ---- sonno: come hai dormito (1-5) e quante volte ti sei svegliato, sul giorno di oggi ---- */
@@ -2112,8 +2368,8 @@ let SN = { v: null, r: null };
 function tileSonno() {
   const d = oggi(), r = S.diario[d] || {}, v7 = Object.keys(S.diario).filter((x) => x > meno(d, 7) && x <= d && S.diario[x].sonno != null).map((x) => S.diario[x].sonno);
   const m = v7.length ? v7.reduce((a, b) => a + b, 0) / v7.length : null;
-  return `<button class="dato" onclick="segnaSonno()"><span class="riga tra"><small>Sonno di stanotte</small>${anello((r.sonno || 0) / 5, "var(--verde)")}</span>
-    <b>${r.sonno != null ? r.sonno + " <u>su 5</u>" : "–"}</b>
+  return `<button class="dato" onclick="${r.sonno == null ? "segnaSonno()" : "dettaglio('sonno')"}"><span class="riga tra"><small>Sonno di stanotte</small>${anello((r.sonno || 0) / 5, "var(--verde)")}</span>
+    <b>${r.sonno != null ? cnt(r.sonno, r.sonno) + " <u>su 5</u>" : "–"}</b>
     <em class="${r.sonno == null ? "fai" : ""}">${r.sonno == null ? "＋ Segna la notte" : (r.risvegli != null ? (r.risvegli >= 4 ? "4 o più" : r.risvegli) + (r.risvegli === 1 ? " risveglio" : " risvegli") + " · " : "") + "media 7 giorni " + it(m.toFixed(1))}</em></button>`;
 }
 function segnaSonno(agg) {
@@ -2122,11 +2378,11 @@ function segnaSonno(agg) {
   for (let n = 1; n <= 5; n++) h += `<button class="${SN.v === n ? "on" : ""}" onclick="SN.v=${n};segnaSonno(1)">${n}</button>`;
   h += `</div></div><div class="voce"><div class="riga tra"><b>Quante volte ti sei svegliato</b></div><div class="cinque">`;
   for (let n = 0; n <= 4; n++) h += `<button class="${SN.r === n ? "on" : ""}" onclick="SN.r=${n};segnaSonno(1)">${n}${n === 4 ? "+" : ""}</button>`;
-  apri(h + `</div></div><button class="pri largo grosso" onclick="salvaSonno()">Salva</button>`);
+  apri(h + `</div></div><button class="pri largo grosso" onclick="salvaSonno()">Salva</button><button class="largo" onclick="dettaglio('sonno')">Vedi l'andamento</button>`);
 }
 function salvaSonno() {
   if (SN.v == null) { avvisa("Tocca un numero da 1 a 5"); return; }
-  const d = oggi(), r = giornoBase(d); r.sonno = SN.v; r.risvegli = SN.r; scriviGiorno(d, r); chiudi(); disegna(); avvisa("Salvato");
+  const d = oggi(), r = giornoBase(d); r.sonno = SN.v; r.risvegli = SN.r; scriviGiorno(d, r); vib(); chiudi(); disegna(); avvisa("Salvato");
 }
 
 function grafVita() {
@@ -2137,69 +2393,34 @@ function grafVita() {
     `<p class="muto">All'ombelico, ogni 2 settimane. È il numero che dice se la pancia scende, anche quando la bilancia resta ferma.</p></div>`;
 }
 
-/* ---- lista della spesa: una settimana di piano. Le voci fisse si sommano da PASTI;
-        per quelle "a scelta" si dice quante volte a settimana (S.spesa.n), le spunte stanno in S.spesa.x ---- */
-const gruppoDi = (pid, k) => PASTI.find((p) => p.id === pid).g.find((g) => (k ? g.k === k : g.uno)).v;
-// le voci "a scelta" che entrano nella lista. Il pasto del sabato sera e il pranzo della domenica sono fuori casa o in famiglia: non si comprano
-const SPESA_G = [
-  { k: "col", t: "Colazione", n: 7, v: gruppoDi("col"), def: { whey: 7 } },
-  { k: "spu", t: "Spuntino", n: 7, v: gruppoDi("spu"), def: { "spu-yogurt": 4, "spu-gallette": 3 } },
-  { k: "prac", t: "Carboidrato del pranzo", n: 6, v: gruppoDi("pra", "carbo"), def: { "pra-riso": 2, "pra-legumi": 2, "pra-quinoa": 1, "pra-patate": 1 } },
-  { k: "mer", t: "Merenda", n: 7, v: gruppoDi("mer"), def: { "mer-frutto": 4, "mer-gallette": 3 } },
-  { k: "cenc", t: "Carboidrato della cena", n: 6, v: gruppoDi("cen", "carbo"), def: { "cen-patate": 3, "cen-pane": 2, "cen-riso": 1 } },
-  { k: "prot", t: "Proteina di pranzo e cena", n: 12, v: proteineDi("sp"), def: { "sp-pollo": 4, "sp-manzo": 1, "sp-maiale": 1, "sp-pesce": 2, "sp-gamberi": 1, "sp-tonno": 1, "sp-bresaola": 1, "sp-uova": 1 } },
-];
-const SPESA_NOME = { "pra-riso": "Riso, o pasta di riso o di mais", "cen-riso": "Riso, o pasta di riso o di mais", "pra-legumi": "Pasta di lenticchie o di ceci", "pra-quinoa": "Quinoa o grano saraceno",
-  "pra-patate": "Patate", "cen-patate": "Patate", "pra-pane": "Pane senza glutine", "cen-pane": "Pane senza glutine", "pra-gallette": "Gallette di riso o mais", "pra-verdura": "Verdura", "cen-verdura": "Verdura",
-  "pra-olio": "Olio extravergine", "cen-olio": "Olio extravergine", "col-yogurt": "Yogurt greco 0%", whey: "Whey isolate senza glutine", crema: "Crema keto", "latte-avena": "Latte d'avena senza glutine",
-  "spu-yogurt": "Yogurt greco e kiwi", "spu-gallette": "Gallette, bresaola e un frutto", "mer-frutto": "Frutto e mandorle", "mer-gallette": "Gallette e bresaola",
-  "sp-pollo": "Petto di pollo o di tacchino", "sp-manzo": "Manzo magro", "sp-maiale": "Lonza o filetto di maiale", "sp-pesce": "Orata o branzino", "sp-gamberi": "Gamberi o mazzancolle", "sp-tonno": "Tonno al naturale", "sp-bresaola": "Bresaola", "sp-uova": "Uova e albume" };
-// voci fatte di più alimenti: [nome in lista, quantità per volta, unità]
-const SPESA_COMP = { "spu-yogurt": [["Yogurt greco 0%", 150, "g"], ["Kiwi, pere o altra frutta", 150, "g"]], "spu-gallette": [["Gallette di riso o mais", 2, "pz"], ["Bresaola", 50, "g"], ["Kiwi, pere o altra frutta", 100, "g"]],
-  "mer-frutto": [["Kiwi, pere o altra frutta", 175, "g"], ["Mandorle", 15, "g"]], "mer-gallette": [["Gallette di riso o mais", 2, "pz"], ["Bresaola", 50, "g"]], "sp-uova": [["Uova", 2, "pz"], ["Albume", 150, "g"]] };
-const SPESA_REP = { "Frutta e verdura": ["Verdura", "Patate", "Kiwi, pere o altra frutta"], "Carne e pesce": ["Petto di pollo o di tacchino", "Manzo magro", "Lonza o filetto di maiale", "Orata o branzino", "Gamberi o mazzancolle", "Bresaola"],
-  "Frigo": ["Albume", "Yogurt greco 0%", "Uova", "Latte d'avena senza glutine"] };
-const spesaN = (G, id) => { const n = (S.spesa && S.spesa.n) || {}; return n[id] != null ? n[id] : G.def[id] || 0; };
-const spesaTot = (G) => G.v.reduce((t, v) => t + spesaN(G, v[0]), 0);
-function listaSpesa() {
-  const L = {};
-  const somma = (nome, n, u) => { const x = L[nome] || (L[nome] = { nome, rep: Object.keys(SPESA_REP).find((r) => SPESA_REP[r].includes(nome)) || "Dispensa", g: 0, ml: 0, pz: 0, altro: [] }); if (u === "altro") x.altro.push(n); else x[u] += n; };
-  const metti = (v, volte) => {
-    if (SPESA_COMP[v[0]]) { for (const c of SPESA_COMP[v[0]]) somma(c[0], c[1] * volte, c[2]); return; }
-    const nome = SPESA_NOME[v[0]] || v[1].split(",")[0], b = basePiano(v, true);
-    if (b.u === "porz.") somma(nome, volte + " × " + v[2], "altro"); else somma(nome, b.n * volte, b.u);
-  };
-  for (const p of PASTI) if (p.id !== "int") for (const g of p.g) if (!g.uno) for (const v of g.v) metti(v, 7);
-  for (const G of SPESA_G) for (const v of G.v) { const n = spesaN(G, v[0]); if (n) metti(v, n); }
-  const peso = (n, u) => (n >= 1000 ? it(parseFloat((n / 1000).toFixed(2))) + (u === "g" ? " kg" : " L") : Math.round(n / 5) * 5 + " " + u);
-  return Object.values(L).map((x) => Object.assign(x, { q: [x.g ? peso(x.g, "g") : "", x.ml ? peso(x.ml, "ml") : "", x.pz ? x.pz + " pezzi" : ""].concat(x.altro).filter(Boolean).join(" + ") }));
+/* ---- lista della spesa: parte vuota, le voci le aggiunge chi usa l'app (S.spesa.l = [{ n: nome, x: 1 se già presa }]).
+        Con il + si scrive a mano oppure si tocca un suggerimento, preso dagli alimenti del piano (ALIM e voci fisse di MENU) ---- */
+const cortoA = (n) => n.split(",")[0].split(" (")[0];
+const ideeSpesa = () => [...new Set(Object.values(ALIM).map((a) => cortoA(a[0])).concat(MENU.filter((p) => p.id !== "int").flatMap((p) => (p.sempre || []).map((f) => cortoA(f[1])))))];
+const listaS = () => { S.spesa = S.spesa || {}; return (S.spesa.l = S.spesa.l || []); };
+function suggSpesa(q) {
+  q = String(q || "").toLowerCase().trim(); const gia = listaS().map((x) => x.n.toLowerCase());
+  const v = ideeSpesa().filter((n) => !gia.includes(n.toLowerCase()) && (!q || n.toLowerCase().includes(q)));
+  return v.map((n) => `<button class="chip" data-n="${esc(n)}" onclick="piuSpesa(this.dataset.n)">+ ${esc(n)}</button>`).join("") || `<span class="muto">${q ? "Nessun suggerimento: tocca + per aggiungerlo così com'è." : "Hai già messo in lista tutti gli alimenti del piano."}</span>`;
 }
-function piuSpesa(gk, id, dir) {
-  const G = SPESA_G.find((x) => x.k === gk), n = spesaN(G, id) + dir; if (n < 0) return;
-  if (dir > 0 && spesaTot(G) >= G.n) { avvisa("Sono già " + G.n + " pasti: prima togline uno"); return; }
-  S.spesa = S.spesa || {}; S.spesa.n = S.spesa.n || {}; S.spesa.n[id] = n; salva(); tieni(disegna);
+function piuSpesa(n) {
+  n = String(n || "").trim(); if (!n) { avvisa("Scrivi cosa ti serve"); return; }
+  const L = listaS(); if (L.some((x) => x.n.toLowerCase() === n.toLowerCase())) { avvisa("È già in lista"); return; }
+  L.push({ n }); vib(); salva(); tieni(disegna);
 }
-function spuntaSpesa(nome) { S.spesa = S.spesa || {}; const x = (S.spesa.x = S.spesa.x || {}); if (x[nome]) delete x[nome]; else x[nome] = 1; salva(); tieni(disegna); }
-function svuotaSpesa() { if (S.spesa) S.spesa.x = {}; salva(); tieni(disegna); }
-let spesaAperta = false;
+function spuntaSpesa(i) { const x = listaS()[i]; if (!x) return; x.x = x.x ? 0 : 1; vib(); salva(); tieni(disegna); }
+function togliSpesa(i) { listaS().splice(i, 1); salva(); tieni(disegna); }
+function svuotaSpesa(tutta) { if (tutta && !confirm("Svuoto tutta la lista?")) return; S.spesa.l = tutta ? [] : listaS().filter((x) => !x.x); salva(); tieni(disegna); }
+let spesaIdee = false;
 function vSpesa() {
-  const L = listaSpesa(), X = (S.spesa && S.spesa.x) || {}, presi = L.filter((x) => X[x.nome]).length;
-  let h = `<div class="riga testata">${freccia("apriSub('cibo')")}<div><div class="sopra">Una settimana di piano</div><h1>Lista della spesa</h1></div></div>
-    <p class="muto conta">Sei giorni di piano più la domenica. Il pranzo della domenica in famiglia e il sabato sera non sono in lista. Pesi a crudo, frutta senza buccia: compra un po' di più per lo scarto.</p>
-    <div class="card"><details class="primo" ${spesaAperta ? "open" : ""} ontoggle="spesaAperta=this.open"><summary>Cosa mangi questa settimana</summary>
-      <p class="muto">Di' quante volte a settimana mangi ogni alimento "a scelta": la lista si ricalcola.</p>`;
-  for (const G of SPESA_G) {
-    const t = spesaTot(G);
-    h += `<div class="pasto"><h3>${G.t} · <span style="color:${t === G.n ? "var(--verde)" : "var(--arancio)"}">${t} di ${G.n}</span></h3><ul>` +
-      G.v.map((v) => `<li class="volte"><span>${esc(SPESA_NOME[v[0]] || v[1].split(",")[0])}</span><button class="tondo" aria-label="Meno" onclick="piuSpesa('${G.k}','${v[0]}',-1)">−</button><b>${spesaN(G, v[0])}</b><button class="tondo" aria-label="Più" onclick="piuSpesa('${G.k}','${v[0]}',1)">+</button></li>`).join("") + `</ul></div>`;
-  }
-  h += `</details></div><p class="muto conta">Presi <b>${presi} di ${L.length}</b>. Tocca una riga quando l'hai messa nel carrello.</p>`;
-  for (const rep of ["Frutta e verdura", "Carne e pesce", "Frigo", "Dispensa"]) {
-    const vv = L.filter((x) => x.rep === rep); if (!vv.length) continue;
-    h += `<div class="card pasto"><div class="nome">${rep}</div><ul>` + vv.map((x) => `<li class="sp ${X[x.nome] ? "on" : ""}" role="checkbox" aria-checked="${!!X[x.nome]}" data-k="${esc(x.nome)}" onclick="spuntaSpesa(this.dataset.k)"><i class="chk"></i><span>${esc(x.nome)}</span><b>${esc(x.q)}</b></li>`).join("") + `</ul></div>`;
-  }
-  return h + `<button class="largo" onclick="svuotaSpesa()">Togli tutte le spunte</button>
-    <p class="muto conta">Controlla anche il tuo integratore. Tutto senza glutine: guarda l'etichetta di gallette, pane, pasta e whey. Tonno: peso sgocciolato. Se in una settimana i pasti "a scelta" sono meno del totale, la lista copre solo quelli indicati.</p>`;
+  const L = listaS(), presi = L.filter((x) => x.x).length, riga = (x) => { const i = L.indexOf(x); return `<li class="sp ${x.x ? "on" : ""}" role="checkbox" aria-checked="${!!x.x}" onclick="spuntaSpesa(${i})"><i class="chk"></i><span>${esc(x.n)}</span><button class="ico" aria-label="Togli dalla lista" onclick="event.stopPropagation();togliSpesa(${i})">✕</button></li>`; };
+  return `<div class="riga testata">${freccia("apriSub('cibo')")}<div><div class="sopra">Ci metti tu quello che ti serve</div><h1>Lista della spesa</h1></div></div>
+    <div class="riga"><input id="sNuovo" placeholder="Cosa ti serve?" autocomplete="off" enterkeyhint="done" oninput="$('sBox').open=true;$('sIdee').innerHTML=suggSpesa(this.value)" onkeydown="if(event.key==='Enter')piuSpesa(this.value)">
+      <button class="pri" style="flex:none;width:56px;padding:0;font-size:26px" aria-label="Aggiungi alla lista" onclick="piuSpesa($('sNuovo').value)">+</button></div>
+    <div class="card"><details class="primo" id="sBox" ${spesaIdee ? "open" : ""} ontoggle="spesaIdee=this.open"><summary>Suggerimenti dal tuo piano</summary><div class="chips" id="sIdee">${suggSpesa("")}</div></details></div>` +
+    (L.length ? `<p class="muto conta">Presi <b>${presi} di ${L.length}</b>. Tocca una riga quando l'hai messa nel carrello.</p><div class="card pasto"><ul>${L.filter((x) => !x.x).map(riga).join("")}${L.filter((x) => x.x).map(riga).join("")}</ul></div>
+      <div class="g2"><button onclick="svuotaSpesa()">Togli quelle prese</button><button class="per" onclick="svuotaSpesa(1)">Svuota la lista</button></div>`
+      : `<div class="card vuoto"><b>La lista è vuota</b>Scrivi qui sopra quello che ti serve e tocca +, oppure apri i suggerimenti e tocca gli alimenti del tuo piano.</div>`);
 }
 
 /* ---- foto dei progressi: restano sul telefono, in IndexedDB (troppo grandi per localStorage). S.foto = [{d, posa}] è l'indice ---- */
@@ -2261,11 +2482,110 @@ async function condividiFoto(k) {
   } catch (e) {}
 }
 
+/* ============ v18: GRAFICI DI DETTAGLIO, TORTA DEI MACRO, COSTANZA, RIEPILOGO DELLA SETTIMANA ============ */
+/* ---- passi, acqua, sonno: barre degli ultimi 7 o 30 giorni con la linea del traguardo; il dito sul grafico mostra il giorno ---- */
+const DETT = {
+  passi: { t: "Passi", rif: PASSI_MIN, tg: "minimo " + mila(PASSI_MIN) + " al giorno", val: (g) => (S.diario[g] || {}).passi, fmt: (v) => mila(v), un: "passi", segna: "segna('passi')", lab: "Segna i passi" },
+  acqua: { t: "Acqua", rif: ACQUA_ML / 1000, tg: "traguardo " + litri(ACQUA_ML) + " litri al giorno", val: (g) => { const a = ((S.cibo || {})[g] || {}).acqua; return a ? a / 1000 : null; }, fmt: (v) => litri(v * 1000), un: "L" },
+  sonno: { t: "Sonno", rif: 4, tg: "una buona notte è da 4 in su", val: (g) => (S.diario[g] || {}).sonno, fmt: (v) => it(parseFloat(v.toFixed(1))), un: "su 5", segna: "segnaSonno()", lab: "Segna la notte",
+    piu: (g) => { const r = (S.diario[g] || {}).risvegli; return r == null ? "" : " · " + (r >= 4 ? "4 o più" : r) + (r === 1 ? " risveglio" : " risvegli"); } },
+};
+let DET = { k: "passi", n: 7 };
+function dettaglio(k, n) {
+  DET = { k: k || DET.k, n: n || DET.n }; const M = DETT[DET.k], d = oggi(), pts = [];
+  for (let i = DET.n - 1; i >= 0; i--) { const g = meno(d, i), v = M.val(g); pts.push({ x: nomeGiorno(g) + " " + dataIt(g), y: v == null ? null : v, g }); }
+  const vv = pts.filter((p) => p.y != null).map((p) => p.y), m = vv.length ? vv.reduce((a, b) => a + b, 0) / vv.length : null, ok = vv.filter((v) => v >= M.rif).length;
+  apri(testaFoglio(M.t) + `<p class="muto" style="margin:2px 0 12px">Ultimi ${DET.n} giorni · ${M.tg}</p>
+    <div class="g2"><button class="pic ${DET.n === 7 ? "pri" : ""}" onclick="dettaglio('${DET.k}',7)">7 giorni</button><button class="pic ${DET.n === 30 ? "pri" : ""}" onclick="dettaglio('${DET.k}',30)">30 giorni</button></div>
+    <div class="tess tre"><div><b>${m == null ? "–" : M.fmt(m)}</b>media ${M.un}</div><div><b>${ok}<span class="muto"> / ${vv.length}</span></b>giorni al traguardo</div><div><b>${vv.length ? M.fmt(Math.max(...vv)) : "–"}</b>il migliore</div></div>` +
+    (vv.length ? grafBarre("det", pts, { rif: M.rif, spento: true, testo: (p) => (p.y == null ? "non segnato" : M.fmt(p.y) + " " + M.un + (M.piu ? M.piu(p.g) : "")) }) +
+      `<div class="leg"><span><i class="ll" style="background:rgba(255,255,255,.45)"></i>traguardo</span><span>barra piena: traguardo raggiunto</span></div><p class="muto">Tieni il dito sul grafico per leggere un giorno.</p>`
+      : `<p class="vuoto"><b>Ancora nessun dato</b>Il grafico compare dal primo giorno segnato.</p>`) +
+    (M.segna ? `<button class="pri largo" onclick="${M.segna}">${M.lab}</button>` : "") + `<button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+
+/* ---- torta dei macro: come si dividono le calorie tra proteine, carboidrati e grassi (tre toni di verde, un solo colore d'accento) ---- */
+function torta(T, N) {
+  const col = ["#3ddc84", "#c9f7dd", "#1f8f55"], nomi = ["Proteine", "Carboidrati", "Grassi"], k = (p, c, g) => [p * 4, c * 4, g * 9];
+  const piano = k(N.p, N.c, N.g), fatto = k(T[1], T[2], T[3]), vuoto = fatto[0] + fatto[1] + fatto[2] < 1, v = vuoto ? piano : fatto;
+  const tot = v[0] + v[1] + v[2], tp = piano[0] + piano[1] + piano[2]; let da = 0, c = "";
+  v.forEach((x, i) => { const q = (x / tot) * 100; if (q > 0.5) c += `<circle cx="21" cy="21" r="15.915" stroke="${col[i]}" stroke-dasharray="${Math.max(0, q - 1.2).toFixed(2)} ${(100 - Math.max(0, q - 1.2)).toFixed(2)}" stroke-dashoffset="${(-da).toFixed(2)}"/>`; da += q; });
+  return `<div class="macro"><svg class="torta" viewBox="0 0 42 42" role="img" aria-label="Divisione delle calorie tra i macronutrienti">${c}</svg>
+    <div class="legm"><div class="muto" style="font-size:12px">${vuoto ? "Come si dividono le calorie del piano" : "Da dove vengono le calorie di oggi"}</div>` +
+    v.map((x, i) => `<div><i style="background:${col[i]}"></i><span>${nomi[i]}</span><b>${Math.round((x / tot) * 100)}%</b>${vuoto ? "" : `<small>piano ${Math.round((piano[i] / tp) * 100)}%</small>`}</div>`).join("") + `</div></div>`;
+}
+
+/* ---- costanza: settimane di fila con le 3 sedute di pesi, giorni di fila con il peso segnato ---- */
+const pesiSett = (lun) => { const dom = meno(lun, -6); return S.sedute.filter((s) => s.data >= lun && s.data <= dom && APP.pesi.includes(s.tipo)).length; };
+const lunediDi = (d) => meno(d, (new Date(d + "T12:00").getDay() + 6) % 7);
+function costanza() {
+  const d = oggi(), lun = lunediDi(d), questa = pesiSett(lun);
+  let sett = questa >= APP.nSett ? 1 : 0; for (let l = meno(lun, 7), i = 0; i < 520 && pesiSett(l) >= APP.nSett; l = meno(l, 7), i++) sett++;      // la settimana in corso non interrompe la serie
+  let settRec = sett; if (S.sedute.length) { let run = 0; for (let l = lunediDi(S.sedute[0].data); l <= lun; l = meno(l, -7)) { run = pesiSett(l) >= APP.nSett ? run + 1 : 0; settRec = Math.max(settRec, run); } }
+  const haPeso = (g) => (S.diario[g] || {}).peso != null;
+  let peso = 0; for (let g = haPeso(d) ? d : meno(d, 1); haPeso(g); g = meno(g, 1)) peso++;
+  let pesoRec = peso, run = 0, prec = null;
+  for (const g of Object.keys(S.diario).filter(haPeso).sort()) { run = prec && meno(g, 1) === prec ? run + 1 : 1; pesoRec = Math.max(pesoRec, run); prec = g; }
+  return { sett, settRec, peso, pesoRec, questa, lun };
+}
+function apriCostanza() {
+  const K = costanza(); let w = "";
+  for (let i = 7; i >= 0; i--) { const n = pesiSett(meno(K.lun, 7 * i)); w += `<div class="${n >= APP.nSett ? "ok" : ""}">${n >= APP.nSett ? "✓" : n}</div>`; }
+  apri(testaFoglio("La tua costanza") + `<div class="tess grande"><div class="${K.sett ? "oro" : ""}"><b>${cnt(K.sett, K.sett)}</b>${K.sett === 1 ? "settimana" : "settimane"} di fila con ${APP.nSett} sedute</div><div><b>${cnt(K.settRec, K.settRec)}</b>il tuo record di settimane</div>
+      <div class="${K.peso ? "oro" : ""}"><b>${cnt(K.peso, K.peso)}</b>${K.peso === 1 ? "giorno" : "giorni"} di fila con il peso</div><div><b>${cnt(K.pesoRec, K.pesoRec)}</b>il tuo record di giorni</div></div>
+    <h2>Ultime 8 settimane</h2><div class="settimane">${w}</div><p class="muto">Sedute di pesi per settimana, a destra quella in corso (${K.questa} di ${APP.nSett}). Finché non è finita, la settimana in corso non interrompe la serie.</p>
+    <p class="muto">Per il peso bastano 3-4 pesate a settimana: la serie di giorni è un di più, non un obbligo.</p><button class="largo" onclick="chiudi()">Chiudi</button>`);
+  muovi($("foglio"), null);
+}
+
+/* ---- riepilogo della settimana: la domenica compare in home tra le cose da fare; dalla voce Coach si apre sempre (fuori dalla domenica mostra la settimana scorsa) ---- */
+function datiSett(lun) {
+  const gg = []; for (let i = 0; i < 7; i++) gg.push(meno(lun, -i));
+  const med = (f) => { const v = gg.map(f).filter((x) => x != null); return v.length ? { m: v.reduce((a, b) => a + b, 0) / v.length, n: v.length } : null; };
+  const dia = (k) => med((g) => (S.diario[g] || {})[k]), prima = media(meno(lun, 8), meno(lun, 1));
+  const tipi = S.sedute.filter((s) => s.data >= lun && s.data <= gg[6] && APP.pesi.includes(s.tipo)).map((s) => s.tipo);
+  const cibo = gg.filter((g) => (S.cibo || {})[g] && totali(g)[0] > 0).map((g) => { const t = totali(g), N = CIBO[modoOn(g) ? "on" : "off"]; return { kcal: t[0], p: t[1], ok: Math.abs(t[0] - N.kcal) <= N.kcal * 0.1 }; });
+  return { lun, dom: gg[6], tipi, peso: dia("peso"), prima, passi: dia("passi"), sonno: dia("sonno"), acqua: med((g) => { const a = ((S.cibo || {})[g] || {}).acqua; return a ? a / 1000 : null; }),
+    cibo: cibo.length ? { n: cibo.length, ok: cibo.filter((x) => x.ok).length, p: cibo.reduce((a, x) => a + x.p, 0) / cibo.length, kcal: cibo.reduce((a, x) => a + x.kcal, 0) / cibo.length } : null };
+}
+const segno = (v, dec) => (v >= 0 ? "+" : "−") + it(Math.abs(v).toFixed(dec));
+function testoSett(W) {
+  const r = [`Riepilogo settimana ${W.lun} / ${W.dom}`, `Sedute di pesi: ${W.tipi.length} su ${APP.nSett}${W.tipi.length ? " (" + W.tipi.join(", ") + ")" : ""}`];
+  r.push("Peso medio: " + (W.peso ? `${it(W.peso.m.toFixed(1))} kg (${W.peso.n} pesate)` + (W.prima ? `, ${segno(W.peso.m - W.prima.m, 2)} kg sulla settimana prima` : "") : "nessuna pesata"));
+  r.push("Passi medi: " + (W.passi ? `${mila(W.passi.m)} (${W.passi.n} giorni)` : "non segnati"));
+  r.push("Sonno medio: " + (W.sonno ? `${it(W.sonno.m.toFixed(1))} su 5 (${W.sonno.n} notti)` : "non segnato"));
+  r.push("Alimentazione: " + (W.cibo ? `${W.cibo.n} giorni spuntati, ${W.cibo.ok} entro il 10% delle calorie del giorno, media ${Math.round(W.cibo.kcal)} kcal e ${Math.round(W.cibo.p)} g di proteine` : "niente spuntato"));
+  r.push("Acqua media: " + (W.acqua ? `${it(W.acqua.m.toFixed(1))} L (${W.acqua.n} giorni)` : "non segnata"));
+  return r.join("\n");
+}
+function riepSett() {
+  const d = oggi(), dom = new Date(d + "T12:00").getDay() === 0, W = datiSett(dom ? lunediDi(d) : meno(lunediDi(d), 7)), n = W.tipi.length;
+  const rr = (t, s, b, cl) => `<div class="rr"><span>${t}<small>${s}</small></span><b class="${cl || ""}">${b}</b></div>`;
+  apri(`<div class="riga tra"><div><div class="sopra">${dom ? "Questa settimana" : "La settimana scorsa"}</div><div class="nome" style="font-size:21px">${nomeGiorno(W.lun)} ${dataIt(W.lun)} – ${nomeGiorno(W.dom)} ${dataIt(W.dom)}</div></div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>
+    <div class="tess grande"><div class="${n >= APP.nSett ? "oro" : ""}"><b>${cnt(n, n)} <u>/ ${APP.nSett}</u></b>sedute di pesi</div>
+      <div><b>${W.peso ? cnt(W.peso.m.toFixed(1), it(W.peso.m.toFixed(1)), 1) + " <u>kg</u>" : "–"}</b>peso medio${W.peso && W.prima ? " · " + segno(W.peso.m - W.prima.m, 2) + " kg" : ""}</div>
+      <div class="${W.passi && W.passi.m >= PASSI_MIN ? "oro" : ""}"><b>${W.passi ? cnt(Math.round(W.passi.m), mila(W.passi.m), 0, 1) : "–"}</b>passi al giorno, in media</div>
+      <div><b>${W.sonno ? cnt(W.sonno.m.toFixed(1), it(W.sonno.m.toFixed(1)), 1) + " <u>su 5</u>" : "–"}</b>sonno medio</div></div>
+    <div class="card">` +
+      rr("Alimentazione", W.cibo ? `${W.cibo.n} giorni spuntati · media ${Math.round(W.cibo.kcal)} kcal · proteine ${Math.round(W.cibo.p)} g` : "nessun giorno spuntato nell'app", W.cibo ? W.cibo.ok + " su " + W.cibo.n + " nel traguardo" : "–", W.cibo && W.cibo.ok >= W.cibo.n - 1 ? "su" : "") +
+      rr("Pesate", "ne servono 3-4 a settimana per leggere l'andamento", (W.peso ? W.peso.n : 0) + " su 4", W.peso && W.peso.n >= 3 ? "su" : "") +
+      rr("Acqua", "traguardo " + litri(ACQUA_ML) + " litri al giorno", W.acqua ? it(W.acqua.m.toFixed(1)) + " L di media" : "–", W.acqua && W.acqua.m >= ACQUA_ML / 1000 ? "su" : "") + `</div>
+    <p class="muto">"Nel traguardo" vuol dire entro il 10% delle calorie del giorno, su quello che hai spuntato.</p>
+    <button class="pri largo" onclick="inviaSett('${W.lun}')">Invia il riepilogo al coach</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+  muovi($("foglio"), null);
+}
+async function inviaSett(lun) {
+  const t = testoSett(datiSett(lun)); let fatto = false;
+  if (navigator.share) { try { await navigator.share({ title: "Riepilogo della settimana", text: t }); fatto = true; } catch (e) {} }
+  else { try { await navigator.clipboard.writeText(t); avvisa("Copiato: incollalo nella chat"); fatto = true; } catch (e) { avvisa("Non riesco a copiare"); } }
+  if (fatto) { S.riepSett = lun; salva(); chiudi(); disegna(); }
+}
+
 /* ============ TASTO INDIETRO DEL TELEFONO ============
    Si tiene sempre una voce in più nella cronologia: il tasto indietro la consuma, l'app chiude ciò che è aperto
    e la rimette. Solo dalla home, senza nulla di aperto, il tasto esce dall'app. */
 function passoIndietro() {
-  if ($("foglio").style.display === "block") { chiudi(); return true; }
+  if (foglioSu) { chiudi(); return true; }
   if (tab === "allena" && S.corso && esAperto != null) { chiudiEs(); return true; }
   if (tab === "allena" && S.corso) { indietro(); return true; }
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
@@ -2282,7 +2602,7 @@ function livelli() {
   if (tab !== "allena") n++; else if (S.corso) n += esAperto != null ? 2 : 1; else if (sub) n += sub === "spesa" ? 2 : 1;
   if (tab === "tecnica" && guida) n++;
   if (tab === "diario" && vistaFoto) n++;
-  if ($("foglio").style.display === "block") n++;
+  if (foglioSu) n++;
   return n;
 }
 let profondo = 0, saltaPop = 0, inCoda = false;
