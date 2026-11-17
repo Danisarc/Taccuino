@@ -15,7 +15,7 @@
 html { background:var(--bg); }
 body { margin:0 auto; color:var(--testo); font:16px/1.4 system-ui,'Segoe UI',Roboto,Arial,sans-serif; -webkit-font-smoothing:antialiased;
        padding:calc(18px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom)); max-width:560px; min-height:100vh; }
-body.inseduta { padding-bottom:calc(390px + env(safe-area-inset-bottom)); }
+body.inseduta { padding-bottom:calc(180px + env(safe-area-inset-bottom)); }
 /* sfondo con luci colorate: è quello che il vetro della barra lascia intravedere */
 body::before { content:""; position:fixed; inset:0; z-index:-1; background:
   radial-gradient(60% 45% at 12% 0%, rgba(61,220,132,.26), transparent 70%),
@@ -119,11 +119,35 @@ ol.piano b { flex:none; color:var(--muto); font-weight:600; font-size:13px; font
 .chip.cur { border-color:var(--verde); color:var(--testo); box-shadow:0 0 0 1px var(--verde) inset; }
 .chip.piu { min-width:42px; border-style:dashed; background:transparent; }
 
-/* pannello della serie */
+/* seduta: elenco degli esercizi (miniatura, nome, serie fatte) */
+.es { display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:10px; margin:10px 0; border-radius:20px; background:var(--card); min-height:86px; }
+.mini { flex:none; width:64px; height:64px; border-radius:14px; background:#141b18 center/cover no-repeat; display:flex; align-items:center; justify-content:center;
+        font-style:normal; font-weight:800; font-size:20px; color:var(--muto); }
+.mini.p { width:44px; height:44px; border-radius:10px; }
+.es .tx { flex:1; min-width:0; } .es b { display:block; font-size:16px; line-height:1.25; } .es small { color:var(--muto); font-size:13px; }
+.es em { flex:none; font-style:normal; font-size:13px; font-weight:700; color:var(--muto); padding:4px 10px; border-radius:20px; background:rgba(255,255,255,.08); font-variant-numeric:tabular-nums; }
+.es.att { border-color:rgba(61,220,132,.55); background:linear-gradient(150deg,rgba(61,220,132,.16),rgba(61,220,132,.04)); }
+.es.att em { background:var(--verde); color:#04130a; }
+.es.fatto em { background:var(--verde3); color:var(--verde); } .es.fatto .mini { opacity:.5; }
+/* pagina del singolo esercizio: foto in due tempi, numeri, serie */
+.demo { position:relative; aspect-ratio:3/2; border-radius:22px; overflow:hidden; background:#141b18; margin:0 0 14px; border:1px solid var(--linea); }
+.demo img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.demo img + img { animation:demo 2.4s step-end infinite; }
+@keyframes demo { 0% { opacity:0; } 50% { opacity:1; } }
+.serie { display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:10px 12px; margin:8px 0; border-radius:18px; background:var(--card); min-height:56px; }
+.serie i { flex:none; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.10); font-style:normal; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.serie span { flex:1; min-width:0; color:var(--muto); font-size:14px; } .serie b { font-size:18px; color:var(--testo); font-variant-numeric:tabular-nums; }
+.serie small { flex:none; color:var(--muto); font-size:12px; }
+.serie.ok i { background:var(--verde); color:#04130a; }
+.adesso { border:1px solid rgba(61,220,132,.55); border-radius:24px; padding:12px; margin:8px 0; background:linear-gradient(150deg,rgba(61,220,132,.14),rgba(61,220,132,.03)); }
+.adesso .atit { font-weight:800; font-size:17px; margin:0 4px 8px; }
+.adesso .obi { white-space:normal; flex-wrap:wrap; row-gap:0; }
+
+/* pannello fisso in basso: solo il timer di recupero */
 #pan { position:fixed; left:0; right:0; bottom:calc(82px + env(safe-area-inset-bottom)); z-index:6; display:none; padding:0 12px; pointer-events:none; }
 #pan .dentro { pointer-events:auto; max-width:440px; margin:0 auto; background:rgba(17,24,21,.86); -webkit-backdrop-filter:blur(26px) saturate(160%); backdrop-filter:blur(26px) saturate(160%);
-               border:1px solid rgba(255,255,255,.14); border-radius:28px; padding:12px; box-shadow:0 12px 40px rgba(0,0,0,.55); }
-#rec { display:none; align-items:center; justify-content:space-between; background:var(--verde3); border:1px solid rgba(61,220,132,.4); border-radius:18px; padding:4px 6px 4px 14px; margin-bottom:10px; color:var(--verde); }
+               border:1px solid rgba(255,255,255,.14); border-radius:26px; padding:8px; box-shadow:0 12px 40px rgba(0,0,0,.55); }
+#rec { display:none; align-items:center; justify-content:space-between; background:var(--verde3); border:1px solid rgba(61,220,132,.4); border-radius:18px; padding:4px 6px 4px 14px; color:var(--verde); }
 #rec.fine { background:rgba(247,169,79,.16); border-color:var(--arancio); color:var(--arancio); }
 #rec b { font-size:24px; font-variant-numeric:tabular-nums; margin-left:8px; color:var(--testo); }
 .ptit { font-size:13px; color:var(--muto); margin:0 4px 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -311,7 +335,6 @@ svg text { font:700 11px system-ui,sans-serif; fill:#f7a94f; }
 <div id="pan"><div class="dentro">
   <div id="rec"><span class="muto" style="color:inherit">Recupero <b id="tempo">0:00</b></span>
     <span class="riga"><button class="pic" onclick="timerPiu(30)">+30"</button><button class="ico" onclick="timerStop()">✕</button></span></div>
-  <div id="pcorpo"></div>
 </div></div>
 
 <nav id="nav" aria-label="Sezioni"></nav>
@@ -475,8 +498,7 @@ function disegna() {
   $("vista").innerHTML = { allena: vAllena, diario: vDiario, storico: vStorico, tecnica: vTecnica, esporta: vEsporta }[tab]();
   const inSeduta = tab === "allena" && !!S.corso;
   document.body.classList.toggle("inseduta", inSeduta);
-  $("pan").style.display = inSeduta ? "block" : "none";
-  if (inSeduta) disPan();
+  $("pan").style.display = inSeduta && tInt ? "block" : "none";      // in basso resta solo il timer di recupero, quando gira
 }
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
 function apri(html, pagina) { fermaCamera(); const f = $("foglio"); f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; $("velo").style.display = "block"; }
@@ -559,8 +581,8 @@ function vScheda() {
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div></div>
       <div class="muto">${esc(f.testo)}</div>
-      <details ${scelta ? "open" : ""}><summary>Cosa si fa</summary><ol class="piano">`;
-  for (const e of se.es) h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
+      <details open><summary>Cosa si fa</summary><ol class="piano">`;
+  for (const e of se.es) h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
   h += `</ol></details><button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta</button>
       ${scelta ? `<button class="largo" onclick="schedaSel=null;disegna()">‹ Torna alla consigliata</button>` : ""}</div>
     <h2>Le sedute di pesi</h2><div class="altre tre3">`;
@@ -766,7 +788,7 @@ function vCibo() {
 function indietro() {
   const c = S.corso; if (!c) return;
   if (c.sid || c.es.some((e) => e.sets.some((r) => r.ok))) { annulla(); return; }
-  S.corso = null; salva(); timerStop(); disegna(); window.scrollTo(0, 0);
+  S.corso = null; esAperto = null; salva(); timerStop(); disegna(); window.scrollTo(0, 0);
 }
 
 /* ============ SEDUTA IN CORSO ============ */
@@ -817,7 +839,7 @@ function avvia(k, v, piena) {
   };
   S.corso = { tipo: k, data: d, nome: SEDUTE[k].nome, corto: SEDUTE[k].corto, inizio: Date.now(), note: "", es: lista.map((e) => copiaEs(e, quante(e))), cur: null,
     pronto: v ? { v, tot, col: L.col, piena: !!piena } : null, adatta: col === "arancione" || col === "rosso" ? { rir: "3", carico: 0.9 } : null };
-  S.corso.cur = primaAperta(0); prepara(); salva(); tab = "allena"; disegna(); window.scrollTo(0, 0); sveglio();
+  esAperto = null; S.corso.cur = primaAperta(0); prepara(); salva(); tab = "allena"; disegna(); window.scrollTo(0, 0); sveglio();
   if (!S.corso.es.length) aggiungi();
 }
 const rirSeduta = (e) => { const c = S.corso; return c && c.adatta ? c.adatta.rir : fase(c ? c.data : oggi()).rir(e); };
@@ -849,66 +871,111 @@ function prepara() {            // riempie la serie corrente con i numeri più p
   if (r.rip == null) r.rip = prima && prima.rip != null ? prima.rip : o ? o.rip : uv ? uv.rip : null;
   if (r.rir == null && !e.norir) r.rir = prima && prima.rir != null ? prima.rir : parseInt(String(rirSeduta(e)).split("-").pop(), 10);
 }
+/* Foto degli esercizi: due tempi del movimento (partenza e arrivo), che la pagina alterna.
+   File in img/es/<id>-1.jpg e <id>-2.jpg, da free-exercise-db (pubblico dominio). Se aggiungi un esercizio alla scheda,
+   metti qui il suo id, le due foto nella cartella e i loro nomi in FILE dentro sw.js. */
+const FOTO = {};
+("scapolari negative bulgaro panca-piana-man rematore-man rumeno-bil laterali-panca curl-inclinata posteriori-panca estensioni-man hack lat panca-incl-bil leg-curl " +
+ "laterali-cavo tricipiti-cavo leg-ext crunch-cavo affondi panca-incl-man rematore-bil rumeno-1g laterali-piedi martello gambe-sbarra calf-man calf-libero crunch-inverso corsa")
+  .split(" ").forEach((id) => { FOTO[id] = ["img/es/" + id + "-1.jpg", "img/es/" + id + "-2.jpg"]; });
+FOTO.appesa = ["img/es/appesa-1.jpg"];
+const fotoEs = (id, tocco) => (FOTO[id] ? `<div class="demo" ${tocco ? `onclick="infoEs('${esc(id)}')"` : ""}>${FOTO[id].map((f) => `<img src="${f}" alt="">`).join("")}</div>` : "");
+const miniEs = (id, cl, n) => `<i class="mini ${cl || ""}" ${FOTO[id] ? `style="background-image:url(${FOTO[id][0]})"` : ""}>${FOTO[id] ? "" : n || ""}</i>`;
+
+/* La seduta ha due schermate: l'elenco degli esercizi, e la pagina di un esercizio (foto, numeri, serie da segnare).
+   esAperto: indice dell'esercizio aperto, null se si guarda l'elenco. */
+let esAperto = null;
+function apriEs(i) {
+  const c = S.corso, e = c.es[i]; if (!e) return;
+  const s = e.sets.findIndex((r) => !r.ok);
+  if (s >= 0) { c.cur = { e: i, s }; prepara(); } else if (c.cur && c.cur.e === i) c.cur = primaAperta(0);
+  esAperto = i; salva(); disegna(); window.scrollTo(0, 0);
+}
+function chiudiEs() { esAperto = null; disegna(); window.scrollTo(0, 0); }
+const lunga = (e, r) => (r.kg != null && r.kg !== 0 ? it(r.kg) + " kg × " : "") + it(r.rip) + (e.u ? unita(e) : r.kg ? "" : " rip");
 function vSeduta() {
-  const c = S.corso, f = fase(c.data);
+  const c = S.corso;
+  if (esAperto != null && c.es[esAperto]) return vEsercizio(esAperto);
+  esAperto = null;
   let fatte = 0, tot = 0; c.es.forEach((e) => { tot += e.sets.length; fatte += e.sets.filter((r) => r.ok).length; });
   let h = `<div class="top"><div class="riga"><button class="ico dietro" aria-label="Indietro" onclick="indietro()">‹</button><div style="min-width:0;flex:1"><div class="tit">${esc(c.corto || c.nome)}</div>
     <div class="muto">${nomeGiorno(c.data)} ${dataIt(c.data)} · <span id="durata"></span> · ${fatte}/${tot} serie${c.pronto ? ` · <span class="sem ${c.pronto.col}">${c.pronto.tot}/25${c.adatta ? " adattata" : ""}</span>` : ""}</div></div>
     <button class="pri pic" onclick="fine()">Fine</button></div>
-    <div class="barra"><i style="width:${tot ? Math.round((fatte / tot) * 100) : 0}%"></i></div></div>`;
+    <div class="barra"><i style="width:${tot ? Math.round((fatte / tot) * 100) : 0}%"></i></div></div>
+    <p class="muto conta">Tocca un esercizio: si apre con la foto e le serie da segnare.</p>`;
   c.es.forEach((e, i) => {
-    const u = ultima(e.id, c.sid), att = c.cur && c.cur.e === i, tutto = e.sets.length && e.sets.every((r) => r.ok);
-    h += `<div class="card ex ${att ? "att" : ""} ${tutto ? "fatto" : ""}" id="ex${i}">
-      <div class="riga"><span class="n" onclick="scegli(${i},-1)">${tutto ? "✓" : i + 1}</span><div class="nome" onclick="scegli(${i},-1)">${esc(e.nome)}${daSalire(e, u) ? '<span class="badge">↑ sali di carico</span>' : ""}</div>
-        <button class="info" aria-label="Spiegazione dell'esercizio" onclick="infoEs('${esc(e.id)}')">i</button><button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div>
-      <div class="det"><div class="muto">${e.sets.length} × ${esc(e.rip)}${e.u ? " " + e.u : ""}${e.norir ? "" : " · RIR " + rirSeduta(e)}${REC[e.t] ? " · rec " + REC[e.t] + '"' : ""}${e.ss ? " · superserie" : ""}</div>
-      <div class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "prima volta"}</div>
-      ${att && e.nota ? `<div class="muto consiglio">${esc(e.nota)}</div>` : ""}
-      <div class="chips">`;
-    e.sets.forEach((r, s) => { h += `<button class="chip ${r.ok ? "ok" : ""} ${att && c.cur.s === s ? "cur" : ""}" onclick="scegli(${i},${s})">${r.ok ? esc(unaSerie(e, r)) : s + 1}</button>`; });
-    h += `<button class="chip piu" aria-label="Aggiungi una serie" onclick="piuSerie(${i})">+</button></div></div></div>`;
+    const ok = e.sets.filter((r) => r.ok).length, tutto = e.sets.length && ok === e.sets.length, att = !tutto && c.cur && c.cur.e === i;
+    h += `<button class="es ${att ? "att" : ""} ${tutto ? "fatto" : ""}" onclick="apriEs(${i})">${miniEs(e.id, "", i + 1)}
+      <span class="tx"><b>${esc(e.nome)}</b><small>${e.sets.length} × ${esc(e.rip)}${unita(e)}${e.ss ? " · superserie" : ""}${att ? " · adesso" : ""}</small></span><em>${tutto ? "✓" : ok + "/" + e.sets.length}</em></button>`;
   });
+  if (tot && fatte === tot) h += `<button class="pri largo grosso" onclick="fine()">Fine seduta</button>`;
   h += `<button class="largo" onclick="aggiungi()">+ Aggiungi esercizio</button>
     <div class="card"><label style="margin-top:0">Giorno della seduta</label><input type="date" value="${c.data}" onchange="if(this.value){S.corso.data=this.value;salva();tieni(disegna)}">
     <label>Note</label><textarea onchange="S.corso.note=this.value;salva()" placeholder="Com'è andata, fastidi, energia...">${esc(c.note)}</textarea></div>
     <button class="per largo" onclick="annulla()">Annulla seduta</button>`;
   return h;
 }
-function disPan() {
-  const c = S.corso, e = cE(), r = cS(), p = $("pcorpo");
-  if (!r) { p.innerHTML = `<div class="ptit"><b>${c.es.length ? "Tutte le serie fatte" : "Nessun esercizio"}</b></div><button class="pri largo" style="margin-top:0" onclick="${c.es.length ? "fine()" : "aggiungi()"}">${c.es.length ? "Fine seduta" : "+ Aggiungi esercizio"}</button>`; return; }
-  const u = e.u || "rip", f = fase(c.data);
+function vEsercizio(i) {
+  const c = S.corso, e = c.es[i], u = ultima(e.id, c.sid), I = INFO[e.id], comp = e.ss ? c.es.find((x) => x.id === e.ss) : null;
+  const tutto = e.sets.length && e.sets.every((r) => r.ok), un = e.u === "sec" ? "secondi" : e.u === "min" ? "minuti" : "ripetizioni";
+  let h = `<div class="top"><div class="riga"><button class="ico dietro" aria-label="Torna all'elenco" onclick="chiudiEs()">‹</button>
+    <div style="min-width:0;flex:1"><div class="tit">Esercizio ${i + 1} di ${c.es.length}</div><div class="muto">${esc(c.corto || c.nome)} · <span id="durata"></span></div></div>
+    <button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div></div>` + fotoEs(e.id, true) +
+    `<div class="nome" style="font-size:23px;line-height:1.2">${esc(e.nome)}${daSalire(e, u) ? '<span class="badge">↑ sali di carico</span>' : ""}</div>` +
+    (I ? `<div class="muto" style="margin-top:2px">${esc(I.m)}</div>` : "") +
+    `<div class="tess"><div><b>${e.sets.length}</b>serie</div><div><b>${esc(e.rip)}${unita(e)}</b>${un}</div><div><b>${e.norir ? "–" : rirSeduta(e)}</b>RIR</div><div><b>${REC[e.t] ? REC[e.t] + '"' : "–"}</b>recupero</div></div>
+    <p class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "è la prima volta"}</p>` +
+    (comp ? `<p class="muto">Superserie con <b style="color:var(--testo)">${esc(comp.nome)}</b>: una serie di questo, subito una dell'altro, poi 60" di pausa. L'app passa da sola dall'uno all'altro.</p>` : "") +
+    (e.nota ? `<div class="card consiglioCoach"><b>Nota del coach</b>${esc(e.nota)}</div>` : "") + `<h2>Le serie</h2>`;
+  e.sets.forEach((r, s) => {
+    if (c.cur && c.cur.e === i && c.cur.s === s) { h += adesso(e, r, s); return; }
+    const o = r.ok ? null : obiettivo(e, s);
+    h += `<button class="serie ${r.ok ? "ok" : ""}" onclick="scegli(${i},${s})"><i>${r.ok ? "✓" : s + 1}</i>
+      <span>${r.ok ? `<b>${esc(lunga(e, r))}</b>${r.rir != null && !e.norir ? " · RIR " + r.rir + (r.rir === 4 ? "+" : "") : ""}` : o ? "da fare · obiettivo " + esc(lunga(e, o)) : "da fare"}</span><small>${r.ok ? "modifica" : ""}</small></button>`;
+  });
+  h += `<button class="largo piuCibo" onclick="piuSerie(${i})">+ Aggiungi una serie</button>`;
+  if (tutto) {
+    const nx = primaAperta(i + 1);
+    h += nx ? `<button class="pri largo grosso" onclick="apriEs(${nx.e})">Prossimo: ${esc(c.es[nx.e].nome)} ›</button>` : `<button class="pri largo grosso" onclick="fine()">Fine seduta</button>`;
+  }
+  h += `<button class="largo" onclick="infoEs('${esc(e.id)}')">Come si fa, passo per passo</button><button class="largo" onclick="chiudiEs()">‹ Tutti gli esercizi</button>`;
+  return h;
+}
+// la serie da segnare adesso: kg, ripetizioni, RIR e il tasto Fatto
+function adesso(e, r, s) {
+  const c = S.corso, u = e.u || "rip";
   const st = (k, v, lab) => `<div class="st"><button onclick="passo('${k}',-1)">−</button><input inputmode="decimal" value="${esc(it(v))}" placeholder="–" onfocus="this.select()" onchange="scrivi('${k}',this.value)"><button onclick="passo('${k}',1)">+</button><small>${lab}</small></div>`;
   let extra = "";
   if (!r.ok) {
-    const o = obiettivo(e, c.cur.s), iw = c.es.findIndex((x) => !x.nokg && x.t === "m");
+    const o = obiettivo(e, s), iw = c.es.findIndex((x) => !x.nokg && x.t === "m");
     extra = o ? `<div class="obi"><span>Obiettivo</span><b>${esc(unaSerie(e, o))}</b><small>l'altra volta ${esc(unaSerie(e, o.prima))} · ${o.perche}</small></div>`
       : `<div class="obi"><span>Prima volta</span><small>cerca ${e.nokg ? "il ritmo" : "il carico"} che ti lascia ${e.norir ? "margine" : rirSeduta(e) + " ripetizioni nel serbatoio"}</small></div>`;
     // serie di avvicinamento: solo sul primo esercizio con carico, prima della prima serie
-    if (c.cur.e === iw && c.cur.s === 0 && r.kg) extra += `<div class="obi"><span>Riscaldamento</span><small>${it(arrot(r.kg * 0.5, e.p))} kg × 8, poi ${it(arrot(r.kg * 0.75, e.p))} kg × 4</small></div>`;
+    if (c.cur.e === iw && s === 0 && r.kg) extra += `<div class="obi"><span>Riscaldamento</span><small>${it(arrot(r.kg * 0.5, e.p))} kg × 8, poi ${it(arrot(r.kg * 0.75, e.p))} kg × 4</small></div>`;
   }
-  let h = `<div class="ptit"><b>${esc(e.nome)}</b> · serie ${c.cur.s + 1} di ${e.sets.length} · ${esc(e.rip)} ${e.u || "rip"}</div>${extra}
+  let h = `<div class="adesso"><div class="atit">Serie ${s + 1} di ${e.sets.length}${r.ok ? " · modifica" : ""}</div>${extra}
     <div class="ctl ${e.nokg ? "uno" : ""}">${e.nokg ? "" : st("kg", r.kg, "kg")}${st("rip", r.rip, u === "rip" ? "ripetizioni" : u === "sec" ? "secondi" : "minuti")}</div><div class="ult">`;
-  if (!e.norir) { h += `<div><div class="lbl">RIR (obiettivo ${rirSeduta(e)})</div><div class="rir">`; for (let n = 0; n <= 4; n++) h += `<button class="${r.rir === n ? "on" : ""}" onclick="rir(${n})">${n}${n === 4 ? "+" : ""}</button>`; h += `</div></div>`; }
-  h += `<button class="pri" onclick="fatto()">${r.ok ? "Salva modifica" : "Fatto ✓"}</button></div>`;
-  p.innerHTML = h;
+  if (!e.norir) { h += `<div><div class="lbl">Quante ne avevi ancora? (RIR ${rirSeduta(e)})</div><div class="rir">`; for (let n = 0; n <= 4; n++) h += `<button class="${r.rir === n ? "on" : ""}" onclick="rir(${n})">${n}${n === 4 ? "+" : ""}</button>`; h += `</div></div>`; }
+  return h + `<button class="pri" onclick="fatto()">${r.ok ? "Salva modifica" : "Fatto ✓"}</button></div></div>`;
 }
 function passo(k, dir) {
   const e = cE(), r = cS(); let v = r[k];
   const p = k === "kg" ? e.p || 2.5 : e.u ? 5 : 1;
   if (v == null) v = k === "kg" ? Math.max(0, dir * p) : intervallo(e)[0]; else v = Math.max(0, Math.round((v + dir * p) * 100) / 100);
-  r[k] = v; salva(); disPan();
+  r[k] = v; salva(); tieni(disegna);
 }
 function scrivi(k, v) { cS()[k] = num(v); salva(); }
-function rir(n) { const r = cS(); r.rir = r.rir === n ? null : n; salva(); disPan(); }
+function rir(n) { const r = cS(); r.rir = r.rir === n ? null : n; salva(); tieni(disegna); }
 function fatto() {
   const c = S.corso, e = cE(), r = cS(); if (!r) return;
   if (document.activeElement && document.activeElement.tagName === "INPUT") document.activeElement.blur();
   if (r.rip == null || r.rip <= 0) { avvisa("Inserisci " + (e.u ? "la durata" : "le ripetizioni")); return; }
   const era = r.ok; r.ok = true;
   if (!era && REC[e.t]) timerVia(REC[e.t]);
-  const prima = c.cur.e; avanza(); prepara(); salva(); tieni(disegna);
-  if (c.cur && c.cur.e !== prima) { const el = $("ex" + c.cur.e); if (el && el.scrollIntoView) el.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  const prima = c.cur.e; avanza(); prepara(); salva();
+  // superserie: la pagina passa da sola al compagno. Negli altri casi resta sull'esercizio, che mostra il tasto "Prossimo"
+  if (esAperto != null && c.cur && c.cur.e !== prima && c.es[c.cur.e].id === c.es[prima].ss) { esAperto = c.cur.e; disegna(); window.scrollTo(0, 0); avvisa("Superserie: ora " + c.es[c.cur.e].nome); }
+  else tieni(disegna);
 }
 function avanza() {
   const c = S.corso, i = c.cur.e, s = c.cur.s, e = c.es[i];
@@ -962,8 +1029,7 @@ function confAggiungi() {
   const b = daNome(); if (!b) return; const c = S.corso;
   if (c.es.some((x) => x.id === b.id)) { avvisa("È già nella seduta"); return; }
   const e = copiaEs(b, fase(c.data).serie(b)); delete e.ss; if (e.t === "sa") e.t = "i";
-  c.es.push(e); c.cur = { e: c.es.length - 1, s: 0 }; prepara(); salva(); chiudi(); disegna();
-  const el = $("ex" + c.cur.e); if (el && el.scrollIntoView) el.scrollIntoView({ block: "center" });
+  c.es.push(e); c.cur = { e: c.es.length - 1, s: 0 }; esAperto = c.cur.e; prepara(); salva(); chiudi(); disegna(); window.scrollTo(0, 0);
 }
 function sostituisci(i) { foglioNome("Sostituisci: " + esc(S.corso.es[i].nome), "confSostituisci(" + i + ")"); }
 function confSostituisci(i) {
@@ -977,7 +1043,7 @@ function confSostituisci(i) {
 }
 function rimuovi(i) {
   const c = S.corso; if (c.es[i].sets.some((r) => r.ok) && !confirm("Questo esercizio ha serie già fatte. Lo rimuovo?")) return;
-  c.es.splice(i, 1); c.cur = c.es.length ? primaAperta(Math.min(i, c.es.length - 1)) : null; prepara(); salva(); chiudi(); tieni(disegna);
+  c.es.splice(i, 1); esAperto = null; c.cur = c.es.length ? primaAperta(Math.min(i, c.es.length - 1)) : null; prepara(); salva(); chiudi(); tieni(disegna);
 }
 function fine() {
   const c = S.corso, es = [];
@@ -991,7 +1057,7 @@ function fine() {
   const s = { id: c.sid || Date.now(), data: c.data, tipo: c.tipo, nome: c.nome, corto: c.corto, es, note: c.note, pronto: c.pronto || null, minuti: c.sid ? c.minuti : Math.round((Date.now() - c.inizio) / 60000) };
   S.sedute = S.sedute.filter((x) => x.id !== s.id); S.sedute.push(s);
   S.sedute.sort((a, b) => (a.data < b.data ? -1 : a.data > b.data ? 1 : a.id - b.id));
-  S.corso = null; salva(); timerStop(); vai("storico"); riepilogo(s.id, true);
+  S.corso = null; esAperto = null; salva(); timerStop(); vai("storico"); riepilogo(s.id, true);
 }
 /* ============ RIEPILOGO DI FINE SEDUTA ============ */
 const forza = (e) => e.serie.reduce((m, r) => Math.max(m, r.kg ? r.kg * (1 + r.rip / 30) : r.rip || 0), 0);   // massimale stimato, o ripetizioni se a corpo libero
@@ -1021,20 +1087,20 @@ function riepilogo(id, appena) {
     <p class="muto">Il confronto è sulla serie più pesante: prima conta il carico, a parità di carico le ripetizioni.</p>
     <button class="pri largo" onclick="chiudi();vai('esporta')">Invia al coach</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
-function annulla() { if (confirm(S.corso.sid ? "Chiudo senza salvare le modifiche?" : "Cancello la seduta in corso senza salvarla?")) { S.corso = null; salva(); timerStop(); disegna(); } }
+function annulla() { if (confirm(S.corso.sid ? "Chiudo senza salvare le modifiche?" : "Cancello la seduta in corso senza salvarla?")) { S.corso = null; esAperto = null; salva(); timerStop(); disegna(); } }
 function riapri(id) {
   if (S.corso) { avvisa("Chiudi prima la seduta in corso"); return; }
   const s = S.sedute.find((x) => x.id === id), c = catalogo(); if (!s) return;
   S.corso = { sid: s.id, tipo: s.tipo, data: s.data, nome: s.nome, corto: s.corto, inizio: Date.now(), minuti: s.minuti, note: s.note || "", pronto: s.pronto || null, cur: null,
     es: s.es.map((e) => Object.assign({}, c[e.id] || {}, { id: e.id, nome: e.nome, u: e.u || "", sets: e.serie.map((r) => ({ kg: r.kg, rip: r.rip, rir: r.rir, ok: true })) })) };
-  S.corso.cur = { e: 0, s: 0 }; salva(); vai("allena");
+  S.corso.cur = null; esAperto = null; salva(); vai("allena");
 }
 
 /* ============ TIMER DI RECUPERO ============ */
 let tFine = 0, tInt = null, suonato = false;
-function timerVia(sec) { tFine = Date.now() + sec * 1000; suonato = false; $("rec").style.display = "flex"; clearInterval(tInt); tInt = setInterval(tic, 250); tic(); }
+function timerVia(sec) { tFine = Date.now() + sec * 1000; suonato = false; $("rec").style.display = "flex"; $("pan").style.display = "block"; clearInterval(tInt); tInt = setInterval(tic, 250); tic(); }
 function timerPiu(sec) { tFine = Math.max(tFine, Date.now()) + sec * 1000; suonato = false; tic(); }
-function timerStop() { clearInterval(tInt); tInt = null; $("rec").style.display = "none"; }
+function timerStop() { clearInterval(tInt); tInt = null; $("rec").style.display = "none"; $("pan").style.display = "none"; }
 function tic() {
   const r = Math.ceil((tFine - Date.now()) / 1000), a = Math.abs(r);
   $("tempo").textContent = (r < 0 ? "+" : "") + Math.floor(a / 60) + ":" + String(a % 60).padStart(2, "0");
@@ -1277,7 +1343,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.3 · app v13</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v2.3 · app v14</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -1644,7 +1710,7 @@ function infoEs(id) {
   else if (REC[e.t]) r.push([`rec ${REC[e.t]}"`, `Recupero tra una serie e l'altra. Il timer parte da solo quando premi "Fatto" e vibra alla fine.`]);
   if (!e.u && !e.nokg) r.push(["↑ sali di carico", "Compare accanto al nome quando l'ultima volta hai raggiunto il massimo delle ripetizioni in tutte le serie."]);
   r.push([f.nome.split(" · ")[0], f.testo]);
-  let h = `<div class="riga tra"><div class="nome" style="font-size:21px;line-height:1.2">${esc(e.nome)}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>`;
+  let h = `<div class="riga tra"><div class="nome" style="font-size:21px;line-height:1.2">${esc(e.nome)}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>` + fotoEs(id);
   if (I) h += `<p><span class="pillola">${esc(I.m)}</span></p><p>${esc(I.p)}</p>`;
   else h += `<p class="muto">Esercizio aggiunto da te: non ho una scheda di spiegazione. Chiedila al coach in chat.</p>`;
   h += `<h2>Cosa vogliono dire i numeri</h2><div class="card spi">${r.map((x) => `<div><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join("")}</div>`;
@@ -1934,6 +2000,7 @@ function togliExtra(id) { const r = recCibo(oggi(), true); r.extra = (r.extra ||
    e la rimette. Solo dalla home, senza nulla di aperto, il tasto esce dall'app. */
 function passoIndietro() {
   if ($("foglio").style.display === "block") { chiudi(); return true; }
+  if (tab === "allena" && S.corso && esAperto != null) { chiudiEs(); return true; }
   if (tab === "allena" && S.corso) { indietro(); return true; }
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
   if (tab !== "allena") { vai("allena"); return true; }
