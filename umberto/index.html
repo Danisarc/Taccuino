@@ -262,6 +262,7 @@ ol.piano small.muto { font-size:12px; }
 .blocco svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .blocco span { flex:1; min-width:0; } .blocco b { display:block; font-size:17px; } .blocco small { color:var(--muto); font-size:13px; }
 .blocco em { flex:none; font-style:normal; font-size:28px; color:var(--muto); line-height:1; padding-bottom:4px; }
+.blocco i.th { width:66px; height:66px; border-radius:17px; background:#141b18 center/cover no-repeat; }
 .tile { text-align:left; padding:14px; border-radius:20px; background:var(--card); display:flex; flex-direction:column; gap:2px; min-height:96px; }
 .tile small { color:var(--muto); font-size:12px; } .tile b { font-size:20px; line-height:1.2; } .tile span { color:var(--muto); font-size:12px; }
 .testata { margin-bottom:14px; } .testata h1 { margin:0; }
@@ -478,6 +479,7 @@ const SEDUTE = {
     { id:"curl-inclinata", nome:"Curl su panca inclinata 45°", serie:3, rip:"10-12", t:"sb", ss:"laterali-panca", p:1, nota:"Gomito dietro il busto." },
     { id:"posteriori-panca", nome:"Alzate posteriori a pancia in giù", serie:2, rip:"15-20", t:"sa", ss:"estensioni-man", p:1, nota:"Superserie con le estensioni. Braccia quasi tese." },
     { id:"estensioni-man", nome:"Estensioni sopra la testa con manubrio", serie:2, rip:"10-15", t:"sb", ss:"posteriori-panca", p:1, nota:"Gomiti stretti, scendi fino in fondo." },
+    { id:"rollout", nome:"Rollout con bilanciere, in ginocchio", serie:3, rip:"6-10", t:"i", nokg:1, nota:"Vai avanti solo finché la schiena resta piatta: all'inizio anche pochi centimetri. Mai a cedimento." },
   ]},
   B: { nome:"B · a casa, da solo", corto:"B · a casa", es: [
     { id:"squat-bil", nome:"Squat con bilanciere, dai cavalletti", serie:3, rip:"6-10", t:"m", p:2.5, nota:"Sei da solo: mai a cedimento. L'ultima ripetizione deve salire senza rallentare. Coscia almeno parallela, talloni a terra." },
@@ -786,7 +788,7 @@ const fotoSed = (se) => { const e = se.es.filter((x) => x.t === "m" || x.t === "
 function vScheda() {
   const q = quadro(), { f, sett, fatte } = q, pross = prossima(), scelta = !!schedaSel, k = schedaSel || pross, se = SEDUTE[k];
   const nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), gia = fatte[k];
-  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 1.0 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q) +
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 1.1 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q) +
     `<p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 3</b>. I giorni li scegli tu.</p>
     <div class="card eroe ${fotoSed(se) ? "confoto" : ""}" ${fotoSed(se) ? `style="--f:url(${fotoSed(se)})"` : ""}><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : "Prossima consigliata"}${gia ? " · già fatta " + nomeGiorno(gia.data) : ""}</span><span class="pillola">${esc(f.nome.split(" · ")[0])}</span></div>
       <div class="grande">${esc(se.nome)}</div>
@@ -1442,7 +1444,7 @@ function confAlimento() {
 /* Guida "Sostituzioni": quanti grammi di un alimento comune coprono il carboidrato o la proteina di pranzo e cena, sul piano di oggi */
 function vCambi() {
   const k = modoOn(oggi()) ? 0 : 1, pasti = ["pra", "cen"].map(pastoDi);
-  let h = testaGuida("Sostituzioni") + `
+  let h = testaGuida("Sostituzioni") + fotoGuida("img/pasti/prep.jpg", "Non hai un alimento?", "Cosa mettere al suo posto, e quanti grammi") + `
   <p class="muto">Nel piano c'è un alimento, in casa ne hai un altro: ecco quanto metterne. Pesi a crudo; per i prodotti in scatola, sgocciolati.</p>
   <div class="card"><ul>
     <li>Un <b>carboidrato</b> si cambia con un altro carboidrato, a parità di carboidrati.</li>
@@ -1551,7 +1553,7 @@ function prepara() {            // riempie la serie corrente con i numeri più p
    metti qui il suo id, le due foto nella cartella e i loro nomi in FILE dentro sw.js. */
 const FOTO = {};
 ("negative goblet panca-piana-man rematore-man rumeno-bil laterali-panca curl-inclinata posteriori-panca estensioni-man squat-bil lat pectoral leg-ext " +
- "laterali-cavo curl-cavo spinte-cavo crunch-inverso trazioni affondi panca-incl-man rematore-bil rumeno-1g laterali-piedi martello gambe-sbarra calf-man")
+ "laterali-cavo curl-cavo spinte-cavo crunch-inverso rollout plank-lato crunch-cavo trazioni affondi panca-incl-man rematore-bil rumeno-1g laterali-piedi martello gambe-sbarra calf-man")
   .split(" ").forEach((id) => { FOTO[id] = ["img/es/" + id + "-1.jpg", "img/es/" + id + "-2.jpg"]; });
 FOTO["rumeno-casa"] = FOTO["rumeno-bil"];
 const fotoEs = (id, tocco) => (FOTO[id] ? `<div class="demo" ${tocco ? `onclick="infoEs('${esc(id)}')"` : ""}>${FOTO[id].map((f) => `<img src="${f}" alt="">`).join("")}</div>` : "");
@@ -1916,29 +1918,68 @@ const omino = (k) => `<svg viewBox="0 0 160 260">${OMINO[k]}</svg>`;
 let guida = null;
 function apriGuida(g) { guida = g; disegna(); window.scrollTo(0, 0); }
 const GUIDE = [
-  ["trazioni", "Trazioni", "Presa, negative e gli esercizi che le costruiscono", '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>'],
-  ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'],
-  ["sigle", "Sigle e parole", "RIR, superserie, recupero, deload e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>'],
-  ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],
+  ["addome", "Addome", "Il percorso per averlo forte e visibile, in tre tappe", '<path d="M8 3h8v18H8zM8 9h8M8 15h8M12 3v18"/>', "img/es/rollout-2.jpg"],
+  ["trazioni", "Trazioni", "Presa, negative e gli esercizi che le costruiscono", '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>', "img/es/trazioni-1.jpg"],
+  ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', "img/es/panca-piana-man-1.jpg"],
+  ["sigle", "Sigle e parole", "RIR, superserie, recupero, deload e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>', "img/allenamento.jpg"],
+  ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>', "img/pasti/prep.jpg"],
 ];
 function vTecnica() {
   if (guida === "trazioni") return vTrazioni();
   if (guida === "esercizi") return vEsercizi();
   if (guida === "sigle") return vSigle();
   if (guida === "cambi") return vCambi();
+  if (guida === "addome") return vAddome();
   return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
-    GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')"><i><svg viewBox="0 0 24 24">${g[3]}</svg></i><span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
+    GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')">${g[4] ? `<i class="th" style="background-image:url(${g[4]})"></i>` : `<i><svg viewBox="0 0 24 24">${g[3]}</svg></i>`}<span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
 }
+const fotoGuida = (img, t, s) => `<div class="card fotoTesta" style="background-image:url(${img})"><span><b>${t}</b><small>${s}</small></span></div>`;
 const testaGuida = (t) => `<div class="riga testata">${freccia("apriGuida(null)")}<div><div class="sopra">Guide</div><h1>${t}</h1></div></div>`;
 function vEsercizi() {
-  let h = testaGuida("Esercizi") + `<p class="muto">Tocca un esercizio per aprire la sua spiegazione.</p>`; const visti = {};
+  let h = testaGuida("Esercizi") + fotoGuida("img/es/panca-piana-man-1.jpg", "Tutti gli esercizi della scheda", "Foto, come si fa, dove sentirlo") + `<p class="muto">Tocca un esercizio per aprire la sua spiegazione.</p>`; const visti = {};
   for (const k of ["A", "B", "C"]) {
     const es = SEDUTE[k].es.filter((e) => !visti[e.id]); if (!es.length) continue;
     h += `<h2>${esc(SEDUTE[k].nome)}</h2><div class="card"><ol class="piano">`;
-    for (const e of es) { visti[e.id] = 1; h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}<br><small class="muto">${INFO[e.id] ? esc(INFO[e.id].m) : ""}</small></span><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`; }
+    for (const e of es) { visti[e.id] = 1; h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}<br><small class="muto">${INFO[e.id] ? esc(INFO[e.id].m) : ""}</small></span><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`; }
     h += `</ol></div>`;
   }
   return h;
+}
+/* Guida Addome: copia in breve di piano/addome.md dell'atleta. Se cambia il percorso, va aggiornata anche questa. */
+function vAddome() {
+  const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
+  const due = (a, ta, da, b, tb, db) => `<div class="fig"><div><img src="${a}" alt=""><b>${ta}</b>${da}</div><div><img src="${b}" alt=""><b>${tb}</b>${db}</div></div>`;
+  return testaGuida("Addome") + fotoGuida("img/es/gambe-sbarra-2.jpg", "Forte adesso, visibile dopo", "Prima si costruisce il muscolo, poi si scopre") +
+  `<h2>Come si arriva a vederli</h2>` + lista([
+    "<b>Il muscolo si costruisce con esercizi duri e progressivi</b>, come petto e gambe: poche serie fatte bene, non centinaia di ripetizioni.",
+    "<b>Il grasso sopra scende solo con la dieta.</b> Gli esercizi per l'addome non bruciano il grasso della pancia.",
+    "<b>Adesso stai mettendo muscolo</b>, con le calorie un po' sopra il consumo: è il momento di costruire l'addome, non di scoprirlo. Se il peso sale e il giro vita resta fermo, sta andando bene."]) +
+  `<h2>I movimenti</h2>` +
+  due("img/es/rollout-2.jpg", "Rollout", "L'unico con la crescita misurata in uno studio: per questo c'è da subito", "img/es/gambe-sbarra-2.jpg", "Dal basso", "Sollevamento gambe alla sbarra, crunch inverso") +
+  due("img/es/crunch-cavo-2.jpg", "Flessione con carico", "Crunch al cavo: dalla tappa 2", "img/es/plank-lato-2.jpg", "Fianchi", "Già allenati da rematori, affondi e stacchi su una gamba") +
+  `<h2>Le tre tappe</h2><div class="card"><table>
+    <tr><td><b>1 · Fondamenta</b><br><span class="muto">settimane 1-8</span></td><td>9 serie a settimana, una per seduta. Impari il rollout e a muovere bacino e costole, non le anche.</td></tr>
+    <tr><td><b>2 · Carico</b><br><span class="muto">dalla settimana 10</span></td><td>rollout sempre più lungo, gambe sempre più tese alla sbarra, entra il crunch al cavo: 12 serie.</td></tr>
+    <tr><td><b>3 · Scoprirli</b><br><span class="muto">quando lo decidi con il coach</span></td><td>qualche settimana di dieta in leggero deficit, tenendo l'allenamento: è lì che si vedono.</td></tr></table></div>
+  <h2>La settimana, tappa 1</h2><div class="card"><table>
+    <tr><td><b>Seduta A</b></td><td>rollout con bilanciere 3 × 6-10</td></tr>
+    <tr><td><b>Seduta B</b></td><td>crunch inverso a terra 3 × 10-15</td></tr>
+    <tr><td><b>Seduta C</b></td><td>sollevamento gambe alla sbarra 3 × 8-15</td></tr></table></div>
+  <h2>Come si fa bene</h2>` + lista([
+    "<b>Avvicina costole e bacino.</b> Se si muovono solo le gambe o il busto resta dritto, lavorano le anche.",
+    "<b>Espira mentre chiudi</b>, tieni 1 secondo, torna in 2-3 secondi.",
+    "<b>Nel rollout</b> vai ogni volta un po' più lontano, ma solo finché la schiena resta piatta.",
+    "<b>Non tutti i giorni</b>: come ogni muscolo, cresce quando recupera."]) +
+  `<h2>I traguardi</h2>` + lista([
+    "<b>Giro vita</b> all'ombelico, ogni 2 settimane: fermo mentre il peso sale.",
+    "<b>Rollout</b>: 3 × 10 fino a braccia distese, a schiena piatta.",
+    "<b>Sollevamento gambe alla sbarra</b>: 3 × 10 a gambe tese, senza dondolio."]) +
+  `<h2>Cosa non serve</h2>` + lista([
+    "<b>Centinaia di crunch a corpo libero</b>: allenano la resistenza, non fanno crescere né dimagrire.",
+    "<b>Fasce, creme, sudare di più</b>: fanno perdere acqua per qualche ora.",
+    "<b>\"Addominali alti\" e \"bassi\"</b>: è un muscolo solo. Cambiare esercizio sposta un po' l'accento, non lo divide in due.",
+    "<b>Correggere la postura con gli addominali</b>: negli studi rinforzarli non cambia l'inclinazione del bacino."]) +
+  `<p class="muto">Sulla crescita degli addominali gli studi diretti sono pochi: il rollout è l'unico misurato, il resto segue i principi che valgono per tutti i muscoli.</p>`;
 }
 function vSigle() {
   const v = [["RIR", "Ripetizioni in riserva: quante ne avresti ancora fatte, pulite, a fine serie. RIR 2 = ti fermi con 2 nel serbatoio. RIR 0 = non ne usciva più nessuna."],
@@ -1949,10 +1990,12 @@ function vSigle() {
     ["Massimale stimato", "Il carico che faresti per una sola ripetizione, calcolato dalla tua serie migliore. Serve a confrontare sedute con carichi e ripetizioni diversi."],
     ["Rientro", "Le prime settimane dopo uno stop: meno serie e più margine, per riabituare i tendini."], ["Deload", "Settimana di scarico: metà serie e sforzo basso, per recuperare."],
     ["Seduta minima", "I primi 3 esercizi e basta. Per i giorni no: conta come fatta."], ["Come stai oggi", "Cinque voci da 1 a 5. 21-25 verde, 16-20 giallo, 11-15 arancione, fino a 10 rosso: la seduta si adatta."]];
-  return testaGuida("Sigle e parole") + `<div class="card spi">${v.map((x) => `<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`;
+  return testaGuida("Sigle e parole") + fotoGuida("img/allenamento.jpg", "Le parole della scheda", "Cosa vogliono dire, in una riga") +
+    `<div class="fig"><div><img src="img/es/panca-piana-man-1.jpg" alt=""><b>Multiarticolare</b>Più articolazioni: panca, squat, rematore</div><div><img src="img/es/curl-inclinata-1.jpg" alt=""><b>Isolamento</b>Una sola: curl, alzate, leg extension</div></div>
+    <div class="card spi">${v.map((x) => `<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`;
 }
 function vTrazioni() {
-  return testaGuida("Trazioni") + `
+  return testaGuida("Trazioni") + fotoGuida("img/es/trazioni-2.jpg", "Trazioni alla sbarra", "Presa, negative, e come arrivarci") + `
   <p class="muto">Se le trazioni complete non escono ancora, o ne escono poche: i tre esercizi che le costruiscono.</p>
   <div class="card"><div class="nome">La presa, uguale per tutti e tre</div><ul>
     <li><b>Prona</b>: palmi in avanti, pollice chiuso attorno alla sbarra.</li>
@@ -2301,6 +2344,9 @@ const navVetro = (() => {
    m muscoli · p a cosa serve · c come si fa · s dove sentirlo · e errori · a alternativa se non puoi farlo.
    Le chiavi sono gli id degli esercizi della scheda. */
 const INFO = {
+  "rollout": { m: "Addominali, dorsali", p: "È l'esercizio per l'addome con la crescita meglio misurata: in uno studio di 10 settimane il retto dell'addome è cresciuto del 12-18%, con il plank no.",
+    c: ["In ginocchio, mani sul bilanciere caricato con dischi tondi, braccia tese.", "Bacino leggermente in retroversione, addome contratto.", "Fai rotolare il bilanciere in avanti finché riesci a tenere la schiena piatta.", "Torna indietro tirando con l'addome, non con le anche."],
+    s: "Addome che tiene per tutto il movimento, soprattutto nel punto più lontano.", e: ["Schiena che si inarca nel punto più lontano.", "Andare più avanti di quanto controlli.", "Tornare spingendo il sedere indietro."], a: "Crunch inverso a terra, 3 × 10-15." },
   "goblet": { m: "Quadricipiti, glutei", p: "Con il manubrio al petto e i talloni rialzati scendi dritto e profondo: la coscia lavora tanto anche con pochi chili.",
     c: ["Talloni su un disco o un rialzo di 2-3 cm, piedi alla larghezza delle spalle.", "Manubrio in verticale contro il petto, gomiti sotto.", "Scendi in 3\" più in basso che puoi, busto alto.", "Fermati 1\" in basso, poi risali spingendo su tutto il piede."],
     s: "Tutta la coscia davanti, soprattutto in basso.", e: ["Fermarsi a metà discesa.", "Ginocchia che cadono verso l'interno.", "Busto che crolla in avanti."], a: "Affondi indietro con manubri." },
