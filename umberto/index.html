@@ -13,9 +13,9 @@
         --testo:#f2f6f3; --muto:#93a39a; --verde:#3ddc84; --verde2:#1f8f55; --verde3:rgba(61,220,132,.15);
         --arancio:#f7a94f; --rosso:#ff6b5e; }
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html { background:var(--bg); }
+html { background:var(--bg); overflow-x:hidden; overflow-x:clip; }
 body { margin:0 auto; color:var(--testo); font:16px/1.4 system-ui,'Segoe UI',Roboto,Arial,sans-serif; -webkit-font-smoothing:antialiased;
-       padding:calc(18px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom)); max-width:560px; min-height:100vh; }
+       padding:calc(18px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom)); max-width:560px; min-height:100vh; min-height:100dvh; }
 body.inseduta { padding-bottom:calc(180px + env(safe-area-inset-bottom)); }
 /* sfondo con luci colorate: è quello che il vetro della barra lascia intravedere */
 body::before { content:""; position:fixed; inset:0; z-index:-1; background:
@@ -145,7 +145,7 @@ ol.piano b { flex:none; color:var(--muto); font-weight:600; font-size:13px; font
 .adesso .obi { white-space:normal; flex-wrap:wrap; row-gap:0; }
 
 /* pannello fisso in basso: solo il timer di recupero */
-#pan { position:fixed; left:0; right:0; bottom:calc(82px + env(safe-area-inset-bottom)); z-index:6; display:none; padding:0 12px; pointer-events:none; }
+#pan { position:fixed; left:0; right:0; bottom:calc(82px + env(safe-area-inset-bottom) + var(--su, 0px)); z-index:6; display:none; padding:0 12px; pointer-events:none; }
 #pan .dentro { pointer-events:auto; max-width:440px; margin:0 auto; background:rgba(17,24,21,.86); -webkit-backdrop-filter:blur(26px) saturate(160%); backdrop-filter:blur(26px) saturate(160%);
                border:1px solid rgba(255,255,255,.14); border-radius:26px; padding:8px; box-shadow:0 12px 40px rgba(0,0,0,.55); }
 #rec { display:none; align-items:center; justify-content:space-between; background:var(--verde3); border:1px solid rgba(61,220,132,.4); border-radius:18px; padding:4px 6px 4px 14px; color:var(--verde); }
@@ -167,7 +167,7 @@ ol.piano b { flex:none; color:var(--muto); font-weight:600; font-size:13px; font
 .lbl { font-size:11px; color:var(--muto); margin:0 0 3px 2px; }
 
 /* barra in basso: vetro liquido (adattata da webgl-liquid-glass, licenza MIT) */
-#nav { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom)); width:min(calc(100% - 24px),440px); height:60px;
+#nav { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom) + var(--su, 0px)); width:min(calc(100% - 24px),440px); height:60px;
        display:flex; align-items:center; padding:0 6px; border-radius:30px; z-index:7; cursor:pointer;
        -webkit-backdrop-filter:blur(40px) saturate(170%); backdrop-filter:blur(40px) saturate(170%); background:rgba(255,255,255,.11);
        box-shadow:0 8px 32px rgba(0,0,0,.40), inset 0 0 0 .5px rgba(255,255,255,.22);
@@ -668,8 +668,23 @@ function disegna() {
   const di = daInviare(); $("nav").classList.toggle("nuovo", !!(di.s || di.g));      // pallino sulla voce Coach: c'è qualcosa da inviare
   if (tab === "diario" && vistaFoto) caricaFoto();
   $("pan").style.display = inSeduta && tInt ? "block" : "none";      // in basso resta solo il timer di recupero, quando gira
-  allinea();
+  allinea(); ancoraPoi();
 }
+/* La barra deve stare sul bordo basso della parte VISIBILE dello schermo. Sul telefono, passando da una pagina lunga a una corta,
+   la barra degli indirizzi di Chrome ricompare senza che la pagina scorra, e gli elementi fissi restano agganciati più in basso,
+   fuori dallo schermo. Qui si misura di quanto la barra sporge sotto la parte visibile e la si rialza (--su).
+   Con la tastiera aperta la parte visibile si accorcia molto: in quel caso non si tocca niente. */
+function ancoraBarra() {
+  const vv = window.visualViewport, nav = $("nav"); if (!vv || !nav) return;
+  const st = document.documentElement.style, prima = parseFloat(st.getPropertyValue("--su")) || 0;
+  const fuori = nav.getBoundingClientRect().bottom + prima + 12 - (vv.offsetTop + vv.height);
+  const su = fuori > 1 && fuori < 170 && vv.scale < 1.02 ? Math.round(fuori) : 0;
+  if (su !== prima) st.setProperty("--su", su + "px");
+}
+let tAncora = 0;
+const ancoraPoi = () => { ancoraBarra(); clearTimeout(tAncora); tAncora = setTimeout(ancoraBarra, 380); };
+if (window.visualViewport) { visualViewport.addEventListener("resize", ancoraPoi); visualViewport.addEventListener("scroll", ancoraPoi); }
+window.addEventListener("resize", ancoraPoi); window.addEventListener("scroll", ancoraPoi, { passive: true }); window.addEventListener("pageshow", ancoraPoi);
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
 // foglioSu dice se il foglio è aperto: quando si chiude scivola giù per un attimo, ma per l'app è già chiuso
 let foglioSu = false, tChiudi = null;
@@ -2080,7 +2095,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.0 · alimentazione v3.0 · app v21</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.1 · app v5</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
