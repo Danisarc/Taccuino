@@ -1982,6 +1982,7 @@ const GUIDE = [
   ["trazioni", "Trazioni", "I tre esercizi alla sbarra, con disegni, errori e test", '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>'],
   ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'],
   ["sigle", "Sigle e parole", "RIR, superserie, recupero, deload e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>'],
+  ["ormoni", "Energia e ormoni", "Testosterone e fertilità: cosa conta davvero, cosa no", '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'],
   ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],
 ];
 function vTecnica() {
@@ -1989,6 +1990,7 @@ function vTecnica() {
   if (guida === "esercizi") return vEsercizi();
   if (guida === "sigle") return vSigle();
   if (guida === "cambi") return vCambi();
+  if (guida === "ormoni") return vOrmoni();
   return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
     GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')"><i><svg viewBox="0 0 24 24">${g[3]}</svg></i><span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
 }
@@ -2002,6 +2004,43 @@ function vEsercizi() {
     h += `</ol></div>`;
   }
   return h;
+}
+/* Guida generale, uguale per chiunque: niente dati personali. Distingue ciò che è ben dimostrato da ciò che è solo ragionevole. */
+function vOrmoni() {
+  const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
+  return testaGuida("Energia e ormoni") + `<p class="muto">Testosterone e fertilità maschile dipendono soprattutto da come dormi, quanto grasso hai addosso e come vivi. Nessun cibo e nessun integratore li alza da solo.</p>
+  <h2>Quello che conta davvero</h2>` + lista([
+    "<b>Dormire 7-9 ore.</b> Una settimana di sonno corto abbassa il testosterone in un uomo giovane. È la leva più forte.",
+    "<b>Allenarsi con i pesi con costanza</b>, senza esagerare: troppo volume con poco recupero fa l'effetto opposto.",
+    "<b>Grasso corporeo nella norma.</b> Il grasso in eccesso, soprattutto sulla pancia, abbassa il testosterone; perderlo lo rialza.",
+    "<b>Dimagrire piano.</b> Un deficit piccolo non crea problemi; diete molto strette e lunghe abbassano ormoni ed energia.",
+    "<b>Alcol poco o niente</b>, niente fumo, niente cannabis: pesano sia sugli ormoni sia sulla qualità dello sperma.",
+    "<b>Stress.</b> Quando resta alto per settimane, il desiderio e l'energia scendono anche con esami normali."]) +
+  `<h2>A tavola</h2><p class="muto">Non esistono cibi che "alzano il testosterone". Esiste una dieta che non gli fa mancare niente: quella del tuo piano lo fa già.</p>` + lista([
+    "<b>Grassi sufficienti</b>: olio extravergine, frutta secca, uova, pesce grasso. Le diete quasi senza grassi lo abbassano un po'.",
+    "<b>Zinco</b>: carne, pesce, uova, legumi, frutta secca. Serve integrarlo solo con una carenza.",
+    "<b>Vitamina D</b>: pesce grasso, uova, e soprattutto sole. Si integra dopo un esame del sangue.",
+    "<b>Pesce 2-3 volte a settimana</b>, di cui una di pesce grasso: salmone, sgombro, alici.",
+    "<b>Frutta e verdura ogni giorno</b>, di colori diversi, e una manciata di noci: sono legate a una qualità dello sperma migliore.",
+    "<b>Calorie giuste</b>: mangiare troppo poco conta più di qualsiasi alimento."]) +
+  `<h2>Per la fertilità</h2>` + lista([
+    "<b>Tieni la zona al fresco.</b> Niente computer sulle gambe, bagni molto caldi e saune frequenti; biancheria non stretta. Le prove sono modeste, ma non costa niente.",
+    "<b>Alzati spesso</b> se lavori seduto: ore di fila sulla sedia scaldano.",
+    "<b>Febbre alta</b>: può abbassare i valori per 2-3 mesi, poi tornano.",
+    "<b>Mai testosterone o anabolizzanti.</b> Spengono la produzione naturale e possono azzerare gli spermatozoi.",
+    "<b>Lunghi periodi di astinenza non migliorano la qualità</b>: aumentano il volume, ma gli spermatozoi si muovono peggio.",
+    "<b>Ci vogliono circa 3 mesi.</b> È il tempo in cui si formano spermatozoi nuovi: ogni cambiamento si vede dopo."]) +
+  `<h2>Cosa non serve</h2>` + lista([
+    "<b>\"Testosterone booster\"</b> (tribulus, fieno greco, acido D-aspartico, maca): nessun effetto utile dimostrato.",
+    "<b>Zinco, vitamina D, ferro a caso</b>: aiutano solo chi è carente. Il ferro in eccesso fa male.",
+    "<b>Antiossidanti \"per la fertilità\"</b>: gli studi danno risultati incerti. Se servono, li indica lo specialista.",
+    "<b>Cibi miracolosi</b>: ostriche, zenzero, aglio, avocado. Sono buoni cibi, non una terapia."]) +
+  `<h2>Quando andare dal medico</h2>` + lista([
+    "Stanchezza o calo del desiderio che durano <b>più di qualche settimana</b>.",
+    "Per misurare il testosterone: prelievo <b>al mattino presto, a digiuno</b>, dopo una notte dormita bene. Un valore basso va ripetuto.",
+    "Se si cerca una gravidanza da <b>12 mesi</b> senza riuscirci: lo spermiogramma è l'esame da fare.",
+    "Dolore, gonfiore o un nodulo a un testicolo: <b>subito</b>."]) +
+  `<p class="muto">Sono indicazioni generali, non una visita. Sonno, allenamento, peso e alcol sono ben dimostrati; il resto è pratica ragionevole.</p>`;
 }
 function vSigle() {
   const v = [["RIR", "Ripetizioni in riserva: quante ne avresti ancora fatte, pulite, a fine serie. RIR 2 = ti fermi con 2 nel serbatoio. RIR 0 = non ne usciva più nessuna."],
