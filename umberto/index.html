@@ -681,8 +681,20 @@ function ancoraBarra() {
   const su = fuori > 1 && fuori < 170 && vv.scale < 1.02 ? Math.round(fuori) : 0;
   if (su !== prima) st.setProperty("--su", su + "px");
 }
-let tAncora = 0;
-const ancoraPoi = () => { ancoraBarra(); clearTimeout(tAncora); tAncora = setTimeout(ancoraBarra, 380); };
+// dopo ogni cambio di pagina si ricontrolla a ogni fotogramma per un secondo: lo schermo può assestarsi con qualche fotogramma di ritardo
+let fineAncora = 0, giroAncora = 0;
+function ancoraPoi() {
+  fineAncora = performance.now() + 1000; ancoraBarra(); if (giroAncora) return;
+  const giro = () => { ancoraBarra(); giroAncora = performance.now() < fineAncora ? requestAnimationFrame(giro) : 0; };
+  giroAncora = requestAnimationFrame(giro);
+}
+/* Un tocco sulla barra cambia pagina; subito dopo il telefono manda anche il "click" di quel tocco. Se in quell'istante la barra
+   non è sotto il dito, il click finisce su quello che c'è nella pagina nuova (un tasto, una guida). Per mezzo secondo dopo un tocco
+   sulla barra, i click fuori dalla barra si ignorano. navToccata la segna la barra quando si alza il dito. */
+window.navToccata = -1e9;
+document.addEventListener("click", (e) => {
+  if (performance.now() - window.navToccata < 500 && !(e.target.closest && e.target.closest("#nav"))) { e.preventDefault(); e.stopPropagation(); }
+}, true);
 if (window.visualViewport) { visualViewport.addEventListener("resize", ancoraPoi); visualViewport.addEventListener("scroll", ancoraPoi); }
 window.addEventListener("resize", ancoraPoi); window.addEventListener("scroll", ancoraPoi, { passive: true }); window.addEventListener("pageshow", ancoraPoi);
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
@@ -2095,7 +2107,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.1 · app v5</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.1 · app v6</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -2314,7 +2326,7 @@ const navVetro = (() => {
   nav.addEventListener("pointerdown", (e) => {
     const i = voceA(e.clientX, e.clientY); if (i < 0) return;
     try { nav.setPointerCapture(e.pointerId); } catch (x) {}
-    rettNav = nav.getBoundingClientRect(); punta(TABS[i].id);
+    ancoraBarra(); rettNav = nav.getBoundingClientRect(); punta(TABS[i].id);
     const b = btn[i].getBoundingClientRect(), cx = b.left - rettNav.left + b.width / 2;
     tr = { on: true, mosso: false, id: e.pointerId, x0: e.clientX, pill0: cx, x: cx, vel: 0, prima: e.clientX };
     mGonfia.t = 1; sveglia();
@@ -2327,7 +2339,7 @@ const navVetro = (() => {
   });
   function su(e) {
     if (!tr.on || e.pointerId !== tr.id) return;
-    tr.on = false; mGonfia.t = 0; ultimoSu = e.timeStamp; let fin = bersaglio;
+    tr.on = false; mGonfia.t = 0; ultimoSu = e.timeStamp; window.navToccata = performance.now(); ancoraPoi(); let fin = bersaglio;
     if (tr.mosso) { const c = nav.getBoundingClientRect(); let best = 1e9; btn.forEach((b, i) => { const r = b.getBoundingClientRect(), d = Math.abs(tr.x - (r.left - c.left + r.width / 2)); if (d < best) { best = d; fin = TABS[i].id; } }); }
     rettNav = null; sveglia();
     if (e.type === "pointercancel") { punta(attivo); return; }
