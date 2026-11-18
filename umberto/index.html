@@ -2107,7 +2107,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.1 · app v6</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v1.1 · app v7</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -2372,7 +2372,7 @@ const navVetro = (() => {
    Le chiavi sono gli id degli esercizi della scheda. */
 const INFO = {
   "rollout": { m: "Addominali, dorsali", p: "È l'esercizio per l'addome con la crescita meglio misurata: in uno studio di 10 settimane il retto dell'addome è cresciuto del 12-18%, con il plank no.",
-    c: ["In ginocchio, mani sul bilanciere caricato con dischi tondi, braccia tese.", "Bacino leggermente in retroversione, addome contratto.", "Fai rotolare il bilanciere in avanti finché riesci a tenere la schiena piatta.", "Torna indietro tirando con l'addome, non con le anche."],
+    c: ["Tappetino sotto le ginocchia. Bilanciere a terra davanti a te, con un disco tondo per lato ben fermato.", "Mani sul bilanciere, larghe come le spalle, braccia tese e spalle sopra le mani: sei a quattro zampe, con le mani sul bilanciere.", "Stringi glutei e addome, come per avvicinare le costole al bacino. Questa posizione non la molli più.", "Fai rotolare piano il bilanciere in avanti: fianchi e spalle avanzano insieme e il corpo si allunga verso terra, dritto come una tavola dalle ginocchia alla testa.", "Fermati appena senti che la schiena sta per inarcarsi. All'inizio sono 20-30 centimetri, ed è giusto così.", "Torna indietro tirando il bilanciere verso le ginocchia con l'addome. Non piegare prima le anche portando il sedere indietro."],
     s: "Addome che tiene per tutto il movimento, soprattutto nel punto più lontano.", e: ["Schiena che si inarca nel punto più lontano.", "Andare più avanti di quanto controlli.", "Tornare spingendo il sedere indietro."], a: "Crunch inverso a terra, 3 × 10-15." },
   "goblet": { m: "Quadricipiti, glutei", p: "Con il manubrio al petto e i talloni rialzati scendi dritto e profondo: la coscia lavora tanto anche con pochi chili.",
     c: ["Talloni su un disco o un rialzo di 2-3 cm, piedi alla larghezza delle spalle.", "Manubrio in verticale contro il petto, gomiti sotto.", "Scendi in 3\" più in basso che puoi, busto alto.", "Fermati 1\" in basso, poi risali spingendo su tutto il piede."],
@@ -2487,6 +2487,15 @@ const INFO = {
     c: ["Ritmo a cui riesci a parlare a frasi intere.", "4 minuti di corsa facile, 1 di camminata, per 30 minuti.", "Ogni settimana 5 minuti in più, fino a 40 di corsa continua."],
     s: "Respiro impegnato ma sotto controllo.", e: ["Partire troppo forte.", "Trasformarla in una gara."], a: "40' di bici o camminata veloce in salita, o una partita di calcetto." },
 };
+/* Video: nella spiegazione di ogni esercizio un tasto apre la ricerca su YouTube con le parole giuste per quell'esercizio.
+   VIDEO: id dell'esercizio -> parole da cercare ("" = nessun tasto). Se manca la voce si cerca il nome dell'esercizio.
+   Se aggiungi un esercizio alla scheda, aggiungi anche qui le sue parole. */
+const VIDEO = { "rollout": "rollout con bilanciere in ginocchio addominali barbell ab rollout", "negative": "trazioni negative alla sbarra", "panca-piana-man": "panca piana con manubri", "rematore-man": "rematore con manubrio su panca", "rumeno-bil": "stacco rumeno con bilanciere", "laterali-panca": "alzate laterali sdraiato di fianco su panca inclinata lying lateral raise", "curl-inclinata": "curl manubri su panca inclinata", "posteriori-panca": "alzate posteriori a pancia in giù su panca inclinata prone rear delt raise", "estensioni-man": "estensioni tricipiti sopra la testa con un manubrio", "lat": "lat machine presa prona", "laterali-cavo": "alzate laterali al cavo basso dietro il corpo", "leg-ext": "leg extension", "affondi": "affondi indietro con manubri", "panca-incl-man": "panca inclinata 30 gradi con manubri", "rematore-bil": "rematore con bilanciere presa supina", "rumeno-1g": "stacco rumeno su una gamba con manubrio", "laterali-piedi": "alzate laterali in piedi con manubri", "martello": "curl a martello", "gambe-sbarra": "sollevamento ginocchia alla sbarra hanging knee raise", "calf-man": "calf su una gamba sul gradino con manubrio", "crunch-inverso": "crunch inverso a terra reverse crunch", "crunch-cavo": "crunch al cavo in ginocchio", "crunch-peso": "crunch a terra con peso weighted crunch", "goblet": "goblet squat con talloni rialzati", "squat-bil": "squat con bilanciere", "pectoral": "pectoral machine pec deck", "rumeno-casa": "stacco rumeno con bilanciere", "curl-cavo": "curl bicipiti al cavo basso", "spinte-cavo": "spinte tricipiti al cavo pushdown", "trazioni": "trazioni alla sbarra presa prona" };
+function tastoVideo(e) {
+  const q = VIDEO[e.id] != null ? VIDEO[e.id] : String(e.nome || "").split(",")[0].replace(/\(.*?\)/g, "").trim(); if (!q) return "";
+  const url = "https://www.youtube.com/results?search_query=" + encodeURIComponent(q + " esecuzione corretta");
+  return `<button class="largo" style="margin:0 0 14px" onclick="window.open('${url}', '_blank', 'noopener')">▶ Guarda un video dell'esercizio</button>`;
+}
 function infoEs(id) {
   const c = S.corso, inC = c ? c.es.find((x) => x.id === id) : null, e = inC || catalogo()[id]; if (!e) return;
   const f = fase(c ? c.data : oggi()), n = inC ? inC.sets.length : f.serie(e), I = INFO[id], [a, b] = intervallo(e);
@@ -2498,7 +2507,7 @@ function infoEs(id) {
   else if (REC[e.t]) r.push([`rec ${REC[e.t]}"`, `Recupero tra una serie e l'altra. Il timer parte da solo quando premi "Fatto" e vibra alla fine.`]);
   if (!e.u && !e.nokg) r.push(["↑ sali di carico", "Compare accanto al nome quando l'ultima volta hai raggiunto il massimo delle ripetizioni in tutte le serie."]);
   r.push([f.nome.split(" · ")[0], f.testo]);
-  let h = `<div class="riga tra"><div class="nome" style="font-size:21px;line-height:1.2">${esc(e.nome)}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>` + fotoEs(id);
+  let h = `<div class="riga tra"><div class="nome" style="font-size:21px;line-height:1.2">${esc(e.nome)}</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>` + fotoEs(id) + tastoVideo(e);
   if (I) h += `<p><span class="pillola">${esc(I.m)}</span></p><p>${esc(I.p)}</p>`;
   else h += `<p class="muto">Esercizio aggiunto da te: non ho una scheda di spiegazione. Chiedila al coach in chat.</p>`;
   h += `<h2>Cosa vogliono dire i numeri</h2><div class="card spi">${r.map((x) => `<div><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join("")}</div>`;
