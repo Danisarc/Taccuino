@@ -697,7 +697,7 @@ function chiudi() {
    sub: schermata aperta dalla home · schedaSel: seduta scelta a mano nella scheda */
 let sub = null, schedaSel = null;
 function apriSub(s) { sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
-function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : sub === "spesa" ? vSpesa() : sub === "prep" ? vPrep() : vHome(); }
+function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : sub === "spesa" ? vSpesa() : sub === "prep" ? vPrep() : sub === "integ" ? vInteg() : vHome(); }
 function quadro() {
   const d = oggi(), f = fase(d), lun = lunedi(d), domenica = meno(lun, -6);
   const fatte = {}; let sett = 0;       // sedute di pesi salvate questa settimana: è così che l'app sa se ti sei allenata
@@ -997,6 +997,63 @@ const ALIM = {
 const SEZ = { p: ["Proteine", 1, "proteine", "la proteina"], c: ["Carboidrati", 2, "carboidrati", "il carboidrato"], g: ["Grassi", 3, "grassi", "il grasso"] };
 const PROT_PASTO = ["pollo", "manzo", "maiale", "pesce", "gamberi", "tonno", "bresaola", "uova"], GRASSI_PASTO = ["olio", "avocado", "olive", "mandorle"];
 // Qui non ci sono giorni ON e OFF: i due obiettivi di ogni sezione sono uguali. Le voci "libere" sono il sabato sera e la domenica.
+/* ============ INTEGRATORI ============
+   INTEG: quello che il piano prevede. id (lo stesso della spunta nel registro del giorno), dose, quando, gruppo (momento della giornata),
+   v: valori se ha calorie, cibo: 1 se conta come alimento e si sceglie nei pasti (niente spunta qui),
+   i: la spiegazione dietro la "i" (s a cosa serve · c come si prende · p quanto è provato · n a cosa fare attenzione).
+   INTEG_NO: [nome, in breve, perché] per quello che non serve. Copia di piano/alimentazione.md: se cambia il file, va aggiornata anche questa.
+   Le voci senza "cibo" diventano le voci fisse del blocco Integratori dell'Alimentazione (MENU, id "int"). */
+const INTEG = [
+  { id: "integratore", nome: "Il tuo integratore", dose: "come ora", quando: "a pranzo", gruppo: "A pranzo",
+    i: { s: "È quello che prendi già.",
+         c: "Continua come ora, a pranzo. La spunta serve solo a ricordarti di averlo preso.",
+         p: "Dose e durata sono quelle che ti sono state indicate: l'app non le cambia.",
+         n: "Non cambiare dose né orario senza chiedere a chi te l'ha consigliato." } },
+  { id: "whey", nome: "Whey isolate senza glutine", dose: "15 g", quando: "a colazione, nell'impasto dei pancake", gruppo: "Conta come cibo", cibo: 1,
+    i: { s: "Sono un modo comodo di arrivare alle proteine della giornata, niente di più.",
+         c: "Le scegli nella sezione Proteine della colazione: calorie e proteine sono già nel conto del giorno.",
+         p: "Valgono quanto le proteine del cibo.",
+         n: "Controlla che sulla confezione ci sia scritto senza glutine, o la spiga barrata. Se a colazione scegli lo yogurt, non servono." } },
+];
+const INTEG_NO = [
+  ["Creatina", "non ora", "È l'integratore con più prove per forza e muscolo, ma le prime settimane aggiunge 1-2 kg d'acqua nei muscoli: adesso confonderebbe la lettura della bilancia. Se ne riparla più avanti con il coach."],
+  ["Drenanti e tisane detox", "non funzionano", "Fanno perdere acqua per qualche ora, non grasso. Il gonfiore si lavora con i pasti del piano, l'acqua e i passi."],
+  ["Brucia grassi", "non funzionano", "Nessun effetto che si possa misurare. Il grasso scende con il deficit calorico e con il movimento."],
+  ["Lassativi", "solo con il medico", "Non sono un aiuto per dimagrire e a lungo andare peggiorano l'intestino. Si usano solo se li indica il medico."],
+  ["Zinco, ferro, vitamina D", "solo con gli esami", "Si integrano se gli esami del sangue mostrano una carenza, alla dose indicata dal medico."],
+  ["Qualsiasi integratore nuovo", "chiedi prima", "Prima di aggiungere qualcosa, chiedi al coach e al tuo medico: alcuni prodotti non vanno d'accordo tra loro."],
+];
+function infoInt(id) {
+  const x = INTEG.find((y) => y.id === id); if (!x) return;
+  apri(testaFoglio(esc(x.nome)) + `<p><span class="pillola">${esc(x.dose)} · ${esc(x.quando)}</span></p>
+    <h2>A cosa serve</h2><div class="card">${esc(x.i.s)}</div>
+    <h2>Come si prende</h2><div class="card">${esc(x.i.c)}</div>
+    <h2>Quanto è provato</h2><div class="card">${esc(x.i.p)}</div>
+    <h2>A cosa fare attenzione</h2><div class="card">${esc(x.i.n)}</div>
+    <button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+function infoNo(n) {
+  const x = INTEG_NO[n]; if (!x) return;
+  apri(testaFoglio(esc(x[0])) + `<p><span class="pillola">${esc(x[1])}</span></p><h2>Perché</h2><div class="card">${esc(x[2])}</div><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+function vInteg() {
+  const r = recCibo(oggi()), daSpuntare = INTEG.filter((x) => !x.cibo), presi = daSpuntare.filter((x) => r.f && r.f["int:" + x.id]).length, gruppi = [];
+  for (const x of INTEG) if (!gruppi.includes(x.gruppo)) gruppi.push(x.gruppo);
+  const tastoI = (js) => `<button class="info" aria-label="Spiegazione" onclick="event.stopPropagation();${js}">i</button>`;
+  let h = `<div class="riga testata">${freccia("apriSub('cibo')")}<div><div class="sopra">Alimentazione</div><h1>Integratori</h1></div></div>
+    <p class="muto conta">Presi oggi: <b>${presi} di ${daSpuntare.length}</b>. Tocca una voce per spuntarla, la <b>i</b> per sapere a cosa serve e come si prende.</p>`;
+  for (const g of gruppi) {
+    h += `<h2>${esc(g)}</h2><div class="card pasto"><ul>` + INTEG.filter((x) => x.gruppo === g).map((x) => {
+      const sel = !x.cibo && !!(r.f && r.f["int:" + x.id]);
+      return `<li class="sp ${sel ? "on" : ""}" ${x.cibo ? `onclick="infoInt('${x.id}')"` : `role="checkbox" aria-checked="${sel}" onclick="spuntaF('int:${x.id}')"`}>${x.cibo ? "" : `<i class="chk"></i>`}<span>${esc(x.nome)}<br><small class="muto">${esc(x.dose)} · ${esc(x.quando)}</small></span>${tastoI("infoInt('" + x.id + "')")}</li>`; }).join("") + `</ul></div>`;
+  }
+  h += `<h2>Non servono</h2><div class="card pasto"><ul>` + INTEG_NO.map((x, n) => `<li class="sp" onclick="infoNo(${n})"><span>${esc(x[0])}<br><small class="muto">${esc(x[1])}</small></span>${tastoI("infoNo(" + n + ")")}</li>`).join("") + `</ul></div>
+    <h2>Da ricordare</h2><div class="card"><ul>
+      <li><b>Un integratore nuovo alla volta</b>, per 4-6 settimane, decidendo prima che cosa guardi per capire se serve.</li>
+      <li><b>Prima di aggiungerne uno</b> chiedi al coach. Se prendi farmaci, anche al medico.</li>
+      <li><b>Nessun integratore</b> compensa poco sonno, calorie sbagliate o un allenamento senza progressione.</li></ul></div>`;
+  return h;
+}
 const MENU = [
   { id: "col", ora: "8:30", nome: "Colazione",
     sempre: [["albume", "Albume, per i pancake", "150 g", [78, 16, 1, 0, 0, 10, 0.1, 16, 245, 0]], ["latte-avena", "Latte d'avena senza glutine", "40 g", [16, 0.5, 2.5, 0.5, 0.3, 5, 0, 2, 15, 0]]],
@@ -1025,7 +1082,7 @@ const MENU = [
            p: { t: [30, 30], piano: [[30, 0, 3], [30, 0, 3]], v: PROT_PASTO },
            g: { t: [10, 10], piano: [[0, 0, 10], [0, 0, 10]], v: ["olio", "avocado", "olive"] } } },
   { id: "int", ora: "Ogni giorno", nome: "Integratori", sez: {},
-    sempre: [["integratore", "Il tuo integratore, a pranzo · 0 kcal", "come ora", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]] },
+    sempre: INTEG.filter((x) => !x.cibo).map((x) => [x.id, esc(x.nome) + '<br><small class="muto">' + esc(x.quando) + "</small>", x.dose, x.v || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]) },
 ];
 // idee pronte del coach: gli alimenti entrano nelle sezioni con i grammi calcolati sul pasto di oggi
 const PREP_BASE = [
@@ -1184,13 +1241,13 @@ function vCibo() {
     }
     const fisse = (p.sempre || []).filter((f) => fissaOn(f, on));
     if (fisse.length) corpo += `${p.id === "int" ? "" : "<h3>Sempre</h3>"}<ul>` + fisse.map((f) => { const sel = !!(r.f && r.f[p.id + ":" + f[0]]); if (sel) { kc += f[3][0]; pieno = true; }
-      return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b></li>`; }).join("") + `</ul>`;
+      return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b>${p.id === "int" ? `<button class="info" aria-label="Spiegazione" onclick="event.stopPropagation();infoInt('${f[0]}')">i</button>` : ""}</li>`; }).join("") + `</ul>`;
     // voci libere (pasti fuori casa, in famiglia): si spuntano quando capitano, entrano nel conto e non fanno scattare il ricalcolo
     if ((p.libere || []).length) corpo += `<h3>${p.libereT || "Quando capita"}</h3><ul>` + p.libere.map((f) => { const sel = !!(r.f && r.f[p.id + ":" + f[0]]); if (sel) { kc += f[3][0]; pieno = true; }
       return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b></li>`; }).join("") + `</ul>`;
     if (p.id === "int") h += `<h2>Integratori</h2>`;
     h += `<div class="card pasto" id="pasto-${p.id}"><div class="riga tra ${FOTO_PASTO.includes(p.id) ? "ban" : ""}" ${FOTO_PASTO.includes(p.id) ? `style="background-image:url(img/pasti/${p.id}.jpg)"` : ""}><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div><span class="pillola">${Math.round(kc)} kcal</span></div>${corpo}` +
-      (p.id !== "int" ? `<div class="g2" style="margin-top:14px"><button class="pic" onclick="comePiano('${p.id}')">Come da piano</button><button class="pic" onclick="prepPasto='${p.id}';apriSub('prep')">Meal prep</button></div>` : "") + `</div>`;
+      (p.id !== "int" ? `<div class="g2" style="margin-top:14px"><button class="pic" onclick="comePiano('${p.id}')">Come da piano</button><button class="pic" onclick="prepPasto='${p.id}';apriSub('prep')">Meal prep</button></div>` : `<button class="largo" style="margin-top:14px" onclick="apriSub('integ')">Come prenderli e cosa non serve ›</button>`) + `</div>`;
   }
   h += `<p class="muto conta">${APP.notaInt}</p>
     <h2>Da ricordare</h2><div class="card"><ul>
@@ -1338,7 +1395,8 @@ function togliPrep(n) { if (!confirm("Elimino questo piatto dal ricettario?")) r
 function menuCibo() {
   const da = listaS().filter((x) => !x.x).length;
   apri(testaFoglio("Alimentazione") + `<button class="blocco" onclick="chiudi();prepPasto=null;apriSub('prep')"><span><b>Meal prep</b><small>Il tuo ricettario: ${piatti().length ? piatti().length + (piatti().length === 1 ? " piatto salvato" : " piatti salvati") : "ancora nessun piatto"}</small></span><em>›</em></button>
-    <button class="blocco" onclick="chiudi();apriSub('spesa')"><span><b>Lista della spesa</b><small>${da ? da + " da prendere" : "Vuota: ci aggiungi tu quello che serve"}</small></span><em>›</em></button>`);
+    <button class="blocco" onclick="chiudi();apriSub('spesa')"><span><b>Lista della spesa</b><small>${da ? da + " da prendere" : "Vuota: ci aggiungi tu quello che serve"}</small></span><em>›</em></button>
+    <button class="blocco" onclick="chiudi();apriSub('integ')"><span><b>Integratori</b><small>Cosa prendere, quando, e cosa non serve</small></span><em>›</em></button>`);
 }
 
 /* ---- un alimento che non è in elenco: codice a barre (BarcodeDetector + Open Food Facts), elenco senza codice (BASE) o valori a mano.
@@ -2728,7 +2786,7 @@ function passoIndietro() {
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
   if (tab === "diario" && vistaFoto) { chiudiFoto(); return true; }
   if (tab !== "allena") { vai("allena"); return true; }
-  if (sub) { apriSub(sub === "spesa" || sub === "prep" ? "cibo" : null); return true; }
+  if (sub) { apriSub(sub === "spesa" || sub === "prep" || sub === "integ" ? "cibo" : null); return true; }
   return false;
 }
 /* La cronologia del browser tiene una voce per ogni livello aperto (scheda della barra, pagina, foglio): le voci nascono
@@ -2736,7 +2794,7 @@ function passoIndietro() {
    livelli(): quanti livelli sono aperti adesso. allinea(): porta la cronologia a quel numero, dopo ogni disegno. */
 function livelli() {
   let n = 0;
-  if (tab !== "allena") n++; else if (S.corso) n += esAperto != null ? 2 : 1; else if (sub) n += sub === "spesa" || sub === "prep" ? 2 : 1;
+  if (tab !== "allena") n++; else if (S.corso) n += esAperto != null ? 2 : 1; else if (sub) n += sub === "spesa" || sub === "prep" || sub === "integ" ? 2 : 1;
   if (tab === "tecnica" && guida) n++;
   if (tab === "diario" && vistaFoto) n++;
   if (foglioSu) n++;
