@@ -2217,7 +2217,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v13</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v14</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -2557,12 +2557,12 @@ const INFO = {
     c: ["Segna i minuti della lezione.", "Nelle note scrivi com'è andata."], s: "–", e: ["Usarla per recuperare una seduta di pesi saltata: sono due cose diverse."], a: "Una camminata di 40 minuti." },
 };
 /* Video: nella spiegazione di ogni esercizio un tasto apre la ricerca su YouTube con le parole giuste per quell'esercizio.
-   VIDEO: id dell'esercizio -> parole da cercare ("" = nessun tasto). Se manca la voce si cerca il nome dell'esercizio.
+   VIDEO: id dell'esercizio -> parole da cercare, oppure l'indirizzo di un video scelto dal coach ("" = nessun tasto). Se manca la voce si cerca il nome dell'esercizio.
    Se aggiungi un esercizio alla scheda, aggiungi anche qui le sue parole. */
 const VIDEO = { "leg-press": "leg press", "lat": "lat machine presa media", "hip-thrust": "hip thrust con bilanciere", "chest-press": "chest press alla macchina", "leg-curl": "leg curl seduto", "laterali-man": "alzate laterali con manubri", "pallof": "pallof press al cavo", "goblet": "goblet squat con manubrio", "pulley": "pulley basso", "rumeno-man": "stacco rumeno con manubri", "lento-man": "lento avanti con manubri da seduta", "abductor": "abductor machine", "face-pull": "face pull al cavo", "dead-bug": "dead bug", "bulgaro": "squat bulgaro con manubri", "hip-thrust-casa": "hip thrust con manubrio spalle sul divano", "ponte-fem": "ponte per i femorali con talloni su una sedia", "bird-dog": "bird dog", "goblet-lento": "goblet squat con manubrio", "rematore-man": "rematore con manubrio", "abduzioni-terra": "abduzioni dell'anca sdraiata sul fianco", "posteriori-seduta": "alzate posteriori da seduta con manubri", "tirata-casa": "", "spinta-casa": "", "pilates": "" };
 function tastoVideo(e) {
   const q = VIDEO[e.id] != null ? VIDEO[e.id] : String(e.nome || "").split(",")[0].replace(/\(.*?\)/g, "").trim(); if (!q) return "";
-  const url = "https://www.youtube.com/results?search_query=" + encodeURIComponent(q + " esecuzione corretta");
+  const url = /^https?:/.test(q) ? q : "https://www.youtube.com/results?search_query=" + encodeURIComponent(q + " esecuzione corretta");      // un indirizzo intero apre quel video preciso
   return `<button class="largo" style="margin:0 0 14px" onclick="window.open('${url}', '_blank', 'noopener')">▶ Guarda un video dell'esercizio</button>`;
 }
 function infoEs(id) {
