@@ -262,6 +262,7 @@ ol.piano small.muto { font-size:12px; }
 .blocco svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .blocco span { flex:1; min-width:0; } .blocco b { display:block; font-size:17px; } .blocco small { color:var(--muto); font-size:13px; }
 .blocco em { flex:none; font-style:normal; font-size:28px; color:var(--muto); line-height:1; padding-bottom:4px; }
+.blocco i.th { width:66px; height:66px; border-radius:17px; background:#141b18 center/cover no-repeat; }
 .tile { text-align:left; padding:14px; border-radius:20px; background:var(--card); display:flex; flex-direction:column; gap:2px; min-height:96px; }
 .tile small { color:var(--muto); font-size:12px; } .tile b { font-size:20px; line-height:1.2; } .tile span { color:var(--muto); font-size:12px; }
 .testata { margin-bottom:14px; } .testata h1 { margin:0; }
@@ -1508,7 +1509,7 @@ function confAlimento() {
 /* Guida "Sostituzioni": quanti grammi di un alimento comune coprono il carboidrato o la proteina di pranzo e cena, sul piano di oggi */
 function vCambi() {
   const k = modoOn(oggi()) ? 0 : 1, pasti = ["pra", "cen"].map(pastoDi);
-  let h = testaGuida("Sostituzioni") + `
+  let h = testaGuida("Sostituzioni") + fotoGuida("img/pasti/prep.jpg", "Non hai un alimento?", "Cosa mettere al suo posto, e quanti grammi") + `
   <p class="muto">Nel piano c'è un alimento, in casa ne hai un altro: ecco quanto metterne. Pesi a crudo; per i prodotti in scatola, sgocciolati.</p>
   <div class="card"><ul>
     <li>Un <b>carboidrato</b> si cambia con un altro carboidrato, a parità di carboidrati.</li>
@@ -1972,11 +1973,12 @@ function cancella(id) { if (confirm("Elimino questa seduta dallo storico?")) { S
 let guida = null;
 function apriGuida(g) { guida = g; disegna(); window.scrollTo(0, 0); }
 const GUIDE = [
-  ["regole", "Prima e durante la seduta", "Quando mangiare, cosa portare, quando fermarsi", '<path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.800-1.200-8-4.500-8-9V6zM9 12l2 2 4-4"/>'],
-  ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'],
-  ["casa", "Allenarsi a casa", "Casa A e Casa B, e cosa fare quando i manubri sono leggeri", '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>'],
-  ["sigle", "Sigle e parole", "RIR, recupero, scarico e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>'],
-  ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],
+  ["addome", "Addome", "Meno gonfia, più forte: il percorso in tre leve", '<path d="M8 3h8v18H8zM8 9h8M8 15h8M12 3v18"/>', "img/es/pallof-2.jpg"],
+  ["regole", "Prima e durante la seduta", "Quando mangiare, cosa portare, quando fermarsi", '<path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.800-1.200-8-4.500-8-9V6zM9 12l2 2 4-4"/>', "img/allenamento.jpg"],
+  ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', "img/es/leg-press-1.jpg"],
+  ["casa", "Allenarsi a casa", "Casa A e Casa B, e cosa fare quando i manubri sono leggeri", '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>', "img/es/goblet-1.jpg"],
+  ["sigle", "Sigle e parole", "RIR, recupero, scarico e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>', "img/es/lat-1.jpg"],
+  ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>', "img/pasti/prep.jpg"],
 ];
 function vTecnica() {
   if (guida === "regole") return vRegole();
@@ -1984,19 +1986,61 @@ function vTecnica() {
   if (guida === "casa") return vCasa();
   if (guida === "sigle") return vSigle();
   if (guida === "cambi") return vCambi();
+  if (guida === "addome") return vAddome();
   return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
-    GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')"><i><svg viewBox="0 0 24 24">${g[3]}</svg></i><span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
+    GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')">${g[4] ? `<i class="th" style="background-image:url(${g[4]})"></i>` : `<i><svg viewBox="0 0 24 24">${g[3]}</svg></i>`}<span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
 }
+const fotoGuida = (img, t, s) => `<div class="card fotoTesta" style="background-image:url(${img})"><span><b>${t}</b><small>${s}</small></span></div>`;
 const testaGuida = (t) => `<div class="riga testata">${freccia("apriGuida(null)")}<div><div class="sopra">Guide</div><h1>${t}</h1></div></div>`;
 function vEsercizi() {
-  let h = testaGuida("Esercizi") + `<p class="muto">Tocca un esercizio per aprire la sua spiegazione.</p>`; const visti = {};
+  let h = testaGuida("Esercizi") + fotoGuida("img/es/leg-press-1.jpg", "Tutti gli esercizi della scheda", "Foto, come si fa, dove sentirlo") + `<p class="muto">Tocca un esercizio per aprire la sua spiegazione.</p>`; const visti = {};
   for (const k of PESI) {
     const es = SEDUTE[k].es.filter((e) => !visti[e.id]); if (!es.length) continue;
     h += `<h2>${esc(SEDUTE[k].nome)}</h2><div class="card"><ol class="piano">`;
-    for (const e of es) { visti[e.id] = 1; h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}<br><small class="muto">${INFO[e.id] ? esc(INFO[e.id].m) : ""}</small></span><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`; }
+    for (const e of es) { visti[e.id] = 1; h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}<br><small class="muto">${INFO[e.id] ? esc(INFO[e.id].m) : ""}</small></span><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`; }
     h += `</ol></div>`;
   }
   return h;
+}
+/* Guida Addome: copia in breve del percorso scritto dal coach. Se cambia il percorso, va aggiornata anche questa.
+   Testo generale: niente riferimenti a condizioni di salute. */
+function vAddome() {
+  const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
+  const due = (a, ta, da, b, tb, db) => `<div class="fig"><div><img src="${a}" alt=""><b>${ta}</b>${da}</div><div><img src="${b}" alt=""><b>${tb}</b>${db}</div></div>`;
+  return testaGuida("Addome") + fotoGuida("img/es/pallof-2.jpg", "Meno gonfia, più forte", "Tre leve diverse: gonfiore, grasso, tronco") +
+  `<h2>L'idea</h2>` + lista([
+    "<b>La pancia che vedi è fatta di tre cose</b>: gonfiore, grasso e un tronco poco allenato. Si lavorano in tre modi diversi.",
+    "<b>Il gonfiore è la parte che cambia più in fretta</b>, e non dipende dagli esercizi: dipende da respiro, movimento, intestino e tavola.",
+    "<b>Gli esercizi per l'addome non tolgono il grasso della pancia.</b> Rendono forte il tronco; il grasso lo toglie il piano alimentare."]) +
+  `<h2>1 · Gonfiore: da subito</h2><div class="card"><table>
+    <tr><td><b>Respira con la pancia</b></td><td>5 minuti, 3 volte al giorno, per 4 settimane. Non subito dopo mangiato.</td></tr>
+    <tr><td><b>Cammina dopo i pasti</b></td><td>10-15 minuti tranquilli dopo pranzo e dopo cena.</td></tr>
+    <tr><td><b>Acqua</b></td><td>2 litri al giorno: la segni nella home.</td></tr>
+    <tr><td><b>Passi</b></td><td>8000 al giorno: il movimento regolare aiuta l'intestino.</td></tr></table></div>` + lista([
+    "<b>Come si respira con la pancia</b>: seduta o in piedi, una mano sul petto e una sulla pancia. Inspiri dal naso gonfiando la pancia, il petto resta fermo. Espiri piano dalla bocca, la pancia rientra.",
+    "<b>Dopo cena</b> non sdraiarti per 2-3 ore.",
+    "<b>A tavola</b>: verdura cotta e frutta del piano ogni giorno, mangiando in 15-20 minuti.",
+    "<b>Se in 4 settimane non cambia niente</b>: ricontrolla la spiga barrata sui prodotti e i pasti fuori casa, e parlane con il coach. Non togliere altri cibi da sola."]) +
+  `<h2>2 · Grasso</h2>` + lista([
+    "Scende con il <b>piano alimentare</b> che hai già: nessun esercizio lo toglie da un punto preciso.",
+    "I <b>passi</b> contano quanto le sedute.",
+    "L'esercizio regolare riduce il giro vita anche quando il peso si muove poco."]) +
+  `<h2>3 · Tronco forte</h2>` +
+  due("img/es/pallof-2.jpg", "Pallof press", "In piedi: resisti alla rotazione", "img/es/dead-bug-2.jpg", "Dead bug", "Schiena a terra, braccio e gamba opposti") +
+  `<div class="card"><table>
+    <tr><td><b>Adesso</b></td><td>il pilates del sabato. Chiedi all'insegnante di evitare con te le posizioni a testa in giù.</td></tr>
+    <tr><td><b>Settimane 1-3</b><br><span class="muto">quando parti con i pesi</span></td><td>pallof press e dead bug (a casa: bird dog e dead bug), 2 serie da 8-10 per lato.</td></tr>
+    <tr><td><b>Settimane 4-8</b></td><td>gli stessi, una serie in più.</td></tr>
+    <tr><td><b>Scheda nuova</b></td><td>si aggiunge un trasporto: camminare con un manubrio in una mano sola.</td></tr></table></div>` + lista([
+    "<b>Espira durante lo sforzo</b>, non trattenere mai il fiato.",
+    "<b>Niente crunch e niente esercizi a testa in giù</b>: gli esercizi sono scelti per restare dritta o in appoggio, senza spingere sullo stomaco.",
+    "<b>Se un esercizio ti dà fastidio allo stomaco</b>, ti fermi e lo dici al coach: si cambia l'esercizio.",
+    "<b>Per il cardio</b>, bici e camminata prima della corsa e dei salti."]) +
+  `<h2>Cosa misuriamo</h2>` + lista([
+    "<b>Gonfiore la sera</b>: un voto da 1 a 5 nelle note del giorno, per le prime 4 settimane. È il primo segnale che cambia.",
+    "<b>Giro vita</b> sotto l'ombelico, al mattino a digiuno, ogni 2 settimane.",
+    "<b>Intestino</b>: quante volte a settimana."]) +
+  `<p class="muto">La respirazione, la camminata e l'esercizio regolare hanno studi a favore, ma piccoli: sono prove che vale la pena fare, non cure. Se il gonfiore si accompagna a dolore, o peggiora, si sente il medico.</p>`;
 }
 function vSigle() {
   const v = [["RIR", "Ripetizioni in riserva: quante ne avresti ancora fatte, pulite, a fine serie. RIR 3 = ti fermi con 3 in serbo. RIR 0 = non ne usciva più nessuna."],
@@ -2012,10 +2056,10 @@ function vSigle() {
     ["Seduta minima", "I primi 3 esercizi e basta. Per i giorni no: conta come fatta."],
     ["Come stai oggi", "Cinque voci da 1 a 5. 21-25 verde: seduta piena. 16-20 giallo: una serie in meno dal quarto esercizio. 11-15 arancione: seduta minima con carichi −10%. Fino a 10 rosso: solo una camminata."],
     ["Giorno personalizzato", "Nel piano alimentare: stessi traguardi, ma alimenti e quantità li scrivi tu. Per i giorni fuori casa."]];
-  return testaGuida("Sigle e parole") + `<div class="card spi">${v.map((x) => `<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`;
+  return testaGuida("Sigle e parole") + fotoGuida("img/es/lat-1.jpg", "Le parole della scheda", "Cosa vogliono dire, in una riga") + `<div class="card spi">${v.map((x) => `<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`;
 }
 function vRegole() {
-  return testaGuida("Prima e durante") + `
+  return testaGuida("Prima e durante") + fotoGuida("img/allenamento.jpg", "Prima e durante la seduta", "Quando mangiare, cosa portare, quando fermarsi") + `
   <p class="muto">Poche regole, valide per ogni seduta di pesi, in palestra e a casa.</p>
   <h2>Prima</h2><div class="card"><ul>
     <li><b>Mai a digiuno, mai a stomaco pieno.</b> L'ideale è allenarsi 1,5-3 ore dopo uno spuntino e almeno 2 ore dopo un pasto principale.</li>
@@ -2033,7 +2077,7 @@ function vRegole() {
     <li>La fatica e il bruciore del muscolo a fine serie sono normali.</li></ul></div>`;
 }
 function vCasa() {
-  return testaGuida("A casa") + `
+  return testaGuida("A casa") + fotoGuida("img/es/goblet-1.jpg", "Allenarsi a casa", "Le stesse sedute, con manubri e la tua macchina") + `
   <p class="muto">Se un giorno non puoi andare in palestra, la seduta non salta: la fai a casa.</p>
   <div class="card"><ul>
     <li><b>Casa A</b> al posto di A, <b>Casa B</b> al posto di B.</li>
