@@ -262,6 +262,7 @@ ol.piano small.muto { font-size:12px; }
 .blocco svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .blocco span { flex:1; min-width:0; } .blocco b { display:block; font-size:17px; } .blocco small { color:var(--muto); font-size:13px; }
 .blocco em { flex:none; font-style:normal; font-size:28px; color:var(--muto); line-height:1; padding-bottom:4px; }
+.blocco i.th { width:66px; height:66px; border-radius:17px; background:#141b18 center/cover no-repeat; }
 .tile { text-align:left; padding:14px; border-radius:20px; background:var(--card); display:flex; flex-direction:column; gap:2px; min-height:96px; }
 .tile small { color:var(--muto); font-size:12px; } .tile b { font-size:20px; line-height:1.2; } .tile span { color:var(--muto); font-size:12px; }
 .testata { margin-bottom:14px; } .testata h1 { margin:0; }
@@ -481,6 +482,7 @@ const SEDUTE = {
     { id:"curl-inclinata", nome:"Curl su panca inclinata 45°", serie:3, rip:"10-12", t:"sb", ss:"laterali-panca", p:1, nota:"Gomito dietro il busto." },
     { id:"posteriori-panca", nome:"Alzate posteriori a pancia in giù", serie:2, rip:"15-20", t:"sa", ss:"estensioni-man", p:1, nota:"Superserie con le estensioni. Braccia quasi tese." },
     { id:"estensioni-man", nome:"Estensioni sopra la testa con manubrio", serie:2, rip:"10-15", t:"sb", ss:"posteriori-panca", p:1, nota:"Gomiti stretti, scendi fino in fondo." },
+    { id:"rollout", nome:"Rollout con bilanciere, in ginocchio", serie:3, rip:"6-10", t:"i", nokg:1, nota:"Vai avanti solo finché la schiena resta piatta: all'inizio anche pochi centimetri. Mai a cedimento." },
   ]},
   B: { nome:"B · palestra", corto:"B · palestra", es: [...SBARRA,
     { id:"hack", nome:"Hack squat (o leg press)", serie:3, rip:"8-12", t:"m", p:5, nota:"Profondità piena, talloni ben appoggiati." },
@@ -788,7 +790,7 @@ const fotoSed = (se) => { const e = se.es.filter((x) => x.t === "m" || x.t === "
 function vScheda() {
   const q = quadro(), { f, sett, fatte } = q, pross = prossima(), scelta = !!schedaSel, k = schedaSel || pross, se = SEDUTE[k];
   const nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), gia = fatte[k];
-  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.0 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q) +
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 2.1 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q) +
     `<p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 3</b>. I giorni li scegli tu.</p>
     <div class="card eroe ${fotoSed(se) ? "confoto" : ""}" ${fotoSed(se) ? `style="--f:url(${fotoSed(se)})"` : ""}><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : "Prossima consigliata"}${gia ? " · già fatta " + nomeGiorno(gia.data) : ""}</span><span class="pillola">${esc(f.nome.split(" · ")[0])}</span></div>
       <div class="grande">${esc(se.nome)}</div>
@@ -993,22 +995,22 @@ const INTEG = [
   { id: "creatina", nome: "Creatina monoidrato", dose: "5 g", quando: "a pranzo", gruppo: "A pranzo",
     i: { s: "Più forza e qualche ripetizione in più a ogni serie: nel tempo vuol dire più muscolo.",
          c: "5 g ogni giorno, anche quando non ti alleni. L'orario non conta: a pranzo è solo più facile ricordarsene. Niente fase di carico, niente pause.",
-         p: "È l'integratore con le prove più solide su forza e massa.",
-         n: "Le prime settimane porta 1-2 kg di acqua dentro il muscolo: sulla bilancia si vede, ma non è grasso. Con problemi ai reni si chiede prima al medico." } },
-  { id: "omega3", nome: "Omega-3", dose: "3 capsule", quando: "a pranzo", gruppo: "A pranzo", v: [27, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+         p: "È l'integratore con le prove più solide su forza e massa. L'effetto sul muscolo è reale ma piccolo.",
+         n: "Le prime settimane porta circa 0,5-1 kg di acqua dentro il muscolo: sulla bilancia si vede, ma non è grasso. Alza un poco la creatinina negli esami del sangue senza toccare i reni: dillo al medico prima di un prelievo." } },
+  { id: "omega3", nome: "Omega-3", dose: "1 capsula", quando: "a pranzo", gruppo: "A pranzo", v: [9, 0, 0, 1, 0, 0, 0, 0, 0, 0],
     i: { s: "Copre i grassi EPA e DHA nelle settimane in cui il pesce grasso (salmone, sgombro, alici) è meno di due volte.",
-         c: "3 capsule insieme al pranzo: con un pasto che contiene grassi si assorbono meglio. Sono circa 1,6 g di EPA + DHA e 27 kcal, già nel conto.",
-         p: "Utili per la salute in generale. Sul muscolo l'effetto diretto è piccolo.",
-         n: "Se prendi farmaci anticoagulanti, chiedi prima al medico." } },
+         c: "1 capsula insieme al pranzo: con un pasto che contiene grassi si assorbe meglio. Sono 550 mg di EPA + DHA e 9 kcal, già nel conto.",
+         p: "Servono alla salute, non al muscolo. Bastano 250-500 mg al giorno.",
+         n: "Non serve prenderne di più: oltre 1 g al giorno solo se lo indica il medico. Se prendi farmaci anticoagulanti, chiedi prima a lui." } },
   { id: "magnesio", nome: "Magnesio bisglicinato", dose: "3 capsule", quando: "30-60 minuti prima di dormire", gruppo: "La sera",
     i: { s: "Aiuta i muscoli a rilassarsi e può dare una mano quando il sonno è spezzato da tanti risvegli.",
          c: "3 capsule la sera, 30-60 minuti prima di andare a letto: sono 225 mg di magnesio. Il bisglicinato è la forma che si assorbe meglio e dà meno fastidi all'intestino.",
-         p: "Prove modeste: aiuta soprattutto chi ne assume poco con il cibo. Non è un sonnifero.",
-         n: "Non superare le 3 capsule. Lontano almeno 2 ore da alcuni antibiotici." } },
+         p: "Prove modeste: in uno studio su 155 adulti l'effetto sul sonno è stato piccolo. Non è un sonnifero, e per i crampi non serve.",
+         n: "Non superare le 3 capsule: sono già vicine al limite europeo di 250 mg al giorno da integratori. Lontano almeno 2 ore da alcuni antibiotici." } },
   { id: "glicina", nome: "Glicina in polvere", dose: "3 g", quando: "30-60 minuti prima di dormire", gruppo: "La sera",
     i: { s: "Un aminoacido che può rendere il sonno un po' più continuo e far sentire più riposati al mattino. È in prova per 4 settimane.",
          c: "Mezzo misurino (3 g) sciolto in un po' d'acqua, insieme al magnesio. Ha un sapore leggermente dolce.",
-         p: "Prove limitate, da pochi studi piccoli. È innocua e costa poco: per questo vale una prova.",
+         p: "Prove limitate: pochi studi piccoli, di pochi giorni. Costa poco e sul breve periodo è sicura: vale una prova di 4 settimane, non di più senza riparlarne.",
          n: "In queste 4 settimane guarda una cosa sola: quanti risvegli segni nell'app. Se non cambiano, si toglie. Non superare i 3 g." } },
   { id: "whey", nome: "Proteine whey isolate", dose: "25 g", quando: "a colazione, nel latte", gruppo: "Conta come cibo", cibo: 1,
     i: { s: "Sono un modo comodo di arrivare alle proteine della giornata, niente di più.",
@@ -1017,9 +1019,9 @@ const INTEG = [
          n: "Se a colazione scegli skyr, yogurt o albume, non servono." } },
 ];
 const INTEG_NO = [
-  ["Ashwagandha", "non adesso", "Ha qualche prova su stress e sonno, ma a 300-600 mg di estratto al giorno: una capsula da 200 mg è sotto quella dose. Può interferire con la tiroide e sono segnalati rari danni al fegato. Prima vengono le abitudini del sonno; semmai dopo, a cicli e sentito il medico."],
+  ["Ashwagandha", "no", "Ha qualche prova su stress e sonno, con effetti piccoli. Ma l'istituto tedesco per la valutazione del rischio la sconsiglia, la Danimarca l'ha vietata, non esiste una dose sicura stabilita e sono descritti effetti sulla tiroide e danni al fegato. Se ne parla solo con il medico."],
   ["Coenzima Q10", "non serve", "In una persona giovane e sana non migliora energia, recupero né muscolo. Ha senso soprattutto per chi prende statine, su indicazione del medico."],
-  ["Multivitaminico da uomo", "non serve", "Con questo piano vitamine e minerali arrivano dal cibo. Quelli \"da uomo\" portano spesso ferro, che senza una carenza non va aggiunto, zinco in dose piena ed estratti come ginseng e ginkgo, che la sera non aiutano il sonno."],
+  ["Multivitaminico da uomo", "non serve", "Nelle persone sane i multivitaminici non mostrano benefici. Con questo piano vitamine e minerali arrivano dal cibo. Quelli \"da uomo\" portano spesso ferro, che senza una carenza non va aggiunto, zinco in dose piena ed estratti come ginseng e ginkgo, che la sera non aiutano il sonno."],
   ["Melatonina", "tolta", "Agisce sull'addormentamento e sul fuso orario. Sui risvegli durante la notte non fa nulla."],
   ["Vitamina C e zinco", "tolti", "Frutta, verdura, carne e pesce del piano li coprono già. Lo zinco in più si prende solo con una carenza vista negli esami."],
   ["Vitamina D", "solo con gli esami", "Si integra se gli esami del sangue mostrano una carenza, alla dose indicata dal medico."],
@@ -1095,11 +1097,11 @@ const PREP_BASE = [
 ];
 // APP: quello che cambia da un atleta all'altro nei testi e nei conti del motore (sedute di pesi a settimana, giorni ON/OFF, promemoria)
 const APP = { nSett: 3, pesi: ["A", "B", "C"], onoff: true, versione: "Versione 3.0 · definizione lenta", adulto: "un uomo adulto. Il magnesio dell'integratore non è contato, perché dipende dal prodotto",
-  notaInt: "Creatina e magnesio non hanno calorie; gli omega-3 sì, circa 9 kcal a capsula. Tolti: vitamina C, zinco, melatonina.",
+  notaInt: "Creatina, magnesio e glicina non contano nelle calorie; la capsula di omega-3 sì, circa 9 kcal.",
   ricorda: ["<b>Acqua</b> 2,2-2,5 litri: la segni nella home.",
     "<b>Pasto libero</b>: uno a settimana, in un giorno OFF, al posto della cena. Una pizza e una bibita light; nessuna compensazione il giorno dopo.",
     "<b>Sedute a casa in un altro orario</b>: sposta il carboidrato dello spuntino 60-90' prima dei pesi, e almeno 2 ore dopo un pasto principale.",
-    "<b>Zuccheri liquidi</b> (succhi, bibite, ginseng zuccherato): zero.", "<b>Ultima caffeina</b> alle 14:00."] };
+    "<b>Zuccheri liquidi</b> (succhi, bibite, ginseng zuccherato): zero.", "<b>Ultima caffeina</b> alle 13:30: almeno 9 ore prima di andare a letto."] };
 const TOL = [7, 10, 5], GIU = [0.5, 0.5, 1], SU = 0.5;      // sotto TOL grammi non si ricalcola; una sezione scende al massimo di GIU e sale al massimo di SU (in frazione del suo obiettivo)
 const pastoDi = (pid) => MENU.find((p) => p.id === pid);
 const a100 = (x) => (x.x ? x.x.per100 : ALIM[x.k] ? ALIM[x.k][2].map((n) => (n / ALIM[x.k][1]) * 100) : new Array(10).fill(0));
@@ -1505,7 +1507,7 @@ function confAlimento() {
 /* Guida "Sostituzioni": quanti grammi di un alimento comune coprono il carboidrato o la proteina di pranzo e cena, sul piano di oggi */
 function vCambi() {
   const k = modoOn(oggi()) ? 0 : 1, pasti = ["pra", "cen"].map(pastoDi);
-  let h = testaGuida("Sostituzioni") + `
+  let h = testaGuida("Sostituzioni") + fotoGuida("img/pasti/prep.jpg", "Non hai un alimento?", "Cosa mettere al suo posto, e quanti grammi") + `
   <p class="muto">Nel piano c'è un alimento, in casa ne hai un altro: ecco quanto metterne. Pesi a crudo; per i prodotti in scatola, sgocciolati.</p>
   <div class="card"><ul>
     <li>Un <b>carboidrato</b> si cambia con un altro carboidrato, a parità di carboidrati.</li>
@@ -1614,7 +1616,7 @@ function prepara() {            // riempie la serie corrente con i numeri più p
    metti qui il suo id, le due foto nella cartella e i loro nomi in FILE dentro sw.js. */
 const FOTO = {};
 ("scapolari negative bulgaro panca-piana-man rematore-man rumeno-bil laterali-panca curl-inclinata posteriori-panca estensioni-man hack lat panca-incl-bil leg-curl " +
- "laterali-cavo tricipiti-cavo leg-ext crunch-cavo affondi panca-incl-man rematore-bil rumeno-1g laterali-piedi martello gambe-sbarra calf-man calf-libero crunch-inverso corsa")
+ "laterali-cavo tricipiti-cavo leg-ext crunch-cavo crunch-peso rollout plank-lato affondi panca-incl-man rematore-bil rumeno-1g laterali-piedi martello gambe-sbarra calf-man calf-libero crunch-inverso corsa")
   .split(" ").forEach((id) => { FOTO[id] = ["img/es/" + id + "-1.jpg", "img/es/" + id + "-2.jpg"]; });
 FOTO.appesa = ["img/es/appesa-1.jpg"];
 const fotoEs = (id, tocco) => (FOTO[id] ? `<div class="demo" ${tocco ? `onclick="infoEs('${esc(id)}')"` : ""}>${FOTO[id].map((f) => `<img src="${f}" alt="">`).join("")}</div>` : "");
@@ -1979,11 +1981,12 @@ const omino = (k) => `<svg viewBox="0 0 160 260">${OMINO[k]}</svg>`;
 let guida = null;
 function apriGuida(g) { guida = g; disegna(); window.scrollTo(0, 0); }
 const GUIDE = [
-  ["trazioni", "Trazioni", "I tre esercizi alla sbarra, con disegni, errori e test", '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>'],
-  ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'],
-  ["sigle", "Sigle e parole", "RIR, superserie, recupero, deload e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>'],
-  ["ormoni", "Energia e ormoni", "Testosterone e fertilità: cosa conta davvero, cosa no", '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'],
-  ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>'],
+  ["addome", "Addome", "Il percorso per averlo forte e visibile, in tre tappe", '<path d="M8 3h8v18H8zM8 9h8M8 15h8M12 3v18"/>', "img/es/crunch-cavo-2.jpg"],
+  ["trazioni", "Trazioni", "I tre esercizi alla sbarra, con disegni, errori e test", '<path d="M3 4h18M7 4v5M17 4v5M7 9c0 3 2 4 5 4s5-1 5-4M12 13v8"/>', "img/es/negative-1.jpg"],
+  ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', "img/es/panca-piana-man-1.jpg"],
+  ["sigle", "Sigle e parole", "RIR, superserie, recupero, deload e le altre", '<path d="M4 5h16M4 12h16M4 19h10"/>', "img/allenamento.jpg"],
+  ["ormoni", "Energia e ormoni", "Testosterone e fertilità: cosa conta davvero, cosa no", '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', "img/pasti/cen.jpg"],
+  ["cambi", "Sostituzioni", "Cosa mettere al posto di un alimento, e quanti grammi", '<path d="M4 8h13l-3-3M20 16H7l3 3"/>', "img/pasti/prep.jpg"],
 ];
 function vTecnica() {
   if (guida === "trazioni") return vTrazioni();
@@ -1991,16 +1994,18 @@ function vTecnica() {
   if (guida === "sigle") return vSigle();
   if (guida === "cambi") return vCambi();
   if (guida === "ormoni") return vOrmoni();
+  if (guida === "addome") return vAddome();
   return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
-    GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')"><i><svg viewBox="0 0 24 24">${g[3]}</svg></i><span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
+    GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')">${g[4] ? `<i class="th" style="background-image:url(${g[4]})"></i>` : `<i><svg viewBox="0 0 24 24">${g[3]}</svg></i>`}<span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
 }
+const fotoGuida = (img, t, s) => `<div class="card fotoTesta" style="background-image:url(${img})"><span><b>${t}</b><small>${s}</small></span></div>`;
 const testaGuida = (t) => `<div class="riga testata">${freccia("apriGuida(null)")}<div><div class="sopra">Guide</div><h1>${t}</h1></div></div>`;
 function vEsercizi() {
-  let h = testaGuida("Esercizi") + `<p class="muto">Tocca un esercizio per aprire la sua spiegazione.</p>`; const visti = {};
+  let h = testaGuida("Esercizi") + fotoGuida("img/es/panca-piana-man-1.jpg", "Tutti gli esercizi della scheda", "Foto, come si fa, dove sentirlo") + `<p class="muto">Tocca un esercizio per aprire la sua spiegazione.</p>`; const visti = {};
   for (const k of ["A", "B", "C", "M", "F"]) {
     const es = SEDUTE[k].es.filter((e) => !visti[e.id]); if (!es.length) continue;
     h += `<h2>${esc(SEDUTE[k].nome)}</h2><div class="card"><ol class="piano">`;
-    for (const e of es) { visti[e.id] = 1; h += `<li onclick="infoEs('${e.id}')"><span>${esc(e.nome)}<br><small class="muto">${INFO[e.id] ? esc(INFO[e.id].m) : ""}</small></span><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`; }
+    for (const e of es) { visti[e.id] = 1; h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}<br><small class="muto">${INFO[e.id] ? esc(INFO[e.id].m) : ""}</small></span><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`; }
     h += `</ol></div>`;
   }
   return h;
@@ -2008,39 +2013,79 @@ function vEsercizi() {
 /* Guida generale, uguale per chiunque: niente dati personali. Distingue ciò che è ben dimostrato da ciò che è solo ragionevole. */
 function vOrmoni() {
   const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
-  return testaGuida("Energia e ormoni") + `<p class="muto">Testosterone e fertilità maschile dipendono soprattutto da come dormi, quanto grasso hai addosso e come vivi. Nessun cibo e nessun integratore li alza da solo.</p>
+  return testaGuida("Energia e ormoni") + fotoGuida("img/pasti/cen.jpg", "Abitudini, non prodotti", "Sonno, peso e stile di vita contano più di tutto") + `<p class="muto">Testosterone e fertilità maschile dipendono soprattutto da come dormi, quanto grasso hai addosso e come vivi. Nessun cibo e nessun integratore li alza da solo.</p>
   <h2>Quello che conta davvero</h2>` + lista([
-    "<b>Dormire 7-9 ore.</b> Una settimana di sonno corto abbassa il testosterone in un uomo giovane. È la leva più forte.",
-    "<b>Allenarsi con i pesi con costanza</b>, senza esagerare: troppo volume con poco recupero fa l'effetto opposto.",
-    "<b>Grasso corporeo nella norma.</b> Il grasso in eccesso, soprattutto sulla pancia, abbassa il testosterone; perderlo lo rialza.",
-    "<b>Dimagrire piano.</b> Un deficit piccolo non crea problemi; diete molto strette e lunghe abbassano ormoni ed energia.",
-    "<b>Alcol poco o niente</b>, niente fumo, niente cannabis: pesano sia sugli ormoni sia sulla qualità dello sperma.",
-    "<b>Stress.</b> Quando resta alto per settimane, il desiderio e l'energia scendono anche con esami normali."]) +
+    "<b>Dormire 7-9 ore.</b> In uno studio piccolo, una settimana a 5 ore per notte ha abbassato il testosterone del 10-15% in uomini giovani.",
+    "<b>Allenarsi con costanza</b>, senza esagerare. I pesi non alzano il testosterone a riposo: aiutano perché tolgono grasso, migliorano il sonno e l'energia.",
+    "<b>Grasso corporeo nella norma.</b> Il grasso in eccesso abbassa il testosterone e peggiora la qualità dello sperma. Perderlo lo rialza, ma solo in chi ne ha in eccesso, e di poco.",
+    "<b>Dimagrire piano.</b> Un deficit piccolo non crea problemi; diete molto strette e lunghe, in chi è già magro, abbassano ormoni ed energia.",
+    "<b>Niente fumo</b>: sulla qualità dello sperma è il danno meglio dimostrato. <b>Alcol</b>: fa male il consumo alto e abituale; su quello moderato gli studi non concordano. Cannabis: pochi dati, meglio evitarla.",
+    "<b>Stress.</b> Quando resta alto per settimane, il desiderio e l'energia possono scendere anche con esami normali."]) +
   `<h2>A tavola</h2><p class="muto">Non esistono cibi che "alzano il testosterone". Esiste una dieta che non gli fa mancare niente: quella del tuo piano lo fa già.</p>` + lista([
-    "<b>Grassi sufficienti</b>: olio extravergine, frutta secca, uova, pesce grasso. Le diete quasi senza grassi lo abbassano un po'.",
+    "<b>Grassi sufficienti</b>: olio extravergine, frutta secca, uova, pesce grasso. Le diete molto povere di grassi lo abbassano del 10-15%, restando nella norma.",
     "<b>Zinco</b>: carne, pesce, uova, legumi, frutta secca. Serve integrarlo solo con una carenza.",
-    "<b>Vitamina D</b>: pesce grasso, uova, e soprattutto sole. Si integra dopo un esame del sangue.",
+    "<b>Vitamina D</b>: pesce grasso, uova, e soprattutto sole. Si integra dopo un esame del sangue; senza carenza non alza il testosterone.",
     "<b>Pesce 2-3 volte a settimana</b>, di cui una di pesce grasso: salmone, sgombro, alici.",
     "<b>Frutta e verdura ogni giorno</b>, di colori diversi, e una manciata di noci: sono legate a una qualità dello sperma migliore.",
     "<b>Calorie giuste</b>: mangiare troppo poco conta più di qualsiasi alimento."]) +
-  `<h2>Per la fertilità</h2>` + lista([
-    "<b>Tieni la zona al fresco.</b> Niente computer sulle gambe, bagni molto caldi e saune frequenti; biancheria non stretta. Le prove sono modeste, ma non costa niente.",
+  `<div class="fig"><div><img src="img/pasti/cen.jpg" alt=""><b>Pesce grasso</b>Salmone, sgombro, alici: una volta a settimana</div><div><img src="img/pasti/mer.jpg" alt=""><b>Frutta e frutta secca</b>Ogni giorno, con una manciata di noci</div></div>
+  <h2>Per la fertilità</h2>` + lista([
+    "<b>Tieni la zona al fresco.</b> Niente computer sulle gambe, bagni molto caldi e saune frequenti; biancheria non stretta. Sono studi piccoli e l'effetto è reversibile: è una precauzione che non costa niente.",
     "<b>Alzati spesso</b> se lavori seduto: ore di fila sulla sedia scaldano.",
     "<b>Febbre alta</b>: può abbassare i valori per 2-3 mesi, poi tornano.",
-    "<b>Mai testosterone o anabolizzanti.</b> Spengono la produzione naturale e possono azzerare gli spermatozoi.",
+    "<b>Mai testosterone o anabolizzanti.</b> Spengono la produzione naturale e possono azzerare gli spermatozoi; per tornare come prima servono 6-12 mesi.",
     "<b>Lunghi periodi di astinenza non migliorano la qualità</b>: aumentano il volume, ma gli spermatozoi si muovono peggio.",
     "<b>Ci vogliono circa 3 mesi.</b> È il tempo in cui si formano spermatozoi nuovi: ogni cambiamento si vede dopo."]) +
   `<h2>Cosa non serve</h2>` + lista([
     "<b>\"Testosterone booster\"</b> (tribulus, fieno greco, acido D-aspartico, maca): nessun effetto utile dimostrato.",
     "<b>Zinco, vitamina D, ferro a caso</b>: aiutano solo chi è carente. Il ferro in eccesso fa male.",
-    "<b>Antiossidanti \"per la fertilità\"</b>: gli studi danno risultati incerti. Se servono, li indica lo specialista.",
+    "<b>Antiossidanti \"per la fertilità\"</b>: prove molto deboli; le linee guida degli urologi europei non li consigliano di routine.",
     "<b>Cibi miracolosi</b>: ostriche, zenzero, aglio, avocado. Sono buoni cibi, non una terapia."]) +
   `<h2>Quando andare dal medico</h2>` + lista([
     "Stanchezza o calo del desiderio che durano <b>più di qualche settimana</b>.",
-    "Per misurare il testosterone: prelievo <b>al mattino presto, a digiuno</b>, dopo una notte dormita bene. Un valore basso va ripetuto.",
+    "Per misurare il testosterone: prelievo <b>tra le 7 e le 10, a digiuno</b>, dopo una notte dormita bene. Un valore basso va ripetuto: una volta su tre il secondo prelievo è normale.",
     "Se si cerca una gravidanza da <b>12 mesi</b> senza riuscirci: lo spermiogramma è l'esame da fare.",
     "Dolore, gonfiore o un nodulo a un testicolo: <b>subito</b>."]) +
-  `<p class="muto">Sono indicazioni generali, non una visita. Sonno, allenamento, peso e alcol sono ben dimostrati; il resto è pratica ragionevole.</p>`;
+  `<p class="muto">Sono indicazioni generali, non una visita. Ben dimostrati: fumo, anabolizzanti, grasso in eccesso. Il resto è pratica ragionevole, con prove più deboli.</p>`;
+}
+/* Guida Addome: copia in breve di piano/addome.md. Se cambia il percorso, va aggiornata anche questa. */
+function vAddome() {
+  const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
+  const due = (a, ta, da, b, tb, db) => `<div class="fig"><div><img src="${a}" alt=""><b>${ta}</b>${da}</div><div><img src="${b}" alt=""><b>${tb}</b>${db}</div></div>`;
+  return testaGuida("Addome") + fotoGuida("img/es/gambe-sbarra-2.jpg", "Forte e visibile", "Due lavori diversi: il muscolo sotto, il grasso sopra") +
+  `<h2>Come si arriva a vederli</h2>` + lista([
+    "<b>Il muscolo si costruisce con esercizi duri e progressivi</b>, come petto e gambe: poche serie fatte bene, non centinaia di ripetizioni.",
+    "<b>Il grasso sopra scende solo con la dieta.</b> Gli esercizi per l'addome non bruciano il grasso della pancia.",
+    "<b>Servono tutte e due le cose</b>: un addome allenato si vede prima e meglio, a parità di grasso."]) +
+  `<h2>I quattro movimenti</h2>` +
+  due("img/es/crunch-cavo-2.jpg", "Flessione con carico", "Crunch al cavo in palestra, crunch con peso a casa", "img/es/gambe-sbarra-2.jpg", "Dal basso", "Sollevamento gambe alla sbarra, crunch inverso") +
+  due("img/es/rollout-2.jpg", "Rollout", "L'unico con la crescita misurata in uno studio: per questo c'è da subito", "img/es/plank-lato-2.jpg", "Fianchi", "Già allenati da rematori, affondi e stacchi su una gamba") +
+  `<h2>Le tre tappe</h2><div class="card"><table>
+    <tr><td><b>1 · Fondamenta</b><br><span class="muto">fino al 20/12</span></td><td>15 serie a settimana in 5 momenti. Impari il rollout e a muovere bacino e costole, non le anche.</td></tr>
+    <tr><td><b>2 · Carico</b><br><span class="muto">dal 04/01</span></td><td>rollout sempre più lungo, crunch più pesanti da 8-12, gambe sempre più tese alla sbarra, entra il crunch con peso.</td></tr>
+    <tr><td><b>3 · Rifinitura</b><br><span class="muto">quando il giro vita è sceso di 4 cm</span></td><td>10-12 serie per mantenere. Da qui il resto lo fa la dieta.</td></tr></table></div>
+  <h2>La settimana, tappa 1</h2><div class="card"><table>
+    <tr><td><b>Seduta A</b></td><td>rollout con bilanciere 3 × 6-10</td></tr>
+    <tr><td><b>Seduta B</b></td><td>crunch al cavo 3 × 10-15</td></tr>
+    <tr><td><b>Seduta C</b></td><td>sollevamento gambe alla sbarra 3 × 8-15</td></tr>
+    <tr><td><b>Mini routine</b>, 2 volte</td><td>crunch inverso 3 × 10-15</td></tr></table></div>
+  <h2>Come si fa bene</h2>` + lista([
+    "<b>Avvicina costole e bacino.</b> Se si muovono solo le gambe o il busto resta dritto, lavorano le anche.",
+    "<b>Espira mentre chiudi</b>, tieni 1 secondo, torna in 2-3 secondi fino ad allungare l'addome.",
+    "<b>Progressione</b>: nei crunch, quando fai 15 in tutte le serie aumenti il carico e riparti da 10. Nel rollout vai ogni volta un po' più lontano, a schiena piatta.",
+    "<b>Non tutti i giorni</b>: come ogni muscolo, cresce quando recupera."]) +
+  `<h2>I traguardi</h2>` + lista([
+    "<b>Giro vita</b> all'ombelico, ogni 2 settimane: −4 cm è la prima tappa, −6 cm l'obiettivo.",
+    "<b>Sollevamento gambe alla sbarra</b>: 3 × 10 a gambe tese, senza dondolio.",
+    "<b>Rollout</b>: 3 × 10 fino a braccia distese, a schiena piatta.", "<b>Crunch al cavo</b>: carico che sale da un mese all'altro, a parità di ripetizioni.",
+    "<b>Foto</b> ogni 4 settimane, stessa luce e stessa ora."]) +
+  `<h2>Cosa non serve</h2>` + lista([
+    "<b>Centinaia di crunch a corpo libero</b>: allenano la resistenza, non fanno crescere né dimagrire.",
+    "<b>Fasce, creme, sudare di più</b>: fanno perdere acqua per qualche ora.",
+    "<b>\"Addominali alti\" e \"bassi\"</b>: è un muscolo solo. Cambiare esercizio sposta un po' l'accento, non lo divide in due.",
+    "<b>Pancia piatta la mattina e gonfia la sera</b>: è gonfiore, non grasso. Si lavora a tavola, non in palestra.",
+    "<b>Correggere la postura con gli addominali</b>: negli studi rinforzarli non cambia l'inclinazione del bacino."]) +
+  `<p class="muto">Tempi realistici: i primi cambiamenti nel giro vita in 4-6 settimane, addominali visibili in 4-6 mesi di dieta rispettata. Dipende da quanto grasso c'è da togliere, non dagli esercizi. Sulla crescita degli addominali gli studi diretti sono pochi: il rollout è l'unico misurato, il resto segue i principi che valgono per tutti i muscoli.</p>`;
 }
 function vSigle() {
   const v = [["RIR", "Ripetizioni in riserva: quante ne avresti ancora fatte, pulite, a fine serie. RIR 2 = ti fermi con 2 nel serbatoio. RIR 0 = non ne usciva più nessuna."],
@@ -2052,10 +2097,12 @@ function vSigle() {
     ["Rientro", "Le prime settimane dopo uno stop: meno serie e più margine, per riabituare i tendini."], ["Deload", "Settimana di scarico: metà serie e sforzo basso, per recuperare."],
     ["Seduta minima", "I primi 3 esercizi e basta. Per i giorni no: conta come fatta."], ["Come stai oggi", "Cinque voci da 1 a 5. 21-25 verde, 16-20 giallo, 11-15 arancione, fino a 10 rosso: la seduta si adatta."],
     ["Giorno ON / OFF", "ON è il giorno con i pesi: più carboidrati. OFF è il giorno senza: meno carboidrati, stesse proteine."]];
-  return testaGuida("Sigle e parole") + `<div class="card spi">${v.map((x) => `<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`;
+  return testaGuida("Sigle e parole") + fotoGuida("img/allenamento.jpg", "Le parole della scheda", "Cosa vogliono dire, in una riga") +
+    `<div class="fig"><div><img src="img/es/panca-piana-man-1.jpg" alt=""><b>Multiarticolare</b>Più articolazioni: panca, squat, rematore</div><div><img src="img/es/curl-inclinata-1.jpg" alt=""><b>Isolamento</b>Una sola: curl, alzate, leg extension</div></div>
+    <div class="card spi">${v.map((x) => `<div><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`;
 }
 function vTrazioni() {
-  return testaGuida("Trazioni") + boxTrazione() + `
+  return testaGuida("Trazioni") + fotoGuida("img/es/negative-2.jpg", "Verso la prima trazione", "Appesa, scapolari, negative") + boxTrazione() + `
   <p class="muto">I tre esercizi alla sbarra, a inizio seduta. Obiettivo: la prima trazione da solo.</p>
   <div class="card"><div class="nome">La presa, uguale per tutti e tre</div><ul>
     <li><b>Prona</b>: palmi in avanti, pollice chiuso attorno alla sbarra.</li>
@@ -2404,6 +2451,12 @@ const navVetro = (() => {
    m muscoli · p a cosa serve · c come si fa · s dove sentirlo · e errori · a alternativa se non puoi farlo.
    Le chiavi sono gli id degli esercizi della scheda. */
 const INFO = {
+  "crunch-peso": { m: "Retto dell'addome", p: "La versione di casa del crunch al cavo: flessione del busto con un carico che sale nel tempo. Entra nel percorso dalla tappa 2.",
+    c: ["Sdraiato a terra, ginocchia piegate, un asciugamano arrotolato sotto la parte bassa della schiena.", "Disco o manubrio tenuto sul petto alto, vicino al mento.", "Avvicina le costole al bacino arrotolando la schiena: le spalle si staccano, la zona lombare resta giù.", "Tieni 1\" in alto, scendi in 2-3\" fino ad allungare l'addome sopra l'asciugamano."],
+    s: "Tutta la parete davanti, dalle costole all'ombelico.", e: ["Tirare con il collo o lanciare il peso.", "Salire fino a seduto: da metà in su lavorano le anche, non l'addome.", "Scendere di colpo."], a: "Crunch al cavo in ginocchio; senza peso, discesa in 4\"." },
+  "rollout": { m: "Addominali in tenuta, dorsali", p: "È l'esercizio per l'addome con la crescita meglio misurata: in uno studio di 10 settimane il retto dell'addome è cresciuto del 12-18%, con il plank no.",
+    c: ["In ginocchio, mani sul bilanciere caricato con dischi tondi, braccia tese.", "Bacino leggermente in retroversione, addome contratto.", "Fai rotolare il bilanciere in avanti finché riesci a tenere la schiena piatta.", "Torna indietro tirando con l'addome, non con le anche."],
+    s: "Addome che tiene per tutto il movimento, soprattutto nel punto più lontano.", e: ["Schiena che si inarca nel punto più lontano.", "Andare più avanti di quanto controlli.", "Tornare spingendo il sedere indietro."], a: "Crunch a terra con peso, 3 × 10-15." },
   "appesa": { m: "Presa, avambracci, spalle in allungamento", p: "Abitua mani e spalle a reggere il tuo peso: senza questo la trazione non parte.",
     c: ["Presa prona, mani poco più larghe delle spalle, pollice chiuso attorno alla sbarra.", "Stacca i piedi e lasciati pendere a braccia tese.", "Spalle rilassate, che salgono verso le orecchie. Respira normalmente."],
     s: "Avambracci che lavorano, allungamento sotto le ascelle.", e: ["Dondolare.", "Tenere i gomiti piegati.", "Trattenere il respiro."], a: "Se la presa cede prima dei 20\", fai più serie brevi da 10-15\"." },
@@ -2489,7 +2542,7 @@ const INFO = {
   "calf-libero": { m: "Polpacci", p: "A corpo libero i polpacci si allenano bene anche in trasferta.",
     c: ["Avampiede su un gradino, tallone fuori, una mano al muro.", "Scendi fino in fondo e fermati 1\".", "Sali più in alto che puoi."],
     s: "Polpaccio.", e: ["Rimbalzare.", "Movimento corto."], a: "Su due gambe se su una non arrivi a 12." },
-  "crunch-inverso": { m: "Addominali", p: "Senza attrezzi, lavora l'addome muovendo il bacino: aiuta anche la postura del bacino.",
+  "crunch-inverso": { m: "Addominali", p: "Senza attrezzi, lavora l'addome portando il bacino verso le costole.",
     c: ["Sdraiato, mani lungo i fianchi, ginocchia piegate a 90°.", "Arrotola il bacino staccandolo da terra, ginocchia verso il petto.", "Scendi in 3\" senza appoggiare i piedi."],
     s: "Parte bassa dell'addome.", e: ["Lanciare le gambe.", "Spingere con le mani.", "Inarcare la schiena in discesa."], a: "Con le mani che tengono un mobile dietro la testa, se scivoli." },
   "corsa": { m: "Cuore e polmoni", p: "Base di fiato che non toglie recupero alle gambe.",

@@ -943,8 +943,8 @@ const INTEG = [
   { id: "creatina", nome: "Creatina monoidrato", dose: "3 g", quando: "ogni giorno, quando vuoi", gruppo: "Ogni giorno",
     i: { s: "Più forza e qualche ripetizione in più a ogni serie: nel tempo vuol dire più muscolo.",
          c: "3 g ogni giorno, anche quando non ti alleni. L'orario non conta: legala a un pasto per non dimenticarla. Niente fase di carico, niente pause.",
-         p: "È l'integratore con le prove più solide su forza e massa.",
-         n: "Le prime settimane porta 1-2 kg di acqua dentro il muscolo: sulla bilancia si vede, ma non è grasso. Con problemi ai reni si chiede prima al medico." } },
+         p: "È l'integratore con le prove più solide su forza e massa. L'effetto sul muscolo è reale ma piccolo.",
+         n: "Le prime settimane porta circa 0,5-1 kg di acqua dentro il muscolo: sulla bilancia si vede, ma non è grasso. Alza un poco la creatinina negli esami del sangue senza toccare i reni: dillo al medico prima di un prelievo." } },
   { id: "whey", nome: "Proteine in polvere (whey)", dose: "20 g", quando: "a colazione, nel latte", gruppo: "Conta come cibo", cibo: 1,
     i: { s: "Sono un modo comodo di arrivare alle proteine della giornata, niente di più.",
          c: "Le scegli nella sezione Proteine della colazione: calorie e proteine sono già nel conto del giorno.",
@@ -956,7 +956,7 @@ const INTEG_NO = [
   ["BCAA e aminoacidi", "non servono", "Con le proteine del piano sono già coperti: aggiunti a parte non fanno crescere di più."],
   ["Pre-workout", "non serve", "Quasi tutto l'effetto è la caffeina: un caffè 45 minuti prima della seduta fa lo stesso, se non è sera."],
   ["Testosterone booster", "non funzionano", "Tribulus, acido D-aspartico e simili non alzano il testosterone in modo utile e non aggiungono muscolo."],
-  ["Multivitaminico", "non serve", "Con frutta, verdura e i pasti del piano vitamine e minerali ci sono già."],
+  ["Multivitaminico", "non serve", "Nelle persone sane non mostra benefici. Con frutta, verdura e i pasti del piano vitamine e minerali ci sono già."],
 ];
 function infoInt(id) {
   const x = INTEG.find((y) => y.id === id); if (!x) return;
