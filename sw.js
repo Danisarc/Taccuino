@@ -15,7 +15,7 @@ self.addEventListener("activate", (e) => {
 // prima la rete (così gli aggiornamenti arrivano subito), se manca si usa la copia salvata
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET" || new URL(e.request.url).origin !== self.location.origin) return;   // le ricerche su Open Food Facts vanno dirette in rete
-  if (new URL(e.request.url).pathname.includes("/rosa/")) return;   // la cartella di Rosa ha il suo service worker e la sua memoria
+  if (/\/(rosa|umberto)\//.test(new URL(e.request.url).pathname)) return;   // le cartelle degli altri atleti hanno il loro service worker e la loro memoria
   e.respondWith(
     fetch(e.request).then((r) => {
       const copia = r.clone();
