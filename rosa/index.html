@@ -1974,6 +1974,7 @@ let guida = null;
 function apriGuida(g) { guida = g; disegna(); window.scrollTo(0, 0); }
 const GUIDE = [
   ["addome", "Addome", "Meno gonfia, più forte: il percorso in tre leve", '<path d="M8 3h8v18H8zM8 9h8M8 15h8M12 3v18"/>', "img/es/pallof-2.jpg"],
+  ["gonfiore", "Gonfiore: una proposta", "Cosa può gonfiare nel piano e una prova di 2 settimane, da decidere insieme", '<path d="M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v5M12 16h.01"/>', "img/pasti/mer.jpg"],
   ["regole", "Prima e durante la seduta", "Quando mangiare, cosa portare, quando fermarsi", '<path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.800-1.200-8-4.500-8-9V6zM9 12l2 2 4-4"/>', "img/allenamento.jpg"],
   ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', "img/es/leg-press-1.jpg"],
   ["casa", "Allenarsi a casa", "Casa A e Casa B, e cosa fare quando i manubri sono leggeri", '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>', "img/es/goblet-1.jpg"],
@@ -1987,6 +1988,7 @@ function vTecnica() {
   if (guida === "sigle") return vSigle();
   if (guida === "cambi") return vCambi();
   if (guida === "addome") return vAddome();
+  if (guida === "gonfiore") return vGonfiore();
   return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
     GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')">${g[4] ? `<i class="th" style="background-image:url(${g[4]})"></i>` : `<i><svg viewBox="0 0 24 24">${g[3]}</svg></i>`}<span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
 }
@@ -2021,6 +2023,7 @@ function vAddome() {
     "<b>Dopo cena</b> non sdraiarti per 2-3 ore.",
     "<b>A tavola</b>: verdura cotta e frutta del piano ogni giorno, mangiando in 15-20 minuti.",
     "<b>Se in 4 settimane non cambia niente</b>: ricontrolla la spiga barrata sui prodotti e i pasti fuori casa, e parlane con il coach. Non togliere altri cibi da sola."]) +
+  `<button class="blocco" onclick="apriGuida('gonfiore')"><i class="th" style="background-image:url(img/pasti/mer.jpg)"></i><span><b>A tavola: una proposta</b><small>Cosa può gonfiare nel piano, e una prova di 2 settimane da decidere insieme</small></span><em>›</em></button>` +
   `<h2>2 · Grasso</h2>` + lista([
     "Scende con il <b>piano alimentare</b> che hai già: nessun esercizio lo toglie da un punto preciso.",
     "I <b>passi</b> contano quanto le sedute.",
@@ -2041,6 +2044,52 @@ function vAddome() {
     "<b>Giro vita</b> sotto l'ombelico, al mattino a digiuno, ogni 2 settimane.",
     "<b>Intestino</b>: quante volte a settimana."]) +
   `<p class="muto">La respirazione, la camminata e l'esercizio regolare hanno studi a favore, ma piccoli: sono prove che vale la pena fare, non cure. Se il gonfiore si accompagna a dolore, o peggiora, si sente il medico.</p>`;
+}
+/* Guida Gonfiore: una PROPOSTA del coach, non ancora nel piano. Si decide insieme. Testo generale: niente riferimenti a condizioni di salute.
+   Se viene accettata, diventa parte del piano alimentare e questa guida va riscritta di conseguenza. */
+function vGonfiore() {
+  const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
+  const tab = (r) => `<div class="card"><table>${r.map((x) => `<tr><td><b>${x[0]}</b>${x[2] ? `<br><span class="muto">${x[2]}</span>` : ""}</td><td>${x[1]}</td></tr>`).join("")}</table></div>`;
+  return testaGuida("Gonfiore") + fotoGuida("img/pasti/mer.jpg", "Una proposta, da decidere insieme", "Leggila con calma: non è ancora nel tuo piano") +
+  `<div class="card consiglioCoach"><b>Dal coach</b>Ho riguardato il tuo piano alimentare cercando cosa può gonfiare. Qui trovi quello che ho visto e una prova di 2 settimane. Non cambia niente finché non ne parliamo: guardala, fatti la tua idea, poi decidiamo insieme.</div>
+  <h2>Cosa ho trovato nel piano</h2><p class="muto">Sono alimenti buoni, che restano nel piano. In alcune persone però fermentano più di altri.</p>` + tab([
+    ["Crema keto", "contiene polioli, zuccheri che fermentano", "colazione"],
+    ["Yogurt, skyr, fiocchi di latte", "il lattosio; nel piano ci sono due volte al giorno", "colazione e spuntino"],
+    ["Mela e pera", "fruttosio e sorbitolo", "spuntino e merenda"],
+    ["Pasta di lenticchie o di ceci", "i legumi sono l'alimento che produce più gas", "pranzo"],
+    ["Avocado, mandorle in quantità", "in porzioni grandi fermentano", "pranzo"],
+    ["Verdura", "il piano dice quanta, non quale: cavoli, broccoli, carciofi, cipolla e funghi gonfiano molto", "pranzo e cena"],
+    ["Bevanda d'avena", "l'avena è il cereale che si contamina più spesso con il glutine", "colazione"]]) +
+  `<h2>La proposta</h2>` + lista([
+    "<b>Non si toglie niente</b> e le calorie non cambiano.",
+    "<b>Per 2 settimane</b>, in ogni sezione scegli l'alternativa che fa meno aria. Sono tutte già nel tuo piano.",
+    "<b>Poi rimetti le altre</b> una alla volta, e vediamo quale ti gonfia davvero."]) +
+  `<h2>Cosa sceglieresti per 2 settimane</h2>` + tab([
+    ["Colazione", "burro di arachidi 100% al posto della crema"],
+    ["Colazione e spuntino", "whey nell'impasto, bresaola o tonno; yogurt e skyr solo senza lattosio"],
+    ["Frutta", "kiwi o banana non troppo matura, al posto di mela e pera"],
+    ["Pranzo", "riso, patate o quinoa, al posto della pasta di legumi"],
+    ["Grassi", "olio o olive al posto dell'avocado; mandorle o noci fino a 15 g"],
+    ["Verdura", "cotta: zucchine, carote, spinaci, fagiolini, melanzane, finocchi, lattuga. Da parte cavoli, broccoli, cavolfiore, carciofi, funghi, molta cipolla e aglio"],
+    ["Sabato", "pizza margherita, senza funghi"]]) +
+  `<h2>Tre controlli sulle etichette</h2>` + lista([
+    "<b>Bevanda d'avena</b>: deve avere la spiga barrata. Nel dubbio, per queste 2 settimane, una bevanda di riso.",
+    "<b>Pane senza glutine</b>: se tra gli ingredienti c'è inulina o fibra di cicoria, cambialo. Gonfia molto.",
+    "<b>Prodotti \"senza zucchero\"</b>, gomme e caramelle: quasi sempre contengono polioli."]) +
+  `<h2>Come si leggerebbe la prova</h2>` + lista([
+    "<b>Ogni sera</b> un voto al gonfiore da 1 a 5, nelle note del giorno.",
+    "<b>Dopo 2 settimane</b> rimetti un alimento alla volta, ogni 3 giorni, partendo da quello che ti manca di più.",
+    "<b>Se con un alimento il voto risale</b>, quello resta fuori. Gli altri tornano tutti.",
+    "<b>Se in 2 settimane non cambia niente</b>, il cibo non è la causa principale: non si toglie altro, si guarda l'intestino (acqua, kiwi, passi) e si sente il medico."]) +
+  `<h2>Perché così</h2>` + lista([
+    "<b>Non è una dieta di eliminazione.</b> Togliere alimenti rende un piano più difficile da seguire: qui scegli tra cose che hai già.",
+    "<b>Dura poco e finisce</b>: l'obiettivo è scoprire uno o due alimenti, non restringere per sempre.",
+    "<b>Puoi anche dire di no</b>, o provarne solo una parte: per esempio cambiare solo la crema e la frutta."]) +
+  `<h2>Quanto è solido</h2>` + lista([
+    "<b>Il principio</b>, cioè scegliere alimenti che fermentano meno, ha buone prove in chi soffre di gonfiore.",
+    "<b>Quali alimenti fermentano di più</b> viene dalle tabelle di composizione: vale in generale, non è detto che valga per te.",
+    "<b>Su di te</b> lo dice solo la prova, con il voto della sera. Per questo c'è la reintroduzione."]) +
+  `<p class="muto">Quando l'hai letta, parlane con il coach: si decide insieme se farla, quando, e in che forma.</p>`;
 }
 function vSigle() {
   const v = [["RIR", "Ripetizioni in riserva: quante ne avresti ancora fatte, pulite, a fine serie. RIR 3 = ti fermi con 3 in serbo. RIR 0 = non ne usciva più nessuna."],
