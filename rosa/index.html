@@ -512,7 +512,8 @@ table.mis td:first-child { width:38%; } table.mis input { text-align:center; fon
 .slot.snello small { flex:none; color:var(--testo); font-weight:700; font-size:13px; font-variant-numeric:tabular-nums; } .slot.snello .ric { margin-left:8px; }
 .pasto ul.sottoSlot { margin-top:2px; }
 button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
-.testata button.info { margin-right:-2px; }
+.testata button.info { margin-right:-2px; } .testata h1.tcibo { font-size:clamp(19px, 6vw, 25px); font-stretch:104%; letter-spacing:-.5px; } .testata h1.tcibo + *, .testata:has(h1.tcibo) .sopra { font-size:10.5px; letter-spacing:.3px; }
+.g2.onoff button { white-space:nowrap; font-size:clamp(11.5px, 3.5vw, 13.5px); padding-left:4px; padding-right:4px; } .contoSu .sopra { white-space:nowrap; font-size:clamp(11px, 3.4vw, 13px); } .contoSu { gap:clamp(10px, 4vw, 18px); }
 .striscia { position:sticky; top:calc(env(safe-area-inset-top, 0px) + 8px); height:0; z-index:6; pointer-events:none; }
 .striscia > div { position:absolute; left:0; right:0; top:0; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 14px; border-radius:16px; background:var(--solido); border:1px solid rgba(61,220,132,.4);
   box-shadow:0 8px 22px rgba(0,0,0,.45); font-size:12.5px; color:var(--muto); white-space:nowrap; opacity:0; transform:translateY(-14px); transition:opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1); cursor:pointer; }
@@ -1291,32 +1292,38 @@ function qtaSlot(pid, s, n, val) {
 function togliSlot(pid, s, n) { const r = recCibo(oggi(), true), key = pid + "." + s, vv = slotDi(r, key); vv.splice(n, 1); if (!vv.length && r.s) delete r.s[key]; vib(); salva(); tieni(disegna); }
 function spuntaF(key) { const r = recCibo(oggi(), true); r.f = r.f || {}; if (r.f[key]) delete r.f[key]; else r.f[key] = 1; vib(); salva(); tieni(disegna); }
 // "Come da piano" è un interruttore: il primo tocco riempie le sezioni ancora vuote con la prima scelta e spunta le voci fisse,
-// il secondo toglie quello che aveva messo (r.cp[pasto] = { s: [[sezione, alimento]], f: [voci fisse] }); quello che hai scelto tu resta
-function pianoSu(r, pid) {
-  const m = r.cp && r.cp[pid]; if (!m) return false;
-  return m.s.some((q) => { const vv = slotDi(r, pid + "." + q[0]); return vv.length === 1 && vv[0].k === q[1]; }) || m.f.some((f) => r.f && r.f[pid + ":" + f]);
+// il secondo le toglie. Lo stato si legge da quello che c'è nel pasto, non da un segno a parte: così vale anche per i pasti
+// riempiti prima di un aggiornamento. Un pasto è "come da piano" se ogni sezione ha la prima scelta (o è già coperta dal resto
+// della giornata) e le voci fisse sono spuntate.
+function statoPiano(r, pid, R) {
+  const p = pastoDi(pid), on = modoOn(oggi()); let n = 0, ok = true;
+  for (const s of ["p", "c", "g"]) { const z = p.sez[s]; if (!z) continue; const key = pid + "." + s, vv = slotDi(r, key), base = z.t[on ? 0 : 1];
+    if (vv.length) { if (vv.length === 1 && vv[0].k === z.v[0]) n++; else ok = false; }
+    else if (base && (R.t[key] || 0) >= base * 0.15) ok = false; }
+  for (const f of p.sempre || []) if (fissaOn(f, on)) { if (r.f && r.f[pid + ":" + f[0]]) n++; else ok = false; }
+  return ok && n > 0;
 }
-function comePiano(pid, zitto) {
-  const p = pastoDi(pid), r = recCibo(oggi(), true), on = modoOn(oggi()); r.s = r.s || {}; r.f = r.f || {}; r.cp = r.cp || {};
-  if (pianoSu(r, pid)) {
-    for (const q of r.cp[pid].s) { const key = pid + "." + q[0], vv = slotDi(r, key); if (vv.length === 1 && vv[0].k === q[1] && !vv[0].man) delete r.s[key]; }
-    for (const f of r.cp[pid].f) delete r.f[pid + ":" + f];
-    delete r.cp[pid];
+const pianoSu = (r, pid) => statoPiano(r, pid, ricalcolo(oggi()));
+function comePiano(pid, zitto, togli) {
+  const p = pastoDi(pid), r = recCibo(oggi(), true), on = modoOn(oggi()); r.s = r.s || {}; r.f = r.f || {};
+  if (togli == null) togli = pianoSu(r, pid);
+  if (togli) {
+    for (const s of ["p", "c", "g"]) { const z = p.sez[s], key = pid + "." + s, vv = slotDi(r, key); if (z && vv.length === 1 && vv[0].k === z.v[0]) delete r.s[key]; }
+    for (const f of p.sempre || []) delete r.f[pid + ":" + f[0]];
   } else {
-    const messo = { s: [], f: [] };
     for (const s of ["p", "c", "g"]) { const z = p.sez[s]; if (!z || slotDi(r, pid + "." + s).length) continue;
       const T = ricalcolo(oggi()).t[pid + "." + s] || 0; if (T < z.t[on ? 0 : 1] * 0.15) continue;
-      const x = { k: z.v[0], g: 0 }; x.g = grammi(a100(x), SEZ[s][1], T, optA(x)); if (x.g) { r.s[pid + "." + s] = [x]; messo.s.push([s, x.k]); } }
-    for (const f of p.sempre || []) if (fissaOn(f, on) && !r.f[pid + ":" + f[0]]) { r.f[pid + ":" + f[0]] = 1; messo.f.push(f[0]); }
-    r.cp[pid] = messo;
+      const x = { k: z.v[0], g: 0 }; x.g = grammi(a100(x), SEZ[s][1], T, optA(x)); if (x.g) r.s[pid + "." + s] = [x]; }
+    for (const f of p.sempre || []) if (fissaOn(f, on)) r.f[pid + ":" + f[0]] = 1;
   }
-  if (!zitto) { vib(); salva(); tieni(disegna); }
+  delete r.cp;
+  if (!zitto) { vib(); salva(); tieni(disegna); avvisa(togli ? "Tolto da " + p.nome.toLowerCase() : p.nome + " come da piano"); }
 }
-// tutta la giornata: mette il piano nei pasti dove manca; se c'è già dappertutto, lo toglie
+// tutta la giornata: mette il piano nei pasti dove manca; se c'è già dappertutto, lo toglie da tutti
 function giornoPiano() {
   const pp = MENU.filter((p) => p.id !== "int"), r = recCibo(oggi(), true), tutti = pp.every((p) => pianoSu(r, p.id));
-  for (const p of pp) if (tutti || !pianoSu(r, p.id)) comePiano(p.id, true);
-  vib(); salva(); tieni(disegna);
+  for (const p of pp) { if (tutti) comePiano(p.id, true, true); else if (!pianoSu(r, p.id)) comePiano(p.id, true, false); }
+  vib(); salva(); tieni(disegna); avvisa(tutti ? "Giornata svuotata" : "Giornata come da piano");
 }
 function togliVecchio() { const r = recCibo(oggi(), true); r.x = {}; r.extra = []; r.q = {}; r.pers = false; salva(); tieni(disegna); }
 
@@ -1362,15 +1369,16 @@ function infoCibo() {
       <li><b>Un alimento che non è in elenco</b>: in ogni sezione tocca "Scegli", poi "Un altro alimento". Con il codice a barre, dall'elenco o a mano: i grammi li calcola l'app.</li>
       ${APP.ricorda.map((x) => "<li>" + x + "</li>").join("")}</ul></div><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
-// in che sezione del pasto sta una voce fissa: la verdura in "Verdura e altro", il resto nel macro che porta più calorie
+// in che sezione del pasto sta una voce fissa: la verdura in "Verdura e altro", i latticini nelle proteine, il resto nel macro che porta più calorie
 function sezFissa(f) {
   if (/verdur|passata|insalata/i.test(f[1])) return "v";
+  if (/latte|yogurt|skyr|formagg|ricotta|mozzarella|parmigiano|grana|scamorza|provola/i.test(f[1]) && !/avena|soia|mandorl|riso|cocco/i.test(f[1])) return "p";      // i latticini stanno con le proteine (scelta di Daniele)
   const v = f[3], q = [v[1] * 4, v[2] * 4, v[3] * 9];
   return q[1] >= q[0] && q[1] >= q[2] ? "c" : q[0] >= q[2] ? "p" : "g";
 }
 function vCibo() {
   const d = oggi(), on = modoOn(d), k = on ? 0 : 1, N = CIBO[on ? "on" : "off"], r = recCibo(d), T = totali(d), resta = Math.round(N.kcal - T[0]), R = ricalcolo(d), vecchio = totaliV2(d)[0];
-  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">${APP.versione}</div><h1>Alimentazione</h1></div>
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">${APP.versione}</div><h1 class="tcibo">Alimentazione</h1></div>
       <button class="info" aria-label="Come funziona" onclick="infoCibo()">i</button>
       <button class="ico tre-linee" aria-label="Meal prep e lista della spesa" onclick="menuCibo()"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
     ${APP.onoff ? `<div class="g2 onoff"><button class="${on ? "pri" : ""}" onclick="mettiOn(true)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="mettiOn(false)">Giorno OFF · riposo</button></div>` : ""}
@@ -2366,7 +2374,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v21</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v22</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
