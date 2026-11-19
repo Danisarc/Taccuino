@@ -1,7 +1,7 @@
 // Taccuino (cartella umberto): funziona anche senza rete. Cambia VERSIONE a ogni aggiornamento dell'app.
 // Vive in una cartella sua, con una memoria sua: tocca solo le copie che cominciano con PREFISSO.
 const PREFISSO = "taccuino-umberto-";
-const VERSIONE = PREFISSO + "v13";
+const VERSIONE = PREFISSO + "v14";
 const FILE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "img/allenamento.jpg", "img/alimentazione.jpg", "font/archivo.woff2", "img/pasti/col.jpg", "img/pasti/spu.jpg", "img/pasti/pra.jpg", "img/pasti/mer.jpg", "img/pasti/cen.jpg", "img/pasti/prep.jpg",
   "img/trazione-basso.png", "img/trazione-alto.png", "img/foto-alto.jpg", "img/foto-da-dietro.jpg"]
   // foto degli esercizi (img/es): servono anche senza rete, in palestra
