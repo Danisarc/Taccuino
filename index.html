@@ -491,6 +491,33 @@ table.mis td:first-child { width:38%; } table.mis input { text-align:center; fon
 .mt .barra { height:7px; } .barra i { background:linear-gradient(90deg,#2fd07a,#c8ffe0); }
 .tremac > div > small { white-space:nowrap; } .tremac > div > small b { color:var(--verde); font-weight:700; }
 .g2.onoff { gap:8px; } .g2.onoff button { min-height:36px; padding:5px 10px; font-size:13.5px; border-radius:13px; }
+/* Alimentazione: pasti a fisarmonica (uno aperto per volta, con transizione), pallini dei macro, sezioni vuote su una riga, striscia del conto */
+.pasto .ptesta { cursor:pointer; align-items:center; gap:8px; -webkit-tap-highlight-color:transparent; transition:padding .32s cubic-bezier(.2,.8,.2,1), margin .32s cubic-bezier(.2,.8,.2,1), border-radius .32s; }
+.pasto .ptesta > div:first-child { flex:1; min-width:0; } .pasto .ptesta.ban { align-items:flex-end; }
+.pasto:not(.aperto) .ptesta.ban { padding-top:24px; margin-bottom:-16px; border-radius:21px; }
+.ban .nome { transition:font-size .32s; } .pasto:not(.aperto) .ban .nome { font-size:19px; }
+.pasto:not(.ban) .ptesta .nome { font-size:17px; }
+.frec { flex:none; width:9px; height:9px; margin:0 5px 7px 3px; border-right:2px solid var(--testo); border-bottom:2px solid var(--testo); opacity:.85; transform:rotate(45deg); transition:transform .32s cubic-bezier(.2,.8,.2,1), margin .32s; }
+.pasto.aperto .frec { transform:rotate(225deg); margin-bottom:1px; }
+.tredot { display:flex; gap:4px; align-items:center; margin-bottom:5px; } .ptesta:not(.ban) .tredot, .ptesta:not(.ban) .frec { margin-bottom:0; }
+.tredot i { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.28); transition:background .3s, box-shadow .3s; }
+.tredot i.on { background:var(--verde); box-shadow:0 0 6px rgba(61,220,132,.85); }
+.pasto.fatto .ptesta .pillola { background:var(--verde); color:#04130a; }
+.pcorpo { display:grid; grid-template-rows:0fr; transition:grid-template-rows .34s cubic-bezier(.2,.8,.2,1); } .pasto.aperto .pcorpo { grid-template-rows:1fr; }
+.pcorpo > div { overflow:hidden; min-height:0; opacity:0; visibility:hidden; transition:opacity .22s, visibility 0s .34s; }
+.pasto.aperto .pcorpo > div { opacity:1; visibility:visible; transition:opacity .3s .08s, visibility 0s; }
+.pasto:not(.aperto) .ptesta:not(.ban) + .pcorpo { margin-top:0; } .ptesta:not(.ban) + .pcorpo > div > :first-child { margin-top:12px; }
+.pazioni { margin:0 0 2px; } .pazioni button.pri, .giornoP.pri { color:#04130a; }
+.slot.snello { min-height:46px; padding:8px 12px; margin-top:8px; gap:6px; } .slot.snello .tg { flex:none; margin-right:4px; } .slot.snello b { display:inline; }
+.slot.snello small { flex:none; color:var(--testo); font-weight:700; font-size:13px; font-variant-numeric:tabular-nums; } .slot.snello .ric { margin-left:8px; }
+.pasto ul.sottoSlot { margin-top:2px; }
+button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
+.testata button.info { margin-right:-2px; }
+.striscia { position:sticky; top:calc(env(safe-area-inset-top, 0px) + 8px); height:0; z-index:6; pointer-events:none; }
+.striscia > div { position:absolute; left:0; right:0; top:0; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 14px; border-radius:16px; background:var(--solido); border:1px solid rgba(61,220,132,.4);
+  box-shadow:0 8px 22px rgba(0,0,0,.45); font-size:12.5px; color:var(--muto); white-space:nowrap; opacity:0; transform:translateY(-14px); transition:opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1); cursor:pointer; }
+.striscia.su > div { opacity:1; transform:none; pointer-events:auto; } .striscia b { color:var(--testo); font-variant-numeric:tabular-nums; } .striscia .sk b { font-family:var(--tit, inherit); font-size:16px; color:var(--verde); }
+@media (prefers-reduced-motion:reduce) { .pasto .ptesta, .ban .nome, .frec, .tredot i, .pcorpo, .pcorpo > div, .pasto.aperto .pcorpo > div, .striscia > div { transition:none; } }
 </style>
 </head>
 <body>
@@ -757,7 +784,7 @@ function chiudi() {
 /* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
    sub: schermata aperta dalla home · schedaSel: seduta scelta a mano nella scheda */
 let sub = null, schedaSel = null;
-function apriSub(s) { sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
+function apriSub(s) { if (!s) pastoAperto = undefined; sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
 function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : sub === "spesa" ? vSpesa() : sub === "prep" ? vPrep() : sub === "integ" ? vInteg() : vHome(); }
 function quadro() {
   const d = oggi(), f = fase(d), dow = (new Date(d + "T12:00").getDay() + 6) % 7, lun = meno(d, dow), domenica = meno(lun, -6);
@@ -1261,13 +1288,32 @@ function qtaSlot(pid, s, n, val) {
 }
 function togliSlot(pid, s, n) { const r = recCibo(oggi(), true), key = pid + "." + s, vv = slotDi(r, key); vv.splice(n, 1); if (!vv.length && r.s) delete r.s[key]; vib(); salva(); tieni(disegna); }
 function spuntaF(key) { const r = recCibo(oggi(), true); r.f = r.f || {}; if (r.f[key]) delete r.f[key]; else r.f[key] = 1; vib(); salva(); tieni(disegna); }
-// "Come da piano": riempie le sezioni ancora vuote con la prima scelta e spunta le voci fisse
-function comePiano(pid) {
-  const p = pastoDi(pid), r = recCibo(oggi(), true), on = modoOn(oggi()); r.s = r.s || {}; r.f = r.f || {};
-  for (const s of ["p", "c", "g"]) { const z = p.sez[s]; if (!z || slotDi(r, pid + "." + s).length) continue;
-    const T = ricalcolo(oggi()).t[pid + "." + s] || 0; if (T < z.t[on ? 0 : 1] * 0.15) continue;
-    const x = { k: z.v[0], g: 0 }; x.g = grammi(a100(x), SEZ[s][1], T, optA(x)); if (x.g) r.s[pid + "." + s] = [x]; }
-  for (const f of p.sempre || []) if (fissaOn(f, on)) r.f[pid + ":" + f[0]] = 1;
+// "Come da piano" è un interruttore: il primo tocco riempie le sezioni ancora vuote con la prima scelta e spunta le voci fisse,
+// il secondo toglie quello che aveva messo (r.cp[pasto] = { s: [[sezione, alimento]], f: [voci fisse] }); quello che hai scelto tu resta
+function pianoSu(r, pid) {
+  const m = r.cp && r.cp[pid]; if (!m) return false;
+  return m.s.some((q) => { const vv = slotDi(r, pid + "." + q[0]); return vv.length === 1 && vv[0].k === q[1]; }) || m.f.some((f) => r.f && r.f[pid + ":" + f]);
+}
+function comePiano(pid, zitto) {
+  const p = pastoDi(pid), r = recCibo(oggi(), true), on = modoOn(oggi()); r.s = r.s || {}; r.f = r.f || {}; r.cp = r.cp || {};
+  if (pianoSu(r, pid)) {
+    for (const q of r.cp[pid].s) { const key = pid + "." + q[0], vv = slotDi(r, key); if (vv.length === 1 && vv[0].k === q[1] && !vv[0].man) delete r.s[key]; }
+    for (const f of r.cp[pid].f) delete r.f[pid + ":" + f];
+    delete r.cp[pid];
+  } else {
+    const messo = { s: [], f: [] };
+    for (const s of ["p", "c", "g"]) { const z = p.sez[s]; if (!z || slotDi(r, pid + "." + s).length) continue;
+      const T = ricalcolo(oggi()).t[pid + "." + s] || 0; if (T < z.t[on ? 0 : 1] * 0.15) continue;
+      const x = { k: z.v[0], g: 0 }; x.g = grammi(a100(x), SEZ[s][1], T, optA(x)); if (x.g) { r.s[pid + "." + s] = [x]; messo.s.push([s, x.k]); } }
+    for (const f of p.sempre || []) if (fissaOn(f, on) && !r.f[pid + ":" + f[0]]) { r.f[pid + ":" + f[0]] = 1; messo.f.push(f[0]); }
+    r.cp[pid] = messo;
+  }
+  if (!zitto) { vib(); salva(); tieni(disegna); }
+}
+// tutta la giornata: mette il piano nei pasti dove manca; se c'è già dappertutto, lo toglie
+function giornoPiano() {
+  const pp = MENU.filter((p) => p.id !== "int"), r = recCibo(oggi(), true), tutti = pp.every((p) => pianoSu(r, p.id));
+  for (const p of pp) if (tutti || !pianoSu(r, p.id)) comePiano(p.id, true);
   vib(); salva(); tieni(disegna);
 }
 function togliVecchio() { const r = recCibo(oggi(), true); r.x = {}; r.extra = []; r.q = {}; r.pers = false; salva(); tieni(disegna); }
@@ -1284,51 +1330,100 @@ function avvisiCibo(R) {
   }
   return h;
 }
+/* I pasti sono a fisarmonica: uno aperto per volta. pastoAperto = id del pasto aperto, null = tutti chiusi,
+   undefined = lo sceglie l'app in base all'ora (il primo ancora da completare da adesso in poi). */
+let pastoAperto;
+const oraPasto = (p) => { const m = /(\d{1,2})[:.](\d{2})/.exec(p.ora || ""); return m ? +m[1] * 60 + +m[2] : null; };
+function pastoDelMomento(fatti) {
+  const ora = new Date().getHours() * 60 + new Date().getMinutes(), pp = MENU.filter((p) => p.id !== "int" && oraPasto(p) != null);
+  let i = 0; pp.forEach((p, n) => { if (oraPasto(p) <= ora + 45) i = n; });
+  for (let n = i; n < pp.length; n++) if (!fatti[pp[n].id]) return pp[n].id;
+  return pp[i] ? pp[i].id : null;
+}
+// apre e chiude senza ridisegnare la pagina, così il pasto scorre invece di comparire di colpo
+function apriPasto(id) {
+  pastoAperto = pastoAperto === id ? null : id; vib();
+  document.querySelectorAll(".pasto[data-p]").forEach((e) => { const su = e.dataset.p === pastoAperto; e.classList.toggle("aperto", su); e.querySelector(".ptesta").setAttribute("aria-expanded", su); });
+  const c = pastoAperto && $("pasto-" + pastoAperto);
+  if (c) setTimeout(() => { const y = c.getBoundingClientRect().top; if (y < 56 || y > innerHeight * 0.55) window.scrollTo({ top: window.scrollY + y - 64, behavior: CALMO ? "auto" : "smooth" }); }, CALMO ? 0 : 340);
+}
+// la striscia con il conto compare in alto quando il riquadro "Mangiato oggi" è uscito dallo schermo
+function strisciaCibo() { const s = $("striscia"), c = document.querySelector(".conto"); if (s && c) s.classList.toggle("su", c.getBoundingClientRect().bottom < 8); }
+window.addEventListener("scroll", strisciaCibo, { passive: true });
+function infoCibo() {
+  const auto = giornoOn(oggi());
+  apri(testaFoglio("Come funziona") + `<h2>I pasti</h2><p>In ogni pasto scegli <b>una proteina, un carboidrato e un grasso</b>: i grammi sono già calcolati. Se ne mangi di più o di meno, correggi il numero: l'app aggiorna i macro e ricalcola il resto della giornata. Pesi a crudo.</p>
+    <p><b>Come da piano</b> riempie il pasto con la prima scelta di ogni sezione; toccandolo di nuovo toglie quello che aveva messo. I tre pallini accanto al nome del pasto si accendono quando proteina, carboidrato e grasso sono a posto.</p>` +
+    (APP.onoff ? `<h2>Giorno ON e giorno OFF</h2><p>${auto ? "Oggi hai segnato una seduta di pesi: <b>giorno ON</b>." : "Oggi non risultano pesi: <b>giorno OFF</b>. Se ti alleni più tardi, tocca Giorno ON."} Tra ON e OFF cambiano i carboidrati di spuntino e pranzo.</p>` : "") +
+    `<h2>Da ricordare</h2><div class="card"><ul>
+      <li><b>Ricalcolo</b>: vale dentro la giornata. Se una sezione dovrebbe crescere di oltre la metà, l'app si ferma e ti dice di quanto chiudi sopra o sotto. Il giorno dopo non si compensa.</li>
+      <li><b>Un alimento che non è in elenco</b>: in ogni sezione tocca "Scegli", poi "Un altro alimento". Con il codice a barre, dall'elenco o a mano: i grammi li calcola l'app.</li>
+      ${APP.ricorda.map((x) => "<li>" + x + "</li>").join("")}</ul></div><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
+// in che sezione del pasto sta una voce fissa: la verdura in "Verdura e altro", il resto nel macro che porta più calorie
+function sezFissa(f) {
+  if (/verdur|passata|insalata/i.test(f[1])) return "v";
+  const v = f[3], q = [v[1] * 4, v[2] * 4, v[3] * 9];
+  return q[1] >= q[0] && q[1] >= q[2] ? "c" : q[0] >= q[2] ? "p" : "g";
+}
 function vCibo() {
-  const d = oggi(), auto = giornoOn(d), on = modoOn(d), k = on ? 0 : 1, N = CIBO[on ? "on" : "off"], r = recCibo(d), T = totali(d), resta = Math.round(N.kcal - T[0]), R = ricalcolo(d), vecchio = totaliV2(d)[0];
+  const d = oggi(), on = modoOn(d), k = on ? 0 : 1, N = CIBO[on ? "on" : "off"], r = recCibo(d), T = totali(d), resta = Math.round(N.kcal - T[0]), R = ricalcolo(d), vecchio = totaliV2(d)[0];
   let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">${APP.versione}</div><h1>Alimentazione</h1></div>
+      <button class="info" aria-label="Come funziona" onclick="infoCibo()">i</button>
       <button class="ico tre-linee" aria-label="Meal prep e lista della spesa" onclick="menuCibo()"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
-    ${APP.onoff ? `<div class="g2 onoff"><button class="${on ? "pri" : ""}" onclick="mettiOn(true)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="mettiOn(false)">Giorno OFF · riposo</button></div>
-    <p class="muto conta">${auto ? "Oggi hai segnato una seduta di pesi: <b>giorno ON</b>." : "Oggi non risultano pesi: <b>giorno OFF</b>. Se ti alleni più tardi, tocca Giorno ON."} Tra ON e OFF cambiano i carboidrati di spuntino e pranzo.</p>` : ""}
+    ${APP.onoff ? `<div class="g2 onoff"><button class="${on ? "pri" : ""}" onclick="mettiOn(true)">Giorno ON · pesi</button><button class="${on ? "" : "pri"}" onclick="mettiOn(false)">Giorno OFF · riposo</button></div>` : ""}
     <div class="card conto"><div class="contoSu">${giro(T[0] / N.kcal, "gxl", `<b>${cnt(Math.round(T[0]), Math.round(T[0]))}</b><small>di ${N.kcal} kcal</small>`)}
         <div><div class="sopra">Mangiato oggi</div><div class="restano"><b>${Math.abs(resta)}</b> kcal<br>${resta >= 0 ? "ancora da mangiare" : "oltre il traguardo"}</div>
         <span class="pillola ${resta < -N.kcal * 0.03 ? "oltre" : ""}">${Math.round((T[0] / N.kcal) * 100)}% della giornata</span></div></div>
       <div class="tremac">${((Q) => [["Proteine", 1, N.p], ["Carboidrati", 2, N.c], ["Grassi", 3, N.g]].map((m, i) => `<div>${giro(T[m[1]] / m[2], "gsm", `<b>${Math.round(T[m[1]])}</b><small>g</small>`)}<span>${m[0]}</span><small>di ${m[2]} g${Q[i]}</small></div>`).join(""))(quoteMacro(T, N))}</div>
       <details><summary>Fibra, vitamine e minerali</summary>${MICRO.map((m) => misura(m[0], T[m[3]], m[0] === "Fibra" && !on ? 28 : m[2], m[1], m[1] === "g" || m[0] === "Ferro" ? 1 : 0)).join("")}
-        <p class="muto">Sono stime da tabelle medie: marca, cottura e tipo di frutta e verdura spostano i valori. Il traguardo è il fabbisogno giornaliero di ${APP.adulto}.</p></details></div>` +
-    avvisiCibo(R) + (vecchio > 0 ? `<div class="card"><div class="riga tra"><span>Segnato oggi prima dell'aggiornamento: <b>${Math.round(vecchio)} kcal</b>, già nel conto.</span><button class="pic" onclick="togliVecchio()">Togli</button></div></div>` : "") +
-    `<p class="muto conta">In ogni pasto scegli <b>una proteina, un carboidrato e un grasso</b>: i grammi sono già calcolati. Se ne mangi di più o di meno, correggi il numero: l'app aggiorna i macro e ricalcola il resto della giornata. Pesi a crudo.</p>`;
+        <p class="muto">Sono stime da tabelle medie: marca, cottura e tipo di frutta e verdura spostano i valori. Il traguardo è il fabbisogno giornaliero di ${APP.adulto}.</p></details></div>
+    <div class="striscia" id="striscia"><div onclick="window.scrollTo({top:0,behavior:CALMO?'auto':'smooth'})"><span class="sk"><b>${Math.abs(resta)}</b> kcal ${resta >= 0 ? "restano" : "oltre"}</span>
+      <span>P <b>${Math.round(T[1])}</b>/${N.p}</span><span>C <b>${Math.round(T[2])}</b>/${N.c}</span><span>G <b>${Math.round(T[3])}</b>/${N.g}</span></div></div>` +
+    avvisiCibo(R) + (vecchio > 0 ? `<div class="card"><div class="riga tra"><span>Segnato oggi prima dell'aggiornamento: <b>${Math.round(vecchio)} kcal</b>, già nel conto.</span><button class="pic" onclick="togliVecchio()">Togli</button></div></div>` : "");
+  const rigaF = (p, f, sel) => `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b>${p.id === "int" ? `<button class="info" aria-label="Spiegazione" onclick="event.stopPropagation();infoInt('${f[0]}')">i</button>` : ""}</li>`;
+  const pasti = [], fatti = {};
   for (const p of MENU) {
-    let kc = 0, pieno = false, corpo = "";
-    for (const s of ["p", "c", "g", "v"]) {
-      const z = p.sez[s], key = p.id + "." + s, vv = slotDi(r, key), base = z ? z.t[k] : 0; if (!base && !vv.length) continue;
+    let kc = 0, corpo = "", punti = "", nSez = 0, nOk = 0;
+    // le voci fisse del pasto (latte, verdura…) stanno nella sezione del loro macro prevalente, non più in un elenco "Sempre" a parte
+    const fisse = (p.sempre || []).filter((f) => fissaOn(f, on)), selF = (f) => !!(r.f && r.f[p.id + ":" + f[0]]), sezF = (f) => (f[4] && f[4].s) || sezFissa(f);
+    for (const f of fisse) if (selF(f)) kc += f[3][0];
+    if (p.id === "int") corpo += `<ul>` + fisse.map((f) => rigaF(p, f, selF(f))).join("") + `</ul>`;
+    else for (const s of ["p", "c", "g", "v"]) {
+      const z = p.sez[s], key = p.id + "." + s, vv = slotDi(r, key), base = z ? z.t[k] : 0, fs = fisse.filter((f) => sezF(f) === s); if (!base && !vv.length && !fs.length) continue;
       const Ts = R.t[key] || 0, a = R.agg[key], i = SEZ[s][1], coperto = !vv.length && base && Ts < base * 0.15;
-      corpo += `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base ? " · " + Math.round(vv.length ? base : Ts) + " g" : s === "v" ? "" : " · fuori piano oggi"}${a ? ` <span class="ric">ricalcolato ${a > 0 ? "+" : "−"}${Math.round(Math.abs(a))}</span>` : ""}</h3>`;
+      const ric = a ? ` <span class="ric">ricalcolato ${a > 0 ? "+" : "−"}${Math.round(Math.abs(a))}</span>` : "", righeF = fs.map((f) => rigaF(p, f, selF(f))).join("");
+      const tit = `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base ? " · " + Math.round(vv.length ? base : Ts) + " g" : s === "v" || fs.length ? "" : " · fuori piano oggi"}${ric}</h3>`;
+      if (base && s !== "v") { nSez++; if (vv.length || coperto) nOk++; punti += `<i class="${vv.length || coperto ? "on" : ""}"></i>`; }
       if (vv.length) {
-        pieno = true;
-        corpo += `<ul>` + vv.map((x, n) => { const v = vecA(x), o = optA(x); kc += v[0];
+        corpo += tit + `<ul>` + vv.map((x, n) => { const v = vecA(x), o = optA(x); kc += v[0];
           return `<li class="sp on" onclick="togliSlot('${p.id}','${s}',${n})"><i class="chk"></i><span>${esc(nomeA(x))}<br><small class="muto">${macroA(v)}</small></span>
             <input class="qta" inputmode="decimal" aria-label="Quantità di ${esc(nomeA(x))}" value="${it(Math.round((o ? x.g / o.pz : x.g) * 10) / 10)}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="qtaSlot('${p.id}','${s}',${n},this.value)"><em>${o ? "pz" : "g"}</em></li>`; }).join("") +
-          `</ul>` + (s === "v" ? "" : `<button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Cambia o aggiungi</button>`);
-      } else if (coperto) corpo += `<p class="muto" style="margin:4px 0 0">Già coperti dalle altre scelte di oggi: qui non serve aggiungere niente.</p><button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Aggiungi lo stesso</button>`;
-      else { const x0 = { k: z.v[0], g: 0 }; x0.g = grammi(a100(x0), i, Ts, optA(x0));
-        corpo += `<button class="slot" onclick="scegliSlot('${p.id}','${s}')"><span><b>Scegli ${SEZ[s][3]}</b><small>${z.v.length} alternative · es. ${esc(nomeA(x0).split(",")[0].split(" (")[0])} ${qtaA(x0)}</small></span><em>›</em></button>`; }
+          righeF + `</ul>` + (s === "v" ? "" : `<button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Cambia o aggiungi</button>`);
+      } else if (coperto) corpo += tit + `<p class="muto" style="margin:4px 0 0">Già coperti dalle altre scelte di oggi: qui non serve aggiungere niente.</p>` + (righeF ? `<ul>${righeF}</ul>` : "") + `<button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Aggiungi lo stesso</button>`;
+      else if (base) corpo += `<button class="slot snello" onclick="scegliSlot('${p.id}','${s}')"><i class="tg tg-${s}"></i><span><b>Scegli ${SEZ[s][3]}</b>${ric}</span><small>${Math.round(Ts)} g</small><em>›</em></button>` + (righeF ? `<ul class="sottoSlot">${righeF}</ul>` : "");
+      else corpo += tit + `<ul>${righeF}</ul>`;
     }
-    const fisse = (p.sempre || []).filter((f) => fissaOn(f, on));
-    if (fisse.length) corpo += `${p.id === "int" ? "" : "<h3>Sempre</h3>"}<ul>` + fisse.map((f) => { const sel = !!(r.f && r.f[p.id + ":" + f[0]]); if (sel) { kc += f[3][0]; pieno = true; }
-      return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b>${p.id === "int" ? `<button class="info" aria-label="Spiegazione" onclick="event.stopPropagation();infoInt('${f[0]}')">i</button>` : ""}</li>`; }).join("") + `</ul>`;
     // voci libere (pasti fuori casa, in famiglia): si spuntano quando capitano, entrano nel conto e non fanno scattare il ricalcolo
-    if ((p.libere || []).length) corpo += `<h3>${p.libereT || "Quando capita"}</h3><ul>` + p.libere.map((f) => { const sel = !!(r.f && r.f[p.id + ":" + f[0]]); if (sel) { kc += f[3][0]; pieno = true; }
-      return `<li class="sp ${sel ? "on" : ""}" role="checkbox" aria-checked="${sel}" onclick="spuntaF('${p.id}:${f[0]}')"><i class="chk"></i><span>${f[1]}</span><b>${f[2]}</b></li>`; }).join("") + `</ul>`;
-    if (p.id === "int") h += `<h2>Integratori</h2>`;
-    h += `<div class="card pasto" id="pasto-${p.id}"><div class="riga tra ${FOTO_PASTO.includes(p.id) ? "ban" : ""}" ${FOTO_PASTO.includes(p.id) ? `style="background-image:url(img/pasti/${p.id}.jpg)"` : ""}><div><div class="sopra">${p.ora}</div><div class="nome">${p.nome}</div></div><span class="pillola">${Math.round(kc)} kcal</span></div>${corpo}` +
-      (p.id !== "int" ? `<div class="g2" style="margin-top:14px"><button class="pic" onclick="comePiano('${p.id}')">Come da piano</button><button class="pic" onclick="prepPasto='${p.id}';apriSub('prep')">Meal prep</button></div>` : `<button class="largo" style="margin-top:14px" onclick="apriSub('integ')">Come prenderli e cosa non serve ›</button>`) + `</div>`;
+    if ((p.libere || []).length) corpo += `<h3>${p.libereT || "Quando capita"}</h3><ul>` + p.libere.map((f) => { const sel = selF(f); if (sel) kc += f[3][0]; return rigaF(p, f, sel); }).join("") + `</ul>`;
+    fatti[p.id] = nSez > 0 && nOk === nSez;
+    pasti.push({ p, kc, corpo, punti });
   }
-  h += `<p class="muto conta">${APP.notaInt}</p>
-    <h2>Da ricordare</h2><div class="card"><ul>
-      <li><b>Ricalcolo</b>: vale dentro la giornata. Se una sezione dovrebbe crescere di oltre la metà, l'app si ferma e ti dice di quanto chiudi sopra o sotto. Il giorno dopo non si compensa.</li>
-      <li><b>Un alimento che non è in elenco</b>: in ogni sezione tocca "Scegli", poi "Un altro alimento". Con il codice a barre, dall'elenco o a mano: i grammi li calcola l'app.</li>
-      ${APP.ricorda.map((x) => "<li>" + x + "</li>").join("")}</ul></div>`;
+  if (pastoAperto === undefined) pastoAperto = pastoDelMomento(fatti);
+  const pp = MENU.filter((p) => p.id !== "int"), tuttoPiano = pp.length > 0 && pp.every((p) => pianoSu(r, p.id));
+  h += `<button class="largo giornoP ${tuttoPiano ? "pri" : ""}" aria-pressed="${tuttoPiano}" onclick="giornoPiano()">${tuttoPiano ? "✓ " : ""}Tutta la giornata come da piano</button>`;
+  for (const { p, kc, corpo, punti } of pasti) {
+    const foto = FOTO_PASTO.includes(p.id), su = pastoAperto === p.id, ps = pianoSu(r, p.id);
+    if (p.id === "int") h += `<h2>Integratori</h2>`;
+    h += `<div class="card pasto${su ? " aperto" : ""}${fatti[p.id] ? " fatto" : ""}" id="pasto-${p.id}" data-p="${p.id}">
+      <div class="ptesta riga tra ${foto ? "ban" : ""}" role="button" tabindex="0" aria-expanded="${su}" onclick="apriPasto('${p.id}')" ${foto ? `style="background-image:url(img/pasti/${p.id}.jpg)"` : ""}>
+        <div><div class="sopra">${p.ora || ""}</div><div class="nome">${p.nome}</div></div>${punti ? `<span class="tredot" aria-hidden="true">${punti}</span>` : ""}<span class="pillola">${Math.round(kc)} kcal</span><i class="frec"></i></div>
+      <div class="pcorpo"><div>` +
+      (p.id !== "int" ? `<div class="g2 pazioni"><button class="pic ${ps ? "pri" : ""}" aria-pressed="${ps}" onclick="comePiano('${p.id}')">${ps ? "✓ " : ""}Come da piano</button><button class="pic" onclick="prepPasto='${p.id}';apriSub('prep')">Meal prep</button></div>` : "") + corpo +
+      (p.id === "int" ? `<button class="largo" style="margin-top:14px" onclick="apriSub('integ')">Come prenderli e cosa non serve ›</button>` : "") + `</div></div></div>`;
+  }
+  h += `<p class="muto conta">${APP.notaInt}</p>`;
+  requestAnimationFrame(strisciaCibo);
   return h;
 }
 // foglio con le alternative di una sezione: ogni riga ha già i suoi grammi
@@ -1463,7 +1558,7 @@ function inserisciPrep(pid, ing) {
   for (const s in gr) r.s[pid + "." + s] = gr[s];
   vib(); salva();
 }
-function dopoInserito(pid) { prepPasto = null; sub = "cibo"; disegna(); const c = $("pasto-" + pid); if (c) c.scrollIntoView({ block: "start" }); window.scrollBy(0, -12); avvisa("Inserito a " + pastoDi(pid).nome.toLowerCase() + ": giornata aggiornata"); }
+function dopoInserito(pid) { prepPasto = null; sub = "cibo"; pastoAperto = pid; disegna(); const c = $("pasto-" + pid); if (c) c.scrollIntoView({ block: "start" }); window.scrollBy(0, -12); avvisa("Inserito a " + pastoDi(pid).nome.toLowerCase() + ": giornata aggiornata"); }
 function inserisciU() { const pid = U.pasto; inserisciPrep(pid, U.ing); U = null; chiudi(); dopoInserito(pid); }
 function togliPrep(n) { if (!confirm("Elimino questo piatto dal ricettario?")) return; piatti().splice(n, 1); salva(); chiudi(); disegna(); }
 // le tre linee in alto a destra nell'Alimentazione: ricettario e lista della spesa
@@ -2268,7 +2363,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.1 · alimentazione v3.0 · app v34</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.1 · alimentazione v3.0 · app v35</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
