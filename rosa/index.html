@@ -447,6 +447,24 @@ input, textarea, select { background:rgba(0,0,0,.28); }
 .eroe.confoto { background:linear-gradient(150deg,rgba(10,26,17,.80),rgba(10,17,13,.93)), var(--f) center/cover no-repeat; }
 @media (prefers-reduced-motion:reduce) { button, .barra i, .av { transition:none; } #avvio { display:none; }
   #vista, #foglio, #velo, .fantasma, .festa *, .festa svg { animation:none !important; } }
+/* v29: misure del corpo. Il rosso è solo qui, sugli anelli che dicono dove passa il metro */
+svg.corpo { display:block; width:100%; max-width:420px; margin:8px auto 4px; overflow:visible; }
+svg.corpo .pelle { fill:#214332; stroke:var(--verde); stroke-opacity:.55; stroke-width:1.2; stroke-linejoin:round; }
+svg.corpo .capelli { fill:#18301f; stroke:var(--verde); stroke-opacity:.35; stroke-width:1; }
+svg.corpo .segni { fill:none; stroke:var(--verde); stroke-opacity:.22; stroke-width:1.1; stroke-linecap:round; }
+svg.corpo .an { fill:none; stroke:var(--rosso); stroke-width:3; stroke-linecap:round; }
+svg.corpo .an.die { stroke-opacity:.45; }
+svg.corpo .np { fill:var(--rosso); }
+svg.corpo .fl { fill:none; stroke:var(--rosso); stroke-opacity:.6; stroke-width:1; }
+svg.corpo .et { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+svg.corpo .et rect { fill:transparent; }
+svg.corpo .et:active rect { fill:var(--card2); }
+svg.corpo .en { fill:var(--muto); font-size:11.5px; font-weight:600; }
+svg.corpo .ev { fill:var(--testo); font-family:var(--tit, inherit); font-size:17px; font-weight:800; }
+svg.corpo .ev.no { fill:var(--verde); }
+svg.corpo .eu { fill:var(--muto); font-family:inherit; font-size:10.5px; font-weight:500; }
+table.mis { width:100%; } table.mis td { padding:6px 0; vertical-align:middle; border:0; } table.mis td:last-child { width:120px; }
+table.mis input { text-align:center; font-weight:800; font-size:18px; }
 </style>
 </head>
 <body>
@@ -1123,7 +1141,7 @@ const PREP_BASE = [
   { nome: "Frutto e mandorle", per: ["mer"], s: { c: "kiwi", g: "mandorle" } },
 ];
 // APP: quello che cambia da un atleta all'altro nei testi e nei conti del motore (sedute di pesi a settimana, giorni ON/OFF, promemoria)
-const APP = { nSett: 2, pesi: PESI, onoff: false, versione: "Versione 2.0 · 5 pasti, senza glutine", adulto: "una donna adulta",
+const APP = { donna: 1, misureNo: ["avamb"], nSett: 2, pesi: PESI, onoff: false, versione: "Versione 2.0 · 5 pasti, senza glutine", adulto: "una donna adulta",
   notaInt: "Le whey sono cibo e si contano nella colazione. Le voci con \"stima\" sono valori indicativi: servono a non lasciare vuota la giornata.",
   ricorda: ["<b>Non saltare nessuno dei 5 pasti</b>: lo spuntino e la merenda contano quanto gli altri.", "<b>Acqua</b> 2 litri: la segni nella home.",
     "<b>Olio e crema sempre pesati.</b>",
@@ -1920,7 +1938,7 @@ function vDiario() {
   h += `<div class="card"><div class="nome">Media del peso</div>
     <p>Ultimi 7 giorni: <b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "—"}</b> ${m1 ? `<span class="muto">(${m1.n} pesate)</span>` : ""}</p>
     <p>7 giorni prima: <b>${m0 ? it(m0.m.toFixed(1)) + " kg" : "—"}</b>${m1 && m0 ? ` · variazione <b>${(m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2))} kg</b>` : ""}</p>
-    ${grafico()}<p class="muto">Al mattino a digiuno, 3-4 volte a settimana. Nelle prime 2-3 settimane può restare fermo o salire di poco; poi l'atteso è −0,25/−0,5 kg a settimana.</p></div>` + grafVita() + grafPassi() +
+    ${grafico()}<p class="muto">Al mattino a digiuno, 3-4 volte a settimana. Nelle prime 2-3 settimane può restare fermo o salire di poco; poi l'atteso è −0,25/−0,5 kg a settimana.</p></div>` + cardCorpo() + grafPassi() +
     `<button class="blocco" onclick="apriFoto()"><i><svg viewBox="0 0 24 24">${ICO.foto}</svg></i><span><b>Foto dei progressi</b><small>${(S.foto || []).length ? (S.foto || []).length + " foto · fronte, lato, retro a confronto" : "Fronte, lato e retro, ogni 4 settimane"}</small></span><em>›</em></button>`;
   const dd = Object.keys(S.diario).sort().reverse().slice(0, 30);
   if (dd.length) {
@@ -2183,6 +2201,11 @@ function testoCoach(da) {
     t += "Diario (data | peso kg | passi | sonno 1-5 | risvegli | giro vita cm | note)\n";
     for (const d of dd) { const x = S.diario[d]; t += `${d} | ${it(x.peso)} | ${it(x.passi)} | ${it(x.sonno)} | ${it(x.risvegli)} | ${it(x.vita)} | ${x.note || ""}\n`; }
   }
+  const kMis = CHIAVI_MIS.filter((k) => k !== "vita"), mm = dd.filter((d) => kMis.some((k) => S.diario[d][k] != null));
+  if (mm.length) {
+    t += "\nMisure del corpo in cm (data | " + CORPO.filter((m) => m[0] !== "vita").flatMap((m) => (m[5] ? [m[1] + " rilassato", m[1] + " in tensione"] : [m[1]])).join(" | ").toLowerCase() + ")\n";
+    for (const d of mm) t += d + " | " + kMis.map((k) => it(S.diario[d][k])).join(" | ") + "\n";
+  }
   const ff = (S.foto || []).filter((x) => x.d > da);
   if (ff.length) t += "\nFoto dei progressi scattate nell'app (te le mando a parte): " + ff.map((x) => x.d + " " + x.posa).join(", ") + "\n";
   const cc = Object.keys(S.cibo || {}).filter((d) => d > da).sort().filter((d) => totali(d)[0] > 0 || S.cibo[d].acqua);
@@ -2217,7 +2240,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v14</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v15</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -2658,7 +2681,7 @@ const baseVisibili = () => BASE.map((b, i) => ({ b, i })).filter((x) => !(SENZA_
 const baseCibo = (i) => ({ nome: BASE[i][0], cat: BASE[i][1], per100: BASE[i][2].concat([0, 0, 0, 0, 0]), porz: BASE[i][3], base: 1 });
 /* ============ v16: MISURE RAPIDE, SONNO, TRAZIONE, SPESA, FOTO ============
    Il diario di un giorno (S.diario[data]) tiene: peso, passi, sonno 1-5, risvegli, vita (giro vita in cm), note. */
-const vuotoG = (r) => r.peso == null && r.passi == null && r.sonno == null && r.risvegli == null && r.vita == null && !r.note;
+const vuotoG = (r) => r.peso == null && r.passi == null && r.sonno == null && r.risvegli == null && !r.note && CHIAVI_MIS.every((k) => r[k] == null);
 const giornoBase = (d) => Object.assign({ peso: null, passi: null, sonno: null, note: "" }, S.diario[d] || {});
 function scriviGiorno(d, r) { if (vuotoG(r)) delete S.diario[d]; else S.diario[d] = r; salva(); }
 const ultimoCon = (k) => Object.keys(S.diario).filter((d) => S.diario[d][k] != null).sort().pop() || null;
@@ -2707,6 +2730,91 @@ function segnaSonno(agg) {
 function salvaSonno() {
   if (SN.v == null) { avvisa("Tocca un numero da 1 a 5"); return; }
   const d = oggi(), r = giornoBase(d); r.sonno = SN.v; r.risvegli = SN.r; scriviGiorno(d, r); vib(); chiudi(); disegna(); avvisa("Salvato");
+}
+
+/* ============ MISURE DEL CORPO: la sagoma con gli anelli ============
+   Le circonferenze stanno nel diario del giorno (S.diario[data]), accanto a vita: spalle, petto, braccio, braccioT (in tensione),
+   avamb, fianchi, coscia, polp. CORPO = [chiave, nome, lato dell'etichetta (s = sinistra, d = destra), y dell'etichetta, come si misura, chiave della misura in tensione].
+   SAGOMA = metà destra della figura (l'altra è specchiata) e, per ogni misura, [centro x, y, raggio] dell'anello. */
+const CORPO_TUTTE = [
+  ["spalle", "Spalle", "d", 70, "In piedi, braccia lungo i fianchi. Metro orizzontale nel punto più largo delle spalle, sopra i deltoidi, tutto intorno. Meglio se te lo passa un'altra persona."],
+  ["petto", "Petto", "d", 118, "Metro orizzontale all'altezza dei capezzoli, sotto le ascelle. A fine espirazione normale, senza gonfiare il petto."],
+  ["braccio", "Braccio dx", "s", 96, "Rilassato: braccio lungo il fianco, metro a metà tra spalla e gomito. In tensione: gomito piegato a 90°, bicipite contratto, metro nel punto più grosso.", "braccioT"],
+  ["avamb", "Avambraccio dx", "s", 176, "Braccio disteso, mano aperta e rilassata. Metro nel punto più grosso, poco sotto il gomito."],
+  ["vita", "Vita", "d", 186, "Al mattino, metro all'altezza dell'ombelico, orizzontale, a fine espirazione e senza tirare in dentro la pancia."],
+  ["fianchi", "Fianchi", "d", 262, "Piedi uniti, metro orizzontale nel punto più sporgente dei glutei."],
+  ["coscia", "Coscia dx", "s", 286, "In piedi, peso su tutte e due le gambe, muscolo rilassato. Metro a metà tra l'inguine e il ginocchio."],
+  ["polp", "Polpaccio dx", "s", 366, "In piedi, peso su tutte e due le gambe. Metro nel punto più grosso del polpaccio."],
+];
+const SAGOME = {
+  uomo: { d: "M99.5 54H109V64C118 68 132 70 142 74C152 78 157 90 156 104C157 125 158 140 160 158C164 172 168 195 170 222C174 232 174 248 167 255C161 259 157 250 158 222C155 200 150 180 146 162C143 145 141 125 139 108C140 125 136 150 131 170C129 178 129 186 130 192C131 205 137 218 139 232C141 255 138 290 132 318C130 326 130 334 131 340C135 352 135 375 128 400L126 410C130 418 140 420 140 425H112L113 410C110 385 108 360 111 340C111 320 106 280 102 246L99.5 244",
+    a: { spalle: [100, 90, 59], petto: [100, 114, 41], braccio: [149.5, 130, 10.5], avamb: [157, 180, 10], vita: [100, 186, 32], fianchi: [100, 230, 41.5], coscia: [122.5, 282, 19], polp: [122, 362, 15.5] },
+    segni: "M100 70V236M108 118C116 124 128 123 136 114M92 118C84 124 72 123 64 114M88 150H112M89 168H111" },
+  donna: { d: "M99.5 54H108V64C115 68 126 71 134 75C143 79 147 90 146 103C147 124 149 140 151 158C155 172 159 195 161 222C165 232 165 248 158 255C152 259 148 250 149 222C146 200 142 180 138 162C135 145 133 125 131 108C134 120 133 135 128 150C125 160 123 168 123 178C124 195 138 210 142 232C144 258 139 292 131 320C129 326 129 334 130 340C134 352 133 376 126 402L125 410C129 418 138 420 138 425H111L112 410C110 385 108 360 110 340C110 320 105 280 101 246L99.5 244",
+    a: { spalle: [100, 90, 49], petto: [100, 120, 36], braccio: [141, 130, 9], avamb: [148.5, 180, 9], vita: [100, 177, 25.5], fianchi: [100, 232, 44.5], coscia: [123, 282, 19.5], polp: [121, 362, 15] },
+    segni: "M108 126C114 133 124 132 130 124M92 126C86 133 76 132 70 124",
+    capelli: "M100 9C82 9 76 24 78 42C79 54 76 64 72 70C82 72 90 68 92 60H108C110 68 118 72 128 70C124 64 121 54 122 42C124 24 118 9 100 9Z" },
+};
+const SAGOMA = SAGOME[APP.donna ? "donna" : "uomo"];
+const CORPO = CORPO_TUTTE.filter((m) => !(APP.misureNo || []).includes(m[0]));
+const CHIAVI_MIS = CORPO.flatMap((m) => (m[5] ? [m[0], m[5]] : [m[0]]));
+const ultimaMis = (k) => { const d = ultimoCon(k); return d ? { d, v: S.diario[d][k] } : null; };
+const ultimaCorpo = () => CHIAVI_MIS.filter((k) => k !== "vita").map((k) => ultimoCon(k)).filter(Boolean).sort().pop() || null;
+function figuraCorpo() {
+  const OX = 80, W = 360, a = SAGOMA.a;
+  // l'anello: dietro la figura la metà lontana, davanti la metà vicina, come un bracciale intorno al corpo
+  const posto = (m) => { const q = a[m[0]], sx = m[2] === "s", cx = OX + (sx && q[0] !== 100 ? 200 - q[0] : q[0]); return { cx, y: q[1], rx: q[2], ry: Math.max(3.2, q[2] * 0.17) }; };
+  let dietro = "", davanti = "", eti = "";
+  for (const m of CORPO) {
+    const p = posto(m), sx = m[2] === "s", u = ultimaMis(m[0]), ut = m[5] ? ultimaMis(m[5]) : null, ly = m[3];
+    dietro += `<path class="an die" d="M${p.cx - p.rx} ${p.y}A${p.rx} ${p.ry} 0 0 1 ${p.cx + p.rx} ${p.y}"/>`;
+    davanti += `<path class="an" d="M${p.cx - p.rx} ${p.y}A${p.rx} ${p.ry} 0 0 0 ${p.cx + p.rx} ${p.y}"/>`;
+    const bx = sx ? p.cx - p.rx : p.cx + p.rx, gx = sx ? 98 : W - 98, tx = sx ? 93 : W - 93, an = sx ? "end" : "start";
+    davanti += `<circle class="np" cx="${bx}" cy="${p.y}" r="2.4"/><polyline class="fl" points="${bx},${p.y} ${sx ? Math.min(bx - 6, gx + 14) : Math.max(bx + 6, gx - 14)},${ly} ${gx},${ly}"/>`;
+    const val = (x) => (x ? it(x.v) : "＋");
+    eti += `<g class="et" onclick="misuraCorpo('${m[0]}')"><rect x="${sx ? 0 : W - 100}" y="${ly - 22}" width="100" height="${m[5] ? 58 : 42}" rx="10"/>
+      <text class="en" x="${tx}" y="${ly - 8}" text-anchor="${an}">${m[1]}</text>` +
+      (m[5] ? `<text class="ev${u ? "" : " no"}" x="${tx}" y="${ly + 10}" text-anchor="${an}">${val(u)}<tspan class="eu"> rilassato</tspan></text><text class="ev${ut ? "" : " no"}" x="${tx}" y="${ly + 28}" text-anchor="${an}">${val(ut)}<tspan class="eu"> in tensione</tspan></text>`
+        : `<text class="ev${u ? "" : " no"}" x="${tx}" y="${ly + 10}" text-anchor="${an}">${val(u)}${u ? '<tspan class="eu"> cm</tspan>' : ""}</text>`) + `</g>`;
+  }
+  const meta = `<path class="pelle" d="${SAGOMA.d}"/>`;
+  return `<svg class="corpo" viewBox="0 0 ${W} 436" role="img" aria-label="Figura del corpo con i punti dove si misura">
+    ${dietro}<g transform="translate(${OX} 0)">${SAGOMA.capelli ? `<path class="capelli" d="${SAGOMA.capelli}"/>` : ""}${meta}<g transform="translate(200 0) scale(-1 1)">${meta}</g><ellipse class="pelle" cx="100" cy="34" rx="17" ry="21"/><path class="segni" d="${SAGOMA.segni}"/></g>
+    ${davanti}${eti}</svg>`;
+}
+function cardCorpo() {
+  const u = ultimaCorpo() || ultimoCon("vita");
+  return `<div class="card"><div class="riga tra"><div class="nome">Misure del corpo</div><button class="pic" onclick="tutteMisure()">+ Segna tutte</button></div>
+    <p class="muto" style="margin-top:4px">${u ? "Ultime misure: " + dataIt(u) + ". " : ""}Tocca una misura per scriverla e vedere come cambia.</p>${figuraCorpo()}
+    <p class="muto">In centimetri, al mattino a digiuno, sempre sul lato destro e con lo stesso metro. Vita ogni 2 settimane, le altre ogni 4.</p></div>`;
+}
+const numMis = (id) => { const e = $(id), t = e ? e.value.trim() : ""; if (t === "") return null; const v = num(t); return v == null || v < 10 || v > 250 ? NaN : v; };
+function misuraCorpo(k) {
+  const m = CORPO.find((x) => x[0] === k), d = oggi(), r = S.diario[d] || {}, chiavi = m[5] ? [k, m[5]] : [k];
+  const campo = (c, eti) => `<div><label>${eti}</label><input id="m-${c}" class="numerone" style="margin-top:4px" inputmode="decimal" value="${esc(it(r[c]))}" placeholder="${ultimaMis(c) ? it(ultimaMis(c).v) : "cm"}" autocomplete="off"></div>`;
+  let h = testaFoglio(m[1] + " (cm)") + (m[5] ? `<div class="g2">${campo(k, "Rilassato")}${campo(m[5], "In tensione")}</div>` : campo(k, "Oggi")) +
+    `<p class="muto">${m[4]}</p><button class="pri largo grosso" onclick="salvaMisure('${chiavi.join(",")}')">Salva</button>`;
+  chiavi.forEach((c, i) => {
+    const dd = Object.keys(S.diario).filter((x) => S.diario[x][c] != null).sort().slice(-20), n = dd.length; if (!n) return;
+    const u = S.diario[dd[n - 1]][c], p = S.diario[dd[0]][c];
+    h += `<h2>${m[5] ? (i ? "In tensione" : "Rilassato") : "Andamento"}</h2><p>Ultima: <b>${it(u)} cm</b> <span class="muto">(${dataIt(dd[n - 1])})</span>${n > 1 ? ` · dalla prima <b>${(u - p >= 0 ? "+" : "") + it((u - p).toFixed(1))} cm</b>` : ""}</p>` +
+      grafLinea("mis-" + c, dd.map((x) => ({ x: dataIt(x), t: giornoN(x), y: S.diario[x][c] })), { vuoto: "Il grafico compare dalla seconda misura.", testo: (q) => `${it(q.y)} cm` });
+  });
+  apri(h);
+}
+function tutteMisure() {
+  const r = S.diario[oggi()] || {};
+  let h = testaFoglio("Misure di oggi (cm)") + `<p class="muto">Scrivi quelle che hai preso: le altre restano come sono.</p><table class="mis">`;
+  for (const m of CORPO) for (const c of m[5] ? [m[0], m[5]] : [m[0]]) {
+    const u = ultimaMis(c);
+    h += `<tr><td><b>${m[1]}</b>${m[5] ? `<br><span class="muto">${c === m[0] ? "rilassato" : "in tensione"}</span>` : ""}</td><td><input id="m-${c}" inputmode="decimal" value="${esc(it(r[c]))}" placeholder="${u ? it(u.v) : "cm"}" autocomplete="off"></td></tr>`;
+  }
+  apri(h + `</table><button class="pri largo grosso" onclick="salvaMisure('${CHIAVI_MIS.join(",")}')">Salva</button>`, true);
+}
+function salvaMisure(lista) {
+  const kk = lista.split(","), d = oggi(), r = giornoBase(d);
+  for (const k of kk) { const v = numMis("m-" + k); if (Number.isNaN(v)) { avvisa("Controlla il numero"); return; } r[k] = v; }
+  scriviGiorno(d, r); vib(); chiudi(); disegna(); avvisa("Salvato");
 }
 
 function grafVita() {
