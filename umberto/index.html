@@ -444,6 +444,29 @@ input, textarea, select { background:rgba(0,0,0,.28); }
 .fotoTesta { position:relative; height:150px; padding:0; overflow:hidden; background:#141b18 center/cover no-repeat; margin-top:0; }
 .fotoTesta::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,17,13,.05) 30%,rgba(10,17,13,.88)); }
 .fotoTesta span { position:absolute; left:16px; right:16px; bottom:12px; } .fotoTesta b { display:block; font-family:var(--tit); font-stretch:112%; font-size:20px; } .fotoTesta small { color:#d3ded7; font-size:13px; }
+/* v39: schermata Scheda rifatta */
+.tabSed { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:12px 0 4px; }
+.tabSed button { display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 2px 9px; border-radius:16px; background:var(--card); border:1px solid var(--linea); min-height:0; }
+.tabSed b { font-family:var(--tit); font-stretch:112%; font-size:20px; font-weight:800; line-height:1.1; }
+.tabSed .parola b { font-size:15px; line-height:1.47; }
+.tabSed small { font-size:11px; color:var(--muto); white-space:nowrap; }
+.tabSed .fatta small { color:var(--verde); font-weight:700; }
+.tabSed button.qui { background:var(--verde); border-color:var(--verde); color:#04130a; }
+.tabSed button.qui small { color:#04130a; opacity:.75; }
+.sedEroe { padding:18px; border-color:rgba(61,220,132,.32);
+  background:linear-gradient(150deg,rgba(61,220,132,.22),rgba(61,220,132,.05) 60%,rgba(255,255,255,.04)); }
+.sedEroe.confoto { padding-top:132px; background:linear-gradient(180deg,rgba(8,16,12,0) 0%,rgba(8,16,12,.35) 22%,rgba(8,16,12,.86) 42%,rgba(8,16,12,.94) 100%), var(--f) center 28%/cover no-repeat, var(--solido); }
+.sedEroe .eti { font-size:12px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--verde); }
+.sedEroe .grande { font-family:var(--tit); font-stretch:112%; font-size:28px; font-weight:800; letter-spacing:-.4px; line-height:1.1; margin:6px 0 4px; }
+.sedEroe .num { display:flex; gap:22px; margin:10px 0 6px; }
+.sedEroe .num div { font-size:13px; color:var(--testo); opacity:.8; }
+.sedEroe .num b { display:block; font-family:var(--tit); font-stretch:112%; font-size:26px; line-height:1.1; opacity:1; }
+.sedEroe p { margin:6px 0 14px; font-size:14px; line-height:1.4; color:var(--testo); opacity:.85; }
+ol.esLista li { padding:10px 0; font-size:15px; }
+ol.esLista .mini { width:46px; height:46px; }
+ol.esLista span small { display:block; font-size:12px; color:var(--verde); margin-top:2px; }
+ol.esLista b { color:var(--testo); font-size:14px; }
+button.libera { margin-top:10px; }
 .eroe.confoto { background:linear-gradient(150deg,rgba(10,26,17,.80),rgba(10,17,13,.93)), var(--f) center/cover no-repeat; }
 @media (prefers-reduced-motion:reduce) { button, .barra i, .av { transition:none; } #avvio { display:none; }
   #vista, #foglio, #velo, .fantasma, .festa *, .festa svg { animation:none !important; } }
@@ -891,35 +914,40 @@ function salvaProfilo() { S.profilo = { nome: $("pNome").value.trim(), altezza: 
 const fotoSed = (se) => { const e = se.es.filter((x) => x.t === "m" || x.t === "sa").concat(se.es).find((x) => FOTO[x.id] && FOTO[x.id][1]); return e ? FOTO[e.id][1] : ""; };
 function vScheda() {
   const q = quadro(), { f, sett, fatte } = q, pross = prossima(), scelta = !!schedaSel, k = schedaSel || pross, se = SEDUTE[k];
-  const nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), gia = fatte[k];
-  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">Versione 1.1 · ${esc(f.nome)}</div><h1>Scheda</h1></div></div>` + striscia(q) +
-    `<p class="muto conta">Sedute di pesi questa settimana: <b>${sett} di 3</b>. I giorni li scegli tu.</p>
-    <div class="card eroe ${fotoSed(se) ? "confoto" : ""}" ${fotoSed(se) ? `style="--f:url(${fotoSed(se)})"` : ""}><div class="riga tra"><span class="eti">${scelta ? "Seduta scelta" : "Prossima consigliata"}${gia ? " · già fatta " + nomeGiorno(gia.data) : ""}</span><span class="pillola">${esc(f.nome.split(" · ")[0])}</span></div>
+  const nSerie = se.es.reduce((n, e) => n + f.serie(e), 0), gia = fatte[k], foto = fotoSed(se);
+  // v39 di Daniele: in alto la fila delle sedute, poi il riquadro con il tasto Inizia, poi gli esercizi; le regole dietro la "i"
+  let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">v1.1 · ${esc(f.nome)}</div><h1>Scheda</h1></div>
+      <button class="info" aria-label="Come funziona la scheda" onclick="infoScheda()">i</button></div>` + striscia(q) +
+    `<p class="muto conta">Pesi questa settimana: <b>${sett} di 3</b> · i giorni li scegli tu</p><div class="tabSed" style="grid-template-columns:repeat(3,1fr)">`;
+  for (const x of ["A", "B", "C"]) {
+    const sotto = fatte[x] ? "✓ " + nomeGiorno(fatte[x].data).slice(0, 3) : x === pross ? "prossima" : SEDUTE[x].corto.split(" · ")[1] || "";
+    h += `<button class="${x === k ? "qui" : ""} ${fatte[x] ? "fatta" : ""}" onclick="vediSeduta('${x}')"><b>${x}</b><small>${esc(sotto)}</small></button>`;
+  }
+  h += `</div><div class="card sedEroe ${foto ? "confoto" : ""}" ${foto ? `style="--f:url(${foto})"` : ""}>
+      <div class="eti">${gia ? "Già fatta " + nomeGiorno(gia.data) : k === pross ? "Prossima consigliata" : "Seduta di pesi"}</div>
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div></div>
-      <div class="muto">${esc(f.testo)}</div>
-      <details open><summary>Cosa si fa</summary><ol class="piano">`;
-  for (const e of se.es) h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
-  h += `</ol></details><button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta</button>
-      ${scelta ? `<button class="largo" onclick="schedaSel=null;disegna()">‹ Torna alla consigliata</button>` : ""}</div>
-    <h2>Le sedute di pesi</h2><div class="altre tre3">`;
-  for (const x of ["A", "B", "C"]) h += `<button class="${x === k ? "qui" : ""}" onclick="vediSeduta('${x}')"><i>${x}</i><span><b>${esc(SEDUTE[x].corto.split(" · ")[1])}</b><small>${fatte[x] ? "fatta " + nomeGiorno(fatte[x].data) + " ✓" : x === pross ? "consigliata" : "da fare"}</small></span></button>`;
-  h += `</div><h2>In più</h2><div class="altre tre3"><button onclick="inizia('L')"><i>+</i><span><b>Libera</b><small>scegli tu</small></span></button></div>
-    <p class="muto conta">Tocca una seduta per vedere gli esercizi; da lì la puoi iniziare.</p>
-    <h2>Come funziona la scheda</h2>
-    <div class="card"><details class="primo"><summary>La settimana</summary><ul>
+      <p>${esc(f.testo)}</p>
+      <button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta</button></div>
+    <h2>Gli esercizi</h2><div class="card lista"><ol class="piano esLista">`;
+  for (const e of se.es) h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}${e.ss ? `<small>superserie</small>` : ""}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
+  h += `</ol></div><button class="largo libera" onclick="inizia('L')">+ Seduta libera · scegli tu gli esercizi</button>`;
+  return h;
+}
+function infoScheda() {
+  apri(testaFoglio("Come funziona la scheda") + `<h2>La settimana</h2><div class="card"><ul>
       <li><b>3 sedute di pesi</b> a settimana, da un'ora.</li>
       <li><b>A e C</b> con il coach, <b>B</b> a casa da solo. Ordine <b>A → B → C</b>.</li>
       <li><b>Un giorno di pausa</b> tra due sedute.</li>
       <li><b>Da solo</b>: mai a cedimento su squat e stacco. Sulle macchine puoi spingere di più.</li>
-      <li><b>Ogni giorno</b> 7000 passi.</li></ul></details>
-    <details><summary>Il percorso</summary><table>
+      <li><b>Ogni giorno</b> 7000 passi.</li></ul></div>
+    <h2>Il percorso</h2><div class="card"><table>
       <tr><td><b>Avvio</b><br><span class="muto">settimane 1-2</span></td><td>2 serie dove ne sono scritte 3, tutto a RIR 3: servono a trovare i carichi</td></tr>
       <tr><td><b>Blocco 1</b><br><span class="muto">settimane 3-8</span></td><td>tutte le serie, RIR 2 sui multiarticolari, RIR 1-2 sugli isolamenti</td></tr>
       <tr><td><b>Scarico</b><br><span class="muto">settimana 9</span></td><td>stessi carichi, metà delle serie, RIR 4</td></tr>
       <tr><td><b>Blocco 2</b><br><span class="muto">dalla 10</span></td><td>lo scrive il coach sui tuoi numeri</td></tr></table>
-      <p class="muto">Le settimane si contano dalla prima seduta di pesi; una settimana senza pesi non fa avanzare il conto.</p></details>
-    <details><summary>Le regole</summary><ul>
+      <p class="muto">Le settimane si contano dalla prima seduta di pesi; una settimana senza pesi non fa avanzare il conto.</p></div>
+    <h2>Le regole</h2><div class="card"><ul>
       <li><b>RIR</b>: ripetizioni che ti restano nel serbatoio a fine serie.</li>
       <li><b>Doppia progressione</b>: quando chiudi il massimo delle ripetizioni in tutte le serie, la volta dopo sali di carico e riparti dal minimo.</li>
       <li><b>Recuperi</b>: 2' sui multiarticolari, 60-90" sugli isolamenti.</li>
@@ -928,8 +956,8 @@ function vScheda() {
       <li><b>Riscaldamento</b>: 5' di movimento, poi 2 serie leggere solo sul primo esercizio.</li>
       <li><b>Segna sempre</b> carico e ripetizioni: senza numeri non si progredisce.</li>
       <li><b>Seduta minima</b> per i giorni no: i primi 3 esercizi. Conta come fatta.</li>
-      <li><b>Seduta saltata</b>: non si recupera e non si raddoppia, riparti dalla successiva.</li></ul></details></div>`;
-  return h;
+      <li><b>Seduta saltata</b>: non si recupera e non si raddoppia, riparti dalla successiva.</li></ul></div>
+    <button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
 function vediSeduta(k) { schedaSel = k; disegna(); window.scrollTo(0, 0); }
 
