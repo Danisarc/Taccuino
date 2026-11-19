@@ -449,9 +449,12 @@ input, textarea, select { background:rgba(0,0,0,.28); }
   #vista, #foglio, #velo, .fantasma, .festa *, .festa svg { animation:none !important; } }
 /* v29: misure del corpo. Il rosso è solo qui, sugli anelli che dicono dove passa il metro */
 svg.corpo { display:block; width:100%; max-width:420px; margin:8px auto 4px; overflow:visible; }
-svg.corpo .pelle { fill:#214332; stroke:var(--verde); stroke-opacity:.55; stroke-width:1.2; stroke-linejoin:round; }
-svg.corpo .capelli { fill:#18301f; stroke:var(--verde); stroke-opacity:.35; stroke-width:1; }
-svg.corpo .segni { fill:none; stroke:var(--verde); stroke-opacity:.22; stroke-width:1.1; stroke-linecap:round; }
+svg.corpo .pelle { fill:#1f4030; stroke:var(--verde); stroke-opacity:.6; stroke-width:1.1; stroke-linejoin:round; }
+svg.corpo .musc { fill:#3ddc84; fill-opacity:.13; stroke:var(--verde); stroke-opacity:.2; stroke-width:.7; stroke-linejoin:round; }
+svg.corpo .luce { fill:url(#corpoLuce); stroke:none; pointer-events:none; }
+svg.corpo .capelli { fill:#14291d; stroke:var(--verde); stroke-opacity:.4; stroke-width:1; stroke-linejoin:round; }
+svg.corpo .segni { fill:none; stroke:var(--verde); stroke-opacity:.32; stroke-width:1; stroke-linecap:round; }
+svg.corpo .omb { fill:#0d1f16; }
 svg.corpo .an { fill:none; stroke:var(--rosso); stroke-width:3; stroke-linecap:round; }
 svg.corpo .an.die { stroke-opacity:.45; }
 svg.corpo .np { fill:var(--rosso); }
@@ -463,8 +466,8 @@ svg.corpo .en { fill:var(--muto); font-size:11.5px; font-weight:600; }
 svg.corpo .ev { fill:var(--testo); font-family:var(--tit, inherit); font-size:17px; font-weight:800; }
 svg.corpo .ev.no { fill:var(--verde); }
 svg.corpo .eu { fill:var(--muto); font-family:inherit; font-size:10.5px; font-weight:500; }
-table.mis { width:100%; } table.mis td { padding:6px 0; vertical-align:middle; border:0; } table.mis td:last-child { width:120px; }
-table.mis input { text-align:center; font-weight:800; font-size:18px; }
+table.mis { width:100%; } table.mis td, table.mis th { padding:6px 4px 6px 0; vertical-align:middle; border:0; } table.mis th { text-align:center; font-weight:600; color:var(--muto); font-size:12px; }
+table.mis td:first-child { width:38%; } table.mis input { text-align:center; font-weight:800; font-size:18px; width:100%; }
 </style>
 </head>
 <body>
@@ -2201,10 +2204,10 @@ function testoCoach(da) {
     t += "Diario (data | peso kg | passi | sonno 1-5 | risvegli | giro vita cm | note)\n";
     for (const d of dd) { const x = S.diario[d]; t += `${d} | ${it(x.peso)} | ${it(x.passi)} | ${it(x.sonno)} | ${it(x.risvegli)} | ${it(x.vita)} | ${x.note || ""}\n`; }
   }
-  const kMis = CHIAVI_MIS.filter((k) => k !== "vita"), mm = dd.filter((d) => kMis.some((k) => S.diario[d][k] != null));
+  const cMis = COL_MIS.filter((c) => c[0] !== "vita"), mm = dd.filter((d) => cMis.some((c) => S.diario[d][c[0]] != null));
   if (mm.length) {
-    t += "\nMisure del corpo in cm (data | " + CORPO.filter((m) => m[0] !== "vita").flatMap((m) => (m[5] ? [m[1] + " rilassato", m[1] + " in tensione"] : [m[1]])).join(" | ").toLowerCase() + ")\n";
-    for (const d of mm) t += d + " | " + kMis.map((k) => it(S.diario[d][k])).join(" | ") + "\n";
+    t += "\nMisure del corpo in cm (data | " + cMis.map((c) => c[2]).join(" | ") + ")\n";
+    for (const d of mm) t += d + " | " + cMis.map((c) => it(S.diario[d][c[0]])).join(" | ") + "\n";
   }
   const ff = (S.foto || []).filter((x) => x.d > da);
   if (ff.length) t += "\nFoto dei progressi scattate nell'app (te le mando a parte): " + ff.map((x) => x.d + " " + x.posa).join(", ") + "\n";
@@ -2240,7 +2243,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v15</p>
+  <p class="muto" style="margin-top:16px">Scheda v1.1 · alimentazione v2.0 · app v16</p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -2733,81 +2736,110 @@ function salvaSonno() {
 }
 
 /* ============ MISURE DEL CORPO: la sagoma con gli anelli ============
-   Le circonferenze stanno nel diario del giorno (S.diario[data]), accanto a vita: spalle, petto, braccio, braccioT (in tensione),
-   avamb, fianchi, coscia, polp. CORPO = [chiave, nome, lato dell'etichetta (s = sinistra, d = destra), y dell'etichetta, come si misura, chiave della misura in tensione].
-   SAGOMA = metà destra della figura (l'altra è specchiata) e, per ogni misura, [centro x, y, raggio] dell'anello. */
+   Le circonferenze stanno nel diario del giorno (S.diario[data]), accanto a vita. Braccio, avambraccio, coscia e polpaccio si misurano
+   a destra e a sinistra: la chiave semplice è il lato destro (braccio), con la S il sinistro (braccioS); in tensione braccioT e braccioTS.
+   CORPO = [chiave, nome, lato (2 = destra e sinistra; s, d = dove sta l'etichetta), y dell'etichetta, come si misura, chiave in tensione].
+   SAGOME = metà della figura (l'altra è specchiata), i muscoli in chiaro, le linee, e per ogni misura [centro x, y, raggio] dell'anello.
+   La figura guarda chi legge: il suo lato destro è a sinistra sullo schermo. */
 const CORPO_TUTTE = [
-  ["spalle", "Spalle", "d", 70, "In piedi, braccia lungo i fianchi. Metro orizzontale nel punto più largo delle spalle, sopra i deltoidi, tutto intorno. Meglio se te lo passa un'altra persona."],
-  ["petto", "Petto", "d", 118, "Metro orizzontale all'altezza dei capezzoli, sotto le ascelle. A fine espirazione normale, senza gonfiare il petto."],
-  ["braccio", "Braccio dx", "s", 96, "Rilassato: braccio lungo il fianco, metro a metà tra spalla e gomito. In tensione: gomito piegato a 90°, bicipite contratto, metro nel punto più grosso.", "braccioT"],
-  ["avamb", "Avambraccio dx", "s", 176, "Braccio disteso, mano aperta e rilassata. Metro nel punto più grosso, poco sotto il gomito."],
-  ["vita", "Vita", "d", 186, "Al mattino, metro all'altezza dell'ombelico, orizzontale, a fine espirazione e senza tirare in dentro la pancia."],
-  ["fianchi", "Fianchi", "d", 262, "Piedi uniti, metro orizzontale nel punto più sporgente dei glutei."],
-  ["coscia", "Coscia dx", "s", 286, "In piedi, peso su tutte e due le gambe, muscolo rilassato. Metro a metà tra l'inguine e il ginocchio."],
-  ["polp", "Polpaccio dx", "s", 366, "In piedi, peso su tutte e due le gambe. Metro nel punto più grosso del polpaccio."],
+  ["spalle", "Spalle", "s", 52, "In piedi, braccia lungo i fianchi. Metro orizzontale nel punto più largo delle spalle, sopra i deltoidi, tutto intorno. Meglio se te lo passa un'altra persona."],
+  ["petto", "Petto", "d", 52, "Metro orizzontale all'altezza dei capezzoli, sotto le ascelle. A fine espirazione normale, senza gonfiare il petto."],
+  ["braccio", "Braccio", "2", 104, "Rilassato: braccio lungo il fianco, metro a metà tra spalla e gomito. In tensione: gomito piegato a 90°, bicipite contratto, metro nel punto più grosso.", "braccioT"],
+  ["avamb", "Avambraccio", "2", 172, "Braccio disteso, mano aperta e rilassata. Metro nel punto più grosso, poco sotto il gomito."],
+  ["fianchi", "Fianchi", "s", 226, "Piedi uniti, metro orizzontale nel punto più sporgente dei glutei."],
+  ["vita", "Vita", "d", 226, "Al mattino, metro all'altezza dell'ombelico, orizzontale, a fine espirazione e senza tirare in dentro la pancia."],
+  ["coscia", "Coscia", "2", 286, "In piedi, peso su tutte e due le gambe, muscolo rilassato. Metro a metà tra l'inguine e il ginocchio."],
+  ["polp", "Polpaccio", "2", 370, "In piedi, peso su tutte e due le gambe. Metro nel punto più grosso del polpaccio."],
 ];
 const SAGOME = {
-  uomo: { d: "M99.5 54H109V64C118 68 132 70 142 74C152 78 157 90 156 104C157 125 158 140 160 158C164 172 168 195 170 222C174 232 174 248 167 255C161 259 157 250 158 222C155 200 150 180 146 162C143 145 141 125 139 108C140 125 136 150 131 170C129 178 129 186 130 192C131 205 137 218 139 232C141 255 138 290 132 318C130 326 130 334 131 340C135 352 135 375 128 400L126 410C130 418 140 420 140 425H112L113 410C110 385 108 360 111 340C111 320 106 280 102 246L99.5 244",
-    a: { spalle: [100, 90, 59], petto: [100, 114, 41], braccio: [149.5, 130, 10.5], avamb: [157, 180, 10], vita: [100, 186, 32], fianchi: [100, 230, 41.5], coscia: [122.5, 282, 19], polp: [122, 362, 15.5] },
-    segni: "M100 70V236M108 118C116 124 128 123 136 114M92 118C84 124 72 123 64 114M88 150H112M89 168H111" },
-  donna: { d: "M99.5 54H108V64C115 68 126 71 134 75C143 79 147 90 146 103C147 124 149 140 151 158C155 172 159 195 161 222C165 232 165 248 158 255C152 259 148 250 149 222C146 200 142 180 138 162C135 145 133 125 131 108C134 120 133 135 128 150C125 160 123 168 123 178C124 195 138 210 142 232C144 258 139 292 131 320C129 326 129 334 130 340C134 352 133 376 126 402L125 410C129 418 138 420 138 425H111L112 410C110 385 108 360 110 340C110 320 105 280 101 246L99.5 244",
-    a: { spalle: [100, 90, 49], petto: [100, 120, 36], braccio: [141, 130, 9], avamb: [148.5, 180, 9], vita: [100, 177, 25.5], fianchi: [100, 232, 44.5], coscia: [123, 282, 19.5], polp: [121, 362, 15] },
-    segni: "M108 126C114 133 124 132 130 124M92 126C86 133 76 132 70 124",
-    capelli: "M100 9C82 9 76 24 78 42C79 54 76 64 72 70C82 72 90 68 92 60H108C110 68 118 72 128 70C124 64 121 54 122 42C124 24 118 9 100 9Z" },
+  uomo: {
+    d: "M99.5 58H109.5C109.5 64 110 68 112 71C120 75 131 78 140 80C150 82 158 90 159 102C160 112 159 120 157.5 128C160 138 161.5 150 161 160C161 166 162 170 164 174C168 184 170 198 170.5 212C171 220 171.5 226 172 231C175 236 177.5 246 177 256C176.5 264 173 271 169 272C166 272.5 164.5 268 164.5 262C164 256 163.5 250 162.5 246C161 240 160.5 236 161 231C159.5 218 156.5 200 152.5 186C150.5 179 149 173 148 168C146.5 156 145 142 143.5 130C142.5 122 141.5 116 140.5 112C141 124 139.5 138 136.5 150C134 160 131.5 168 131 176C130.5 184 131.5 192 133 200C134.5 208 136 214 136.5 222C138 240 137.5 262 134.5 284C132.5 300 130 312 129.5 322C129 330 130 336 131.5 342C134.5 352 135 366 133 380C131.5 392 128.5 402 127.5 410C127.5 414 128.5 417 131 420C134 423 137 425 137 427.5H113C111.5 424 112.5 418 113.5 412C113 400 110 388 109.5 374C109 362 110.5 352 111.5 344C112 336 111.5 328 110.5 320C108.5 300 105.5 262 101.5 226L99.5 224",
+    testa: "M100 9C113 9 119 19 119 32C119 36 118.5 40 117.5 44C116 53 109 61.5 100 62C91 61.5 84 53 82.5 44C81.5 40 81 36 81 32C81 19 87 9 100 9Z",
+    muscoli: "M101.5 97C112 92 128 92 138 99C139.5 108 134 119 124 122C114 124 104 122 101.5 118ZM142 83C151 85 157 93 157.5 104C157 114 155 121 153 125C149 119 144.5 112 142 104C140 97 140 89 142 83ZM147 130C151 127 156 129 158 135C159.5 144 159 153 157 159C153.5 161 150.5 159 149 155C147.5 146 146.5 137 147 130ZM151 174C156 170 161.5 173 164 181C166.5 192 168 206 168.5 221L163.5 223C161.5 208 157 191 152 180ZM102 128H113C115 128 116 129.5 116 131.5V138C116 140 115 141 113 141H102ZM102 145H113C115 145 116 146.5 116 148.5V155C116 157 115 158 113 158H102ZM102 162H112.5C114.5 162 115.5 163.5 115.5 165.5V172C115.5 174 114.5 175 112.5 175H102ZM102 179H112C114 179 115 181 114.5 184C113.5 194 109 204 102 211ZM106.5 234C116 229 130 231 134 241C135.5 260 133.5 284 129.5 303C126 311 118 313 113.5 309C109.5 290 106.5 258 106.5 234ZM114 347C120 343 129.5 345 132 353C133.5 366 131.5 382 128.5 396L117 398C113 382 112 362 114 347Z",
+    linee: "M103 81C114 79.5 127 80 139 83M100 96V214M131.5 197C123 208 111 218 102.5 222M122 128C128 134 132 144 133 156M112.5 318C115 322 126 322 129 318M113 334C117 337 125 337 129 334M103.5 74L108 62M166 262V268M169.5 262V269M173 260V266",
+    ombelico: [100, 186],
+    a: { spalle: [100, 97, 60.5], petto: [100, 116, 42], braccio: [152.5, 141, 9.5], avamb: [158.5, 181, 9.5], vita: [100, 181, 32.5], fianchi: [100, 222, 38.5], coscia: [121.5, 268, 17.5], polp: [122, 362, 14.5] } },
+  donna: {
+    d: "M99.5 58H108C108 64 108.5 68 110 71C117 75 125 78 132 80C141 82 147 89 148 100C149 110 148.5 120 147.5 128C149 138 150.5 150 150.5 160C150.5 166 151.5 170 153 174C156.5 184 158.5 198 159 212C159.5 220 160 226 160.5 231C163.5 236 165.5 246 165 256C164.5 264 161.5 271 158 272C155 272.5 153.5 268 153.5 262C153 256 152.5 250 151.5 246C150.5 240 150 236 150.5 231C149 218 146.5 200 143 186C141.5 179 140 173 139.5 168C138.5 156 137 142 135.5 130C134.5 122 133.5 116 132.5 112C134 120 134.5 130 132 140C129.5 150 125.5 160 124.5 170C124 178 126 186 130 196C135 206 140 214 141 226C142.5 244 140.5 266 135.5 288C132.5 302 129.5 312 128.5 322C128 330 129 336 130 342C132.5 352 133 366 131 380C129.5 392 127 402 126 410C126 414 127 417 129 420C132 423 135 425 135 427.5H112C110.5 424 111.5 418 112.5 412C112 400 109.5 388 109 374C108.5 362 109.5 352 110.5 344C111 336 110.5 328 109.5 320C107.5 300 104.5 264 101.5 230L99.5 228",
+    testa: "M100 10C112 10 117.5 20 117.5 32C117.5 36 117 40 116 44C114.5 53 108 61 100 61.5C92 61 85.5 53 84 44C83 40 82.5 36 82.5 32C82.5 20 88 10 100 10Z",
+    capelli: "M100 4C80 4 73 20 75 40C76 56 73 72 67 84C78 88 90 84 93 72L95 58H105L107 72C110 84 122 88 133 84C127 72 124 56 125 40C127 20 120 4 100 4Z",
+    frangia: "M82.5 30C84 18 91 11 100 11C109 11 116 18 117.5 30C110 26 104 20 100 14C96 20 90 26 82.5 30Z",
+    muscoli: "M102.5 108C110 104 124 105 130.5 113C133 123 128 133 118 134C108 134.5 102.5 129 102.5 121ZM134 82C141 84 146 91 146.5 101C146.5 110 145.5 118 144 124C140 118 136 110 134.5 102C133 95 133 88 134 82ZM106 238C116 233 133 235 138 246C139 264 136.5 286 131.5 304C127.5 312 118 313 113 309C109 290 106 262 106 238ZM113 347C118.5 343 127.5 345 130 353C131.5 366 129.5 382 126.5 396L116 398C112 382 111 362 113 347Z",
+    linee: "M103 81C112 79.5 122 80 131 83M100 138V176M130 200C122 212 110 222 102.5 226M111.5 318C114 322 125 322 128 318M112 334C116 337 124 337 128 334M103 74L107 62M155 262V268M158.5 262V269M162 260V266",
+    ombelico: [100, 180],
+    a: { spalle: [100, 97, 50], petto: [100, 124, 36], braccio: [142.5, 141, 8.5], avamb: [148.5, 181, 9], vita: [100, 172, 26], fianchi: [100, 226, 43], coscia: [122, 270, 19], polp: [121, 362, 14] } },
 };
 const SAGOMA = SAGOME[APP.donna ? "donna" : "uomo"];
 const CORPO = CORPO_TUTTE.filter((m) => !(APP.misureNo || []).includes(m[0]));
-const CHIAVI_MIS = CORPO.flatMap((m) => (m[5] ? [m[0], m[5]] : [m[0]]));
+// le voci di una misura, nell'ordine in cui si scrivono: [chiave, etichetta breve, etichetta intera per il coach]
+function vociMis(m) {
+  if (m[2] !== "2") return [[m[0], "", m[1].toLowerCase()]];
+  const r = m[5] ? " rilassato" : "", vv = [[m[0], "destro" + r], [m[0] + "S", "sinistro" + r]];
+  if (m[5]) vv.push([m[5], "destro in tensione"], [m[5] + "S", "sinistro in tensione"]);
+  return vv.map((v) => [v[0], v[1], m[1].toLowerCase() + " " + v[1]]);
+}
+const COL_MIS = CORPO.flatMap(vociMis), CHIAVI_MIS = COL_MIS.map((c) => c[0]);
 const ultimaMis = (k) => { const d = ultimoCon(k); return d ? { d, v: S.diario[d][k] } : null; };
 const ultimaCorpo = () => CHIAVI_MIS.filter((k) => k !== "vita").map((k) => ultimoCon(k)).filter(Boolean).sort().pop() || null;
 function figuraCorpo() {
-  const OX = 80, W = 360, a = SAGOMA.a;
-  // l'anello: dietro la figura la metà lontana, davanti la metà vicina, come un bracciale intorno al corpo
-  const posto = (m) => { const q = a[m[0]], sx = m[2] === "s", cx = OX + (sx && q[0] !== 100 ? 200 - q[0] : q[0]); return { cx, y: q[1], rx: q[2], ry: Math.max(3.2, q[2] * 0.17) }; };
+  const OX = 80, W = 360, G = SAGOMA, a = G.a;
   let dietro = "", davanti = "", eti = "";
-  for (const m of CORPO) {
-    const p = posto(m), sx = m[2] === "s", u = ultimaMis(m[0]), ut = m[5] ? ultimaMis(m[5]) : null, ly = m[3];
-    dietro += `<path class="an die" d="M${p.cx - p.rx} ${p.y}A${p.rx} ${p.ry} 0 0 1 ${p.cx + p.rx} ${p.y}"/>`;
-    davanti += `<path class="an" d="M${p.cx - p.rx} ${p.y}A${p.rx} ${p.ry} 0 0 0 ${p.cx + p.rx} ${p.y}"/>`;
-    const bx = sx ? p.cx - p.rx : p.cx + p.rx, gx = sx ? 98 : W - 98, tx = sx ? 93 : W - 93, an = sx ? "end" : "start";
-    davanti += `<circle class="np" cx="${bx}" cy="${p.y}" r="2.4"/><polyline class="fl" points="${bx},${p.y} ${sx ? Math.min(bx - 6, gx + 14) : Math.max(bx + 6, gx - 14)},${ly} ${gx},${ly}"/>`;
-    const val = (x) => (x ? it(x.v) : "＋");
-    eti += `<g class="et" onclick="misuraCorpo('${m[0]}')"><rect x="${sx ? 0 : W - 100}" y="${ly - 22}" width="100" height="${m[5] ? 58 : 42}" rx="10"/>
-      <text class="en" x="${tx}" y="${ly - 8}" text-anchor="${an}">${m[1]}</text>` +
-      (m[5] ? `<text class="ev${u ? "" : " no"}" x="${tx}" y="${ly + 10}" text-anchor="${an}">${val(u)}<tspan class="eu"> rilassato</tspan></text><text class="ev${ut ? "" : " no"}" x="${tx}" y="${ly + 28}" text-anchor="${an}">${val(ut)}<tspan class="eu"> in tensione</tspan></text>`
+  // l'anello: dietro la figura la metà lontana, davanti la metà vicina, come un bracciale intorno al corpo
+  const anello = (m, sx, k, kt) => {
+    const q = a[m[0]], cx = OX + (sx && q[0] !== 100 ? 200 - q[0] : q[0]), y = q[1], rx = q[2], ry = Math.max(3.2, rx * 0.17), ly = m[3];
+    const u = ultimaMis(k), ut = kt ? ultimaMis(kt) : null, val = (x) => (x ? it(x.v) : "＋");
+    dietro += `<path class="an die" d="M${cx - rx} ${y}A${rx} ${ry} 0 0 1 ${cx + rx} ${y}"/>`;
+    davanti += `<path class="an" d="M${cx - rx} ${y}A${rx} ${ry} 0 0 0 ${cx + rx} ${y}"/>`;
+    const bx = sx ? cx - rx : cx + rx, gx = sx ? 98 : W - 98, tx = sx ? 93 : W - 93, an = sx ? "end" : "start";
+    davanti += `<circle class="np" cx="${bx}" cy="${y}" r="2.4"/><polyline class="fl" points="${bx},${y} ${sx ? Math.min(bx - 6, gx + 14) : Math.max(bx + 6, gx - 14)},${ly} ${gx},${ly}"/>`;
+    eti += `<g class="et" onclick="misuraCorpo('${m[0]}')"><rect x="${sx ? 0 : W - 100}" y="${ly - 22}" width="100" height="${kt ? 58 : 42}" rx="10"/>
+      <text class="en" x="${tx}" y="${ly - 8}" text-anchor="${an}">${m[1]}${m[2] === "2" ? (sx ? " dx" : " sx") : ""}</text>` +
+      (kt ? `<text class="ev${u ? "" : " no"}" x="${tx}" y="${ly + 10}" text-anchor="${an}">${val(u)}<tspan class="eu"> rilassato</tspan></text><text class="ev${ut ? "" : " no"}" x="${tx}" y="${ly + 28}" text-anchor="${an}">${val(ut)}<tspan class="eu"> in tensione</tspan></text>`
         : `<text class="ev${u ? "" : " no"}" x="${tx}" y="${ly + 10}" text-anchor="${an}">${val(u)}${u ? '<tspan class="eu"> cm</tspan>' : ""}</text>`) + `</g>`;
+  };
+  for (const m of CORPO) {
+    if (m[2] === "2") { anello(m, true, m[0], m[5]); anello(m, false, m[0] + "S", m[5] ? m[5] + "S" : null); }
+    else anello(m, m[2] === "s", m[0], null);
   }
-  const meta = `<path class="pelle" d="${SAGOMA.d}"/>`;
+  const meta = `<path class="pelle" d="${G.d}"/><path class="musc" d="${G.muscoli}"/><path class="segni" d="${G.linee}"/>`;
   return `<svg class="corpo" viewBox="0 0 ${W} 436" role="img" aria-label="Figura del corpo con i punti dove si misura">
-    ${dietro}<g transform="translate(${OX} 0)">${SAGOMA.capelli ? `<path class="capelli" d="${SAGOMA.capelli}"/>` : ""}${meta}<g transform="translate(200 0) scale(-1 1)">${meta}</g><ellipse class="pelle" cx="100" cy="34" rx="17" ry="21"/><path class="segni" d="${SAGOMA.segni}"/></g>
+    <defs><linearGradient id="corpoLuce" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".10"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>
+    ${dietro}<g transform="translate(${OX} 0)">${G.capelli ? `<path class="capelli" d="${G.capelli}"/>` : ""}
+      <g>${meta}</g><g transform="translate(200 0) scale(-1 1)">${meta}</g>
+      <path class="luce" d="${G.d}"/><path class="luce" transform="translate(200 0) scale(-1 1)" d="${G.d}"/>
+      <ellipse class="pelle" cx="81.5" cy="36" rx="2.6" ry="5.5"/><ellipse class="pelle" cx="118.5" cy="36" rx="2.6" ry="5.5"/><path class="pelle" d="${G.testa}"/><path class="luce" d="${G.testa}"/>
+      ${G.frangia ? `<path class="capelli" d="${G.frangia}"/>` : ""}<ellipse class="omb" cx="${G.ombelico[0]}" cy="${G.ombelico[1]}" rx="1.6" ry="2.4"/></g>
     ${davanti}${eti}</svg>`;
 }
 function cardCorpo() {
   const u = ultimaCorpo() || ultimoCon("vita");
   return `<div class="card"><div class="riga tra"><div class="nome">Misure del corpo</div><button class="pic" onclick="tutteMisure()">+ Segna tutte</button></div>
     <p class="muto" style="margin-top:4px">${u ? "Ultime misure: " + dataIt(u) + ". " : ""}Tocca una misura per scriverla e vedere come cambia.</p>${figuraCorpo()}
-    <p class="muto">In centimetri, al mattino a digiuno, sempre sul lato destro e con lo stesso metro. Vita ogni 2 settimane, le altre ogni 4.</p></div>`;
+    <p class="muto">In centimetri, al mattino a digiuno, con lo stesso metro. Braccia e gambe a destra e a sinistra: una differenza fino a 1 cm è normale. Vita ogni 2 settimane, le altre ogni 4.</p></div>`;
 }
 const numMis = (id) => { const e = $(id), t = e ? e.value.trim() : ""; if (t === "") return null; const v = num(t); return v == null || v < 10 || v > 250 ? NaN : v; };
+const campoMis = (c, eti, r) => `<div><label>${eti}</label><input id="m-${c}" class="numerone" style="margin-top:4px" inputmode="decimal" value="${esc(it(r[c]))}" placeholder="${ultimaMis(c) ? it(ultimaMis(c).v) : "cm"}" autocomplete="off"></div>`;
 function misuraCorpo(k) {
-  const m = CORPO.find((x) => x[0] === k), d = oggi(), r = S.diario[d] || {}, chiavi = m[5] ? [k, m[5]] : [k];
-  const campo = (c, eti) => `<div><label>${eti}</label><input id="m-${c}" class="numerone" style="margin-top:4px" inputmode="decimal" value="${esc(it(r[c]))}" placeholder="${ultimaMis(c) ? it(ultimaMis(c).v) : "cm"}" autocomplete="off"></div>`;
-  let h = testaFoglio(m[1] + " (cm)") + (m[5] ? `<div class="g2">${campo(k, "Rilassato")}${campo(m[5], "In tensione")}</div>` : campo(k, "Oggi")) +
-    `<p class="muto">${m[4]}</p><button class="pri largo grosso" onclick="salvaMisure('${chiavi.join(",")}')">Salva</button>`;
-  chiavi.forEach((c, i) => {
-    const dd = Object.keys(S.diario).filter((x) => S.diario[x][c] != null).sort().slice(-20), n = dd.length; if (!n) return;
-    const u = S.diario[dd[n - 1]][c], p = S.diario[dd[0]][c];
-    h += `<h2>${m[5] ? (i ? "In tensione" : "Rilassato") : "Andamento"}</h2><p>Ultima: <b>${it(u)} cm</b> <span class="muto">(${dataIt(dd[n - 1])})</span>${n > 1 ? ` · dalla prima <b>${(u - p >= 0 ? "+" : "") + it((u - p).toFixed(1))} cm</b>` : ""}</p>` +
-      grafLinea("mis-" + c, dd.map((x) => ({ x: dataIt(x), t: giornoN(x), y: S.diario[x][c] })), { vuoto: "Il grafico compare dalla seconda misura.", testo: (q) => `${it(q.y)} cm` });
-  });
+  const m = CORPO.find((x) => x[0] === k), r = S.diario[oggi()] || {}, vv = vociMis(m), due = m[2] === "2";
+  let h = testaFoglio(m[1] + " (cm)");
+  if (!due) h += campoMis(k, "Oggi", r);
+  else for (let i = 0; i < vv.length; i += 2) h += (m[5] ? `<h2>${i ? "In tensione" : "Rilassato"}</h2>` : "") + `<div class="g2">${campoMis(vv[i][0], "Destro", r)}${campoMis(vv[i + 1][0], "Sinistro", r)}</div>`;
+  h += `<p class="muto">${m[4]}</p><button class="pri largo grosso" onclick="salvaMisure('${vv.map((v) => v[0]).join(",")}')">Salva</button>`;
+  for (const v of vv) {
+    const dd = Object.keys(S.diario).filter((x) => S.diario[x][v[0]] != null).sort().slice(-20), n = dd.length; if (!n) continue;
+    const u = S.diario[dd[n - 1]][v[0]], p = S.diario[dd[0]][v[0]];
+    h += `<h2>${v[1] ? "Andamento · " + v[1] : "Andamento"}</h2><p>Ultima: <b>${it(u)} cm</b> <span class="muto">(${dataIt(dd[n - 1])})</span>${n > 1 ? ` · dalla prima <b>${(u - p >= 0 ? "+" : "") + it((u - p).toFixed(1))} cm</b>` : ""}</p>` +
+      grafLinea("mis-" + v[0], dd.map((x) => ({ x: dataIt(x), t: giornoN(x), y: S.diario[x][v[0]] })), { vuoto: "Il grafico compare dalla seconda misura.", testo: (q) => `${it(q.y)} cm` });
+  }
   apri(h);
 }
 function tutteMisure() {
-  const r = S.diario[oggi()] || {};
-  let h = testaFoglio("Misure di oggi (cm)") + `<p class="muto">Scrivi quelle che hai preso: le altre restano come sono.</p><table class="mis">`;
-  for (const m of CORPO) for (const c of m[5] ? [m[0], m[5]] : [m[0]]) {
-    const u = ultimaMis(c);
-    h += `<tr><td><b>${m[1]}</b>${m[5] ? `<br><span class="muto">${c === m[0] ? "rilassato" : "in tensione"}</span>` : ""}</td><td><input id="m-${c}" inputmode="decimal" value="${esc(it(r[c]))}" placeholder="${u ? it(u.v) : "cm"}" autocomplete="off"></td></tr>`;
+  const r = S.diario[oggi()] || {}, inp = (c) => `<input id="m-${c}" inputmode="decimal" value="${esc(it(r[c]))}" placeholder="${ultimaMis(c) ? it(ultimaMis(c).v) : "cm"}" autocomplete="off">`;
+  let h = testaFoglio("Misure di oggi (cm)") + `<p class="muto">Scrivi quelle che hai preso: le altre restano come sono.</p><table class="mis"><tr><th></th><th>Destro</th><th>Sinistro</th></tr>`;
+  for (const m of CORPO) {
+    if (m[2] !== "2") { h += `<tr><td><b>${m[1]}</b></td><td colspan="2">${inp(m[0])}</td></tr>`; continue; }
+    h += `<tr><td><b>${m[1]}</b>${m[5] ? '<br><span class="muto">rilassato</span>' : ""}</td><td>${inp(m[0])}</td><td>${inp(m[0] + "S")}</td></tr>`;
+    if (m[5]) h += `<tr><td><b>${m[1]}</b><br><span class="muto">in tensione</span></td><td>${inp(m[5])}</td><td>${inp(m[5] + "S")}</td></tr>`;
   }
   apri(h + `</table><button class="pri largo grosso" onclick="salvaMisure('${CHIAVI_MIS.join(",")}')">Salva</button>`, true);
 }
