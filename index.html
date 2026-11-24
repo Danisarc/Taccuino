@@ -346,6 +346,10 @@ ol.piano li { cursor:pointer; }
 ol.passi { margin:0; padding-left:22px; } ol.passi li { margin:6px 0; padding-left:2px; } ol.passi li::marker { color:var(--verde); font-weight:800; }
 ul.err { margin:0; padding:0; list-style:none; } ul.err li { margin:6px 0; padding-left:24px; position:relative; }
 ul.err li::before { content:"✕"; position:absolute; left:2px; color:var(--rosso); font-weight:800; font-size:13px; top:2px; }
+.ritmo { margin:10px 0 4px; padding:11px 13px; border-radius:16px; background:rgba(47,208,122,.08); border:1px solid rgba(47,208,122,.22); font-size:14px; line-height:1.4; }
+.ritmo b { display:block; color:var(--verde); font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
+.ritmo.pochi { background:transparent; border-color:var(--linea); } .ritmo.pochi b { color:var(--muto); }
+.ritmo.due { border-color:var(--verde); } .ritmo small { display:block; margin-top:6px; color:var(--muto); font-size:12.5px; }
 .consiglioCoach { border-color:rgba(247,169,79,.35); background:rgba(247,169,79,.08); font-size:14px; }
 .consiglioCoach b { display:block; color:var(--arancio); font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
 
@@ -895,7 +899,7 @@ function vHome() {
     `<h2>Da segnare oggi</h2><div class="g2">
       <button class="dato" onclick="segna('peso')"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, V, Math.min(pes7, 4) + "/4")}</span>
         <b>${R.peso != null ? cnt(R.peso, it(R.peso), 1) : m1 ? cnt(m1.m.toFixed(1), it(m1.m.toFixed(1)), 1) : "–"} <u>kg</u></b>
-        <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
+        <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : ritmo(d).breve ? ritmo(d).breve : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
       <button class="dato" onclick="${pIeri == null ? "segna('passi')" : "dettaglio('passi')"}"><span class="riga tra"><small>Passi di ieri</small>${anello((pIeri || 0) / PASSI_MIN, V)}</span>
         <b>${pIeri != null ? cnt(pIeri, mila(pIeri), 0, 1) : "–"}</b>
         <em class="${pIeri == null ? "fai" : ""}">${pIeri == null ? "＋ Segna i passi" : "media 7 giorni " + mila(mp.m)}</em></button>` + tileSonno() +
@@ -1249,7 +1253,7 @@ const PREP_BASE = [
   { nome: "Yogurt greco, banana e burro di arachidi", per: ["mer", "spu"], s: { p: "greco", c: "banana", g: "arachidi" } },
 ];
 // APP: quello che cambia da un atleta all'altro nei testi e nei conti del motore (sedute di pesi a settimana, giorni ON/OFF, promemoria)
-const APP = { nSett: 3, pesi: ["A", "B", "C"], onoff: true, versione: "Versione 3.0 · definizione lenta", adulto: "un uomo adulto. Il magnesio dell'integratore non è contato, perché dipende dal prodotto",
+const APP = { ritmo: { min: -0.35, max: -0.2, testo: "−0,2/−0,35 kg a settimana" }, nSett: 3, pesi: ["A", "B", "C"], onoff: true, versione: "Versione 3.0 · definizione lenta", adulto: "un uomo adulto. Il magnesio dell'integratore non è contato, perché dipende dal prodotto",
   notaInt: "Creatina, magnesio e glicina non contano nelle calorie; la capsula di omega-3 sì, circa 9 kcal.",
   ricorda: ["<b>Acqua</b> 2,2-2,5 litri: la segni nella home.",
     "<b>Pasto libero</b>: uno a settimana, in un giorno OFF, al posto della cena. Una pizza e una bibita light; nessuna compensazione il giorno dopo.",
@@ -2177,6 +2181,20 @@ function media(da, a) {
   const v = Object.keys(S.diario).filter((d) => d > da && d <= a && S.diario[d].peso != null).map((d) => S.diario[d].peso);
   return v.length ? { m: v.reduce((x, y) => x + y, 0) / v.length, n: v.length } : null;
 }
+/* Ritmo del peso (regola del coach): media degli ultimi 7 giorni contro quella dei 7 prima, confrontata con il ritmo del piano
+   (APP.ritmo, kg a settimana). Con meno di 3 pesate in una delle due settimane non giudica. Una settimana fuori ritmo può essere acqua:
+   solo se anche la settimana prima era fuori dalla stessa parte, l'app dice di mandare i dati al coach. */
+function ritmo(d) {
+  const R = APP.ritmo, w = [0, 1, 2].map((i) => media(meno(d, 7 * (i + 1)), meno(d, 7 * i))), ok = (m) => m && m.n >= 3;
+  const kg = (x) => (x >= 0 ? "+" : "−") + it(Math.abs(x).toFixed(2)) + " kg";
+  if (!ok(w[0]) || !ok(w[1])) return { s: "pochi", breve: "", tit: "Ancora pochi dati", t: `Per dirti se sei in linea servono almeno 3 pesate in ognuna delle ultime 2 settimane (ora ${w[0] ? w[0].n : 0} e ${w[1] ? w[1].n : 0}). Atteso: ${R.testo}.` };
+  const lato = (x) => (x < R.min ? -1 : x > R.max ? 1 : 0), v = w[0].m - w[1].m, f = lato(v), f0 = ok(w[2]) ? lato(w[1].m - w[2].m) : 0;
+  const cosa = (R.max <= 0 ? f < 0 : f > 0) ? "più veloce del piano" : "più lento del piano";
+  if (!f) return { s: "ok", breve: kg(v) + " · in linea", tit: "In linea", t: `${kg(v)} in una settimana: sei nel ritmo del piano (${R.testo}).` };
+  if (f === f0) return { s: "due", breve: kg(v) + " · da guardare", tit: "Due settimane fuori ritmo", t: `${kg(v)} in una settimana, ${cosa} per la seconda settimana di fila (atteso ${R.testo}). Manda i dati al coach: è il momento di correggere le calorie.` };
+  return { s: "uno", breve: kg(v) + " · " + cosa, tit: "Fuori ritmo questa settimana", t: `${kg(v)} in una settimana, ${cosa} (atteso ${R.testo}). Una settimana sola può essere acqua: si decide se succede anche la prossima.` };
+}
+const boxRitmo = (d) => { const r = ritmo(d); return `<div class="ritmo ${r.s}"><b>${r.tit}</b>${r.t}${APP.ritmo.nota ? `<small>${APP.ritmo.nota}</small>` : ""}</div>`; };
 function grafico() {
   const dd = Object.keys(S.diario).filter((d) => S.diario[d].peso != null).sort().slice(-45);
   const pts = dd.map((d) => { const m = media(meno(d, 7), d); return { x: dataIt(d), t: giornoN(d), y: S.diario[d].peso, y2: m ? m.m : S.diario[d].peso }; });
@@ -2204,7 +2222,7 @@ function vDiario() {
   h += `<div class="card"><div class="nome">Media del peso</div>
     <p>Ultimi 7 giorni: <b>${m1 ? it(m1.m.toFixed(1)) + " kg" : "—"}</b> ${m1 ? `<span class="muto">(${m1.n} pesate)</span>` : ""}</p>
     <p>7 giorni prima: <b>${m0 ? it(m0.m.toFixed(1)) + " kg" : "—"}</b>${m1 && m0 ? ` · variazione <b>${(m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2))} kg</b>` : ""}</p>
-    ${grafico()}<p class="muto">3-4 pesate a settimana, al mattino a digiuno. Atteso: −0,2/−0,35 kg a settimana.</p></div>` + cardCorpo() + grafPassi() +
+    ${grafico()}${boxRitmo(d)}<p class="muto">3-4 pesate a settimana, al mattino a digiuno.</p></div>` + cardCorpo() + grafPassi() +
     `<button class="blocco" onclick="apriFoto()"><i><svg viewBox="0 0 24 24">${ICO.foto}</svg></i><span><b>Foto dei progressi</b><small>${(S.foto || []).length ? (S.foto || []).length + " foto · fronte, lato, retro a confronto" : "Fronte, lato e retro, ogni 4 settimane"}</small></span><em>›</em></button>`;
   const dd = Object.keys(S.diario).sort().reverse().slice(0, 30);
   if (dd.length) {
