@@ -872,8 +872,8 @@ function cambiaGiorno(t, n) {
 }
 const freccia = (js) => `<button class="ico dietro" aria-label="Indietro" onclick="${js}">‹</button>`;
 const prof = () => Object.assign({ nome: "", altezza: null }, S.profilo || {});
-/* Home: saluto, settimana, il piano, e i quattro numeri di oggi (peso, passi di ieri, sonno, acqua).
-   Peso e passi si segnano da qui con un tocco: i passi li conta il telefono, l'app non può leggerli da sola. */
+/* Home: saluto, settimana, il piano, e i tre numeri di oggi (passi di ieri, sonno, acqua).
+   Il peso non è in home (scelta di Rosa, 2026-11-24): si vede e si segna nel profilo. I passi si segnano da qui con un tocco: i passi li conta il telefono, l'app non può leggerli da sola. */
 const mila = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 const PASSI_MIN = 8000;
 function daInviare() { const da = S.inviatoFino || ""; return { s: S.sedute.filter((x) => x.data > da).length, g: Object.keys(S.diario).filter((d) => d > da).length }; }
@@ -907,13 +907,10 @@ function vHome() {
       : `<button class="pri largo grosso" onclick="inizia('${k}')">Inizia la seduta ${esc(se.corto)}</button>`) +
     /* 2 · le quattro cose da segnare ogni giorno */
     `<h2>Da segnare oggi</h2><div class="g2">
-      <button class="dato" onclick="segna('peso')"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, V, Math.min(pes7, 4) + "/4")}</span>
-        <b>${R.peso != null ? cnt(R.peso, it(R.peso), 1) : m1 ? cnt(m1.m.toFixed(1), it(m1.m.toFixed(1)), 1) : "–"} <u>kg</u></b>
-        <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
       <button class="dato" onclick="${pIeri == null ? "segna('passi')" : "dettaglio('passi')"}"><span class="riga tra"><small>Passi di ieri</small>${anello((pIeri || 0) / PASSI_MIN, V)}</span>
         <b>${pIeri != null ? cnt(pIeri, mila(pIeri), 0, 1) : "–"}</b>
         <em class="${pIeri == null ? "fai" : ""}">${pIeri == null ? "＋ Segna i passi" : "media 7 giorni " + mila(mp.m)}</em></button>` + tileSonno() +
-      `<div class="dato" role="button" aria-label="Acqua: vedi l'andamento" onclick="dettaglio('acqua')"><span class="riga tra"><small>Acqua</small>${anello(aq / ACQUA_ML, V)}</span>
+      `<div class="dato" style="grid-column:1/-1;min-height:0" role="button" aria-label="Acqua: vedi l'andamento" onclick="dettaglio('acqua')"><span class="riga tra"><small>Acqua</small>${anello(aq / ACQUA_ML, V)}</span>
         <b>${cnt(aq / 1000, litri(aq), 2)} <u>/ ${litri(ACQUA_ML)} L</u></b>
         <span class="riga"><button class="tondo" aria-label="Togli un bicchiere" onclick="event.stopPropagation();acqua(${-BICCHIERE})">−</button><button class="tondo piu" aria-label="Aggiungi un bicchiere da ${BICCHIERE} ml" onclick="event.stopPropagation();acqua(${BICCHIERE})">+</button><em>${BICCHIERE} ml</em></span></div></div>`;
   /* 3 · le cose in scadenza: giro vita ogni 14 giorni, foto ogni 28, dati da inviare */
@@ -927,14 +924,14 @@ function vHome() {
   const K = costanza();
   return h + `<h2>Il tuo percorso</h2><div class="card lista">` +
     riga("apriCostanza()", ICO.fiamma, K.sett ? K.sett + (K.sett === 1 ? " settimana" : " settimane") + " di fila con " + APP.nSett + " sedute" : "Costanza: " + K.questa + " di " + APP.nSett + " sedute questa settimana",
-      K.peso ? "peso segnato " + K.peso + (K.peso === 1 ? " giorno" : " giorni") + " di fila" : "segna il peso per far partire la serie") +
+      K.sett ? K.questa + " di " + APP.nSett + " sedute questa settimana" : APP.nSett + " sedute in una settimana fanno partire la serie") +
     riga("apriSub('scheda')", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', esc(q.f.nome), esc(q.f.testo)) +
     riga("vai('storico')", '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', u ? "Ultima seduta: " + esc(u.corto || u.nome) : "Storico delle sedute",
       u ? nomeGiorno(u.data) + " " + dataIt(u.data) + " · " + u.es.reduce((n, e) => n + e.serie.length, 0) + " serie · " + S.sedute.length + " in tutto" : "nessuna seduta ancora") + `</div>`;
 }
 /* Profilo: nome e altezza si scrivono qui e restano sul telefono; il resto si ricava da pesate e sedute */
 function profilo() {
-  const P = prof(), d = oggi(), f = fase(d), r = [], m1 = media(meno(d, 7), d), pes = Object.keys(S.diario).filter((x) => S.diario[x].peso != null).sort(), p0 = pes.length ? S.diario[pes[0]].peso : null;
+  const P = prof(), d = oggi(), f = fase(d), r = [], m1 = media(meno(d, 7), d), m0 = media(meno(d, 14), meno(d, 7)), pes7 = m1 ? m1.n : 0, R = S.diario[d] || {}, V = "var(--verde)", pes = Object.keys(S.diario).filter((x) => S.diario[x].peso != null).sort(), p0 = pes.length ? S.diario[pes[0]].peso : null;
   r.push(["Obiettivo", "Perdere grasso e gonfiore senza perdere muscolo."], ["Fase", f.nome + ". " + f.testo]);
   r.push(["Peso", p0 == null ? "Nessuna pesata ancora." : `Partenza ${it(p0)} kg (${dataIt(pes[0])})` + (m1 ? ` · ora ${it(m1.m.toFixed(1))} kg di media · ${(m1.m - p0 >= 0 ? "+" : "") + it((m1.m - p0).toFixed(1))} kg` : "")]);
   if (P.altezza && m1) r.push(["BMI", it((m1.m / Math.pow(P.altezza / 100, 2)).toFixed(1))]);
@@ -942,6 +939,9 @@ function profilo() {
   apri(`<div class="riga tra"><div class="nome" style="font-size:21px">Il mio profilo</div><button class="ico" aria-label="Chiudi" onclick="chiudi()">✕</button></div>
     <div class="g2"><div><label>Nome</label><input id="pNome" value="${esc(P.nome)}" autocomplete="off"></div><div><label>Altezza (cm)</label><input id="pAlt" inputmode="numeric" value="${esc(it(P.altezza))}" placeholder="170"></div></div>
     <button class="pri largo" onclick="salvaProfilo()">Salva</button>
+    <h2>Il peso</h2><button class="dato" style="width:100%;min-height:0" onclick="segna('peso',null,1)"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, V, Math.min(pes7, 4) + "/4")}</span>
+        <b>${R.peso != null ? cnt(R.peso, it(R.peso), 1) : m1 ? cnt(m1.m.toFixed(1), it(m1.m.toFixed(1)), 1) : "–"} <u>kg</u></b>
+        <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>
     <h2>Il percorso</h2><div class="card spi">${r.map((x) => `<div><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join("")}</div>
     <p class="muto">Nome, altezza, pesate e tutto quello che segni restano su questo telefono.</p><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
@@ -3007,18 +3007,19 @@ const MIS = {
   passi: { t: "Passi", ph: "8000", min: 0, max: 100000, modo: "numeric", nota: "Leggi il numero nell'app del telefono che conta i passi e scrivilo qui. Traguardo: 8.000 al giorno." },
   vita: { t: "Giro vita (cm)", ph: "cm", min: 40, max: 200, modo: "decimal", nota: "Al mattino, metro all'altezza dell'ombelico, orizzontale, a fine espirazione e senza tirare in dentro la pancia. Una misura ogni 2 settimane." },
 };
-function segna(k, d) {
+function segna(k, d, dopo) {      // dopo = 1: aperto dal profilo, dopo il salvataggio si torna lì
   d = d || (k === "passi" ? meno(oggi(), 1) : oggi()); const M = MIS[k], r = S.diario[d] || {}, ieri = meno(oggi(), 1);
   apri(testaFoglio(M.t) +
     (k === "passi" ? `<div class="g2" style="margin-top:12px"><button class="${d === ieri ? "pri" : ""}" onclick="segna('passi','${ieri}')">Ieri</button><button class="${d === oggi() ? "pri" : ""}" onclick="segna('passi','${oggi()}')">Oggi</button></div>` : "") +
-    `<input id="qVal" class="numerone" inputmode="${M.modo}" value="${esc(it(r[k]))}" placeholder="${M.ph}" autocomplete="off" onkeydown="if(event.key==='Enter')salvaSegna('${k}','${d}')">
-    <p class="muto">${M.nota}</p><button class="pri largo grosso" onclick="salvaSegna('${k}','${d}')">Salva</button>` + (k === "passi" ? `<button class="largo" onclick="dettaglio('passi')">Vedi l'andamento</button>` : ""));
+    `<input id="qVal" class="numerone" inputmode="${M.modo}" value="${esc(it(r[k]))}" placeholder="${M.ph}" autocomplete="off" onkeydown="if(event.key==='Enter')salvaSegna('${k}','${d}',${dopo ? 1 : 0})">
+    <p class="muto">${M.nota}</p><button class="pri largo grosso" onclick="salvaSegna('${k}','${d}',${dopo ? 1 : 0})">Salva</button>` + (k === "passi" ? `<button class="largo" onclick="dettaglio('passi')">Vedi l'andamento</button>` : ""));
   setTimeout(() => { const x = $("qVal"); if (x) { x.focus(); x.select(); } }, 50);
 }
-function salvaSegna(k, d) {
+function salvaSegna(k, d, dopo) {
   const M = MIS[k], t = $("qVal").value.trim(), v = t === "" ? null : k === "passi" ? num(t.replace(/\D/g, "")) : num(t);
   if (t !== "" && (v == null || v < M.min || v > M.max)) { avvisa("Controlla il numero"); return; }
   const r = giornoBase(d); r[k] = v; scriviGiorno(d, r); vib(); chiudi(); disegna(); avvisa(v == null ? "Tolto" : "Salvato");
+  if (dopo) profilo();      // aperto dal profilo: si torna lì
 }
 
 /* ---- sonno: come hai dormito (1-5) e quante volte ti sei svegliato, sul giorno di oggi ---- */
