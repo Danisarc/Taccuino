@@ -556,6 +556,14 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .rep b{font-family:var(--tit);font-size:16px;line-height:1.15}
 .rep small{color:var(--muto);font-size:12px}
 .rep.piano{border-color:rgba(61,220,132,.55);background:var(--verde3)}
+.rep.foto{position:relative;overflow:hidden;min-height:112px;border:0;background-size:cover;background-position:center;background-color:var(--card2)}
+.rep.foto::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 25%,rgba(0,0,0,.82))}
+.rep.foto b,.rep.foto small{position:relative;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.rep.foto small{color:rgba(255,255,255,.82)}
+.rep.foto.piano{box-shadow:inset 0 0 0 2px var(--verde)}
+.g2.dove button{min-height:50px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;font-size:15px}
+.g2.dove .cons{flex-basis:100%;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--verde);margin-top:-4px}
+.g2.dove button.pri .cons{color:#04130a}
 .famT{font-size:12px;margin:18px 4px 8px;color:var(--muto);text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
 </style>
 </head>
@@ -1606,6 +1614,11 @@ function vociSlot(pid, s) {
   return out;
 }
 // in quali reparti sta una voce: il piano, i tuoi prodotti, e la sua famiglia (se non è adatta alla sezione, in "Altro")
+// v45: la foto di ogni reparto (img/rep/<nome>.jpg, da Wikimedia Commons: crediti in fondo alla voce Coach)
+const FOTO_REP = { mio: "mio", altro: "resto", "Carne": "carne", "Pesce": "pesce", "Uova": "uova", "Salumi": "salumi", "Latte, yogurt e formaggi": "latticini",
+  "Proteine in polvere, tofu e seitan": "polveri", "Legumi": "legumi", "Patate": "patate", "Pane, gallette e prodotti da forno": "pane", "Pasta, riso e cereali": "pasta",
+  "Frutta secca e semi": "frutta_secca", "Frutta": "frutta", "Verdura": "verdura", "Olio, olive e condimenti": "olio", "Dolci e creme": "dolci", "Birra e vino": "bevande" };
+const fotoRep = (id, pid) => (id === "piano" ? (FOTO_PASTO.includes(pid) ? "img/pasti/" + pid + ".jpg" : "img/alimentazione.jpg") : FOTO_REP[id] ? "img/rep/" + FOTO_REP[id] + ".jpg" : "");
 const repDi = (v, s) => (v.piano ? ["piano"] : []).concat(v.mio ? ["mio"] : [], [(FAM_SEZ[s] || []).includes(v.fam) ? v.fam : "altro"]);
 // grammi proposti per una voce nella sezione; 0 = troppi o nessuno: li scrivi tu
 function gVoce(v, s, T) {
@@ -1631,7 +1644,7 @@ function scegliSlot(pid, s, rep) {
   const R0 = rep && reps.find((x) => x.id === rep);
   if (!R0) {
     apri(testaFoglio(p.nome + " · " + SEZ[s][2]) + intro + `<input id="cRep" placeholder="Cerca in tutti i reparti…" autocomplete="off" enterkeyhint="search" oninput="cercaRep(this.value)"><div id="rRep"></div>
-      <div class="reparti" id="gRep">` + reps.map((x, n) => `<button class="rep ${x.id === "piano" ? "piano" : ""}" onclick="scegliSlot('${pid}','${s}',${JSON.stringify(x.id).replace(/"/g, "&quot;")})"><b>${x.nome}</b><small>${x.nn.length} ${x.nn.length === 1 ? "scelta" : "scelte"}</small></button>`).join("") + `</div>` + fine, true);
+      <div class="reparti" id="gRep">` + reps.map((x, n) => `<button class="rep foto ${x.id === "piano" ? "piano" : ""}" ${fotoRep(x.id, pid) ? `style="background-image:url(${fotoRep(x.id, pid)})"` : ""} onclick="scegliSlot('${pid}','${s}',${JSON.stringify(x.id).replace(/"/g, "&quot;")})"><b>${x.nome}</b><small>${x.nn.length} ${x.nn.length === 1 ? "scelta" : "scelte"}</small></button>`).join("") + `</div>` + fine, true);
     return;
   }
   const corpo = R0.id === "altro" ? perFamiglia(R0.nn, (n) => VS[n].nome, s).map((g) => titFam(g.f) + listaV(g.el)).join("") : listaV(R0.nn);
@@ -1864,6 +1877,7 @@ async function cercaNome(q) {
 function aggiornaG() {
   const p = bozza.per100, m = $("sostMsg");
   ["aK", "aP", "aC", "aF", "aFi"].forEach((id, n) => (p[n] = Math.max(0, num($(id).value) || 0)));
+  sceltaDove();
   if (perPrep) { m.innerHTML = "Scrivi i valori per 100 g dell'etichetta e i grammi che metti nel piatto."; bozza.auto = 0; return; }
   if (dove.s === "v") { m.innerHTML = "Scrivi i valori per 100 g e i grammi che mangi: entra nel conto così com'è."; bozza.auto = 0; return; }
   const i = SEZ[dove.s][1], T = bersaglio();
@@ -1875,18 +1889,31 @@ function aggiornaG() {
   if (g && g <= 700 && !bozza.toccato) $("aG").value = it(g);
   bozza.auto = g;
 }
+/* v45: un alimento nuovo si mette nella sezione che scegli (proteine, carboidrati, grassi, verdura); l'app consiglia quella
+   da cui viene la maggior parte delle sue calorie (sezDi) e la scelta resta salvata con l'alimento (S.alimenti[].s) */
+function sceltaDove() {
+  const b = $("aDove"); if (!b || perPrep) return;
+  const p = bozza.per100, cons = p[0] || p[1] || p[2] || p[3] ? sezDi(p) : null;
+  b.innerHTML = ["p", "c", "g", "v"].map((s) => `<button class="${dove.s === s ? "pri" : ""}" onclick="mettiDove('${s}')"><i class="tg tg-${s}"></i>${SEZ[s][0]}${s === cons ? '<small class="cons">consigliato</small>' : ""}</button>`).join("");
+  $("aCons").innerHTML = !cons ? "Scrivi i valori dell'etichetta: ti consiglio io dove metterlo."
+    : `L'app consiglia <b>${SEZ[cons][0].toLowerCase()}</b>: ${cons === "v" ? "ha poche calorie e pochi macro" : "la maggior parte delle sue calorie viene dai " + SEZ[cons][2]}.` + (cons !== dove.s ? " Puoi scegliere un'altra sezione: la giornata si ricalcola lo stesso." : "");
+  const ok = $("aOk"); if (ok) ok.textContent = "Aggiungi a " + nomeDove();
+}
+function mettiDove(s) { dove.s = s; bozza.toccato = 0; vib(); aggiornaG(); }
 function formAlimento(a) {
+  if (a.s && SEZ[a.s] && !perPrep) dove.s = a.s;          // un alimento già salvato torna nella sezione che avevi scelto
   bozza = { codice: a.codice || "", per100: (a.per100 || new Array(10).fill(0)).slice(), toccato: 0, auto: 0 }; while (bozza.per100.length < 10) bozza.per100.push(0);
   const v = bozza.per100, campo = (id, et, val, ph, extra) => `<div><label>${et}</label><input id="${id}" inputmode="decimal" autocomplete="off" value="${val ? esc(it(Math.round(val * 10) / 10)) : ""}" placeholder="${ph || "0"}" ${extra || 'oninput="aggiornaG()"'}></div>`;
   apri(testaFoglio("Un altro alimento") + `<div class="card esito verde" id="sostMsg"></div>` + (a.nostro ? `<p class="muto">Dal nostro archivio.</p>` : a.trovato ? `<p class="muto">Trovato su Open Food Facts: controlla che i valori siano quelli dell'etichetta.</p>` : "") +
-    `<label>Nome</label><input id="aNome" value="${esc(a.nome || "")}" placeholder="Es. Philadelphia light" autocomplete="off">
+    `<label>Nome</label><input id="aNome" value="${esc(a.nome || "")}" placeholder="Es. Philadelphia light" autocomplete="off">` +
+    (perPrep ? "" : `<label>Dove lo metti in ${pastoDi(dove.p).nome.toLowerCase()}</label><div class="g2 dove" id="aDove"></div><p class="muto" id="aCons" style="margin:6px 2px 0"></p>`) + `
     ${campo("aG", "Quanti grammi ne mangi", 0, "100", 'oninput="bozza.toccato=1"')}
     <h2>Valori per 100 g, dall'etichetta</h2>
     <div class="g2">${campo("aK", "Calorie (kcal)", v[0])}${campo("aP", "Proteine (g)", v[1])}${campo("aC", "Carboidrati (g)", v[2])}${campo("aF", "Grassi (g)", v[3])}</div>
     ${campo("aFi", "Fibra (g), se c'è", v[4])}
     <p class="muto">Se conosci solo i valori della porzione intera (una pizza, un piatto al ristorante), scrivi quelli e metti 100 nei grammi.</p>
     <label class="riga" style="gap:10px;color:var(--testo)"><input type="checkbox" id="aSalva" ${a.base ? "" : "checked"} style="width:24px;min-height:24px;flex:none"> Tienilo tra i miei alimenti</label>
-    <button class="pri largo" onclick="confAlimento()">${perPrep ? "Aggiungi al piatto" : "Aggiungi a " + nomeDove()}</button><button class="largo" onclick="aggiungiCibo()">Indietro</button>`, true);
+    <button class="pri largo" id="aOk" onclick="confAlimento()">${perPrep ? "Aggiungi al piatto" : "Aggiungi a " + nomeDove()}</button><button class="largo" onclick="aggiungiCibo()">Indietro</button>`, true);
   aggiornaG();
   if (!bozza.auto && a.porz) $("aG").value = it(a.porz);
 }
@@ -1901,7 +1928,7 @@ function confAlimento() {
   else mettiItem(dove.p, dove.s, { x: { nome, per100: p.slice(), codice: bozza.codice || undefined }, g, man: bozza.auto && Math.abs(g - bozza.auto) > 0.5 ? 1 : undefined });
   if ($("aSalva").checked) {
     S.alimenti = (S.alimenti || []).filter((x) => (bozza.codice ? x.codice !== bozza.codice : x.nome.toLowerCase() !== nome.toLowerCase()));
-    S.alimenti.unshift({ nome, per100: p.slice(), porz: g, codice: bozza.codice, cat: { p: "prot", c: "carbo", g: "altro" }[perPrep ? sezDi(p) : dove.s] || "altro" }); S.alimenti = S.alimenti.slice(0, 40);
+    S.alimenti.unshift({ nome, per100: p.slice(), porz: g, codice: bozza.codice, s: perPrep ? undefined : dove.s, cat: { p: "prot", c: "carbo", g: "altro" }[perPrep ? sezDi(p) : dove.s] || "altro" }); S.alimenti = S.alimenti.slice(0, 40);
   }
   if (perPrep) { salva(); editPrep(); avvisa("Aggiunto al piatto"); return; }
   vib(); salva(); chiudi(); tieni(disegna); avvisa("Aggiunto a " + nomeDove());
@@ -2612,7 +2639,7 @@ function vEsporta() {
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
   <p class="muto" style="margin-top:16px">Scheda v2.1 · alimentazione v3.0 · app <span class="verApp">${verApp}</span></p>
-  <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
+  <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Foto dei reparti: Samsule2, Peachyeung316, Bff, David Adam Kess, Maksym Kozlenko, CC BY-SA 4.0 · DryPot, CC BY-SA 3.0 · Ella Olsson, Karen and Brad Emerson, formulatehealth, CC BY 2.0 · Vyacheslav Argenberg, CC BY 4.0 · kakyusei, FULVIO_TOGNON, Alexschneider250, Baileynorwood, Hans Braxmeier, margenauer, Mx. Granger, CC0 · Jon Sullivan, pubblico dominio. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
 async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Taccuino palestra", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
