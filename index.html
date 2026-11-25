@@ -2563,7 +2563,7 @@ function vEsporta() {
   <p class="muto">Se cambi telefono o cancelli i dati di Chrome lo storico si perde. Ogni tanto scarica una copia.</p>
   <div class="g2"><button onclick="scarica()">Scarica copia</button><button onclick="$('imp').click()">Ripristina</button></div>
   <input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="ripristina(this)">
-  <p class="muto" style="margin-top:16px">Scheda v2.1 · alimentazione v3.0 · app v38</p>
+  <p class="muto" style="margin-top:16px">Scheda v2.1 · alimentazione v3.0 · app <span class="verApp">${verApp}</span></p>
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
@@ -3518,6 +3518,10 @@ window.addEventListener("popstate", () => {
   passoIndietro(); allinea();
 });
 
+// la versione si legge dalla copia installata sul telefono (nome della cache del service worker), non da una scritta fissa
+let verApp = "…";
+if (window.caches) caches.keys().then((k) => { const v = k.map((x) => /^taccuino-v(\d+)$/.exec(x)).filter(Boolean).map((m) => +m[1]).sort((a, b) => b - a)[0];
+  if (v) { verApp = "v" + v; document.querySelectorAll(".verApp").forEach((e) => (e.textContent = verApp)); } }).catch(() => {});
 disegna(); sveglio();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
