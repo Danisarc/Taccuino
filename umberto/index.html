@@ -551,6 +551,7 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
   box-shadow:0 8px 22px rgba(0,0,0,.45); font-size:12.5px; color:var(--muto); white-space:nowrap; opacity:0; transform:translateY(-14px); transition:opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1); cursor:pointer; }
 .striscia.su > div { opacity:1; transform:none; pointer-events:auto; } .striscia b { color:var(--testo); font-variant-numeric:tabular-nums; } .striscia .sk b { font-family:var(--tit, inherit); font-size:16px; color:var(--verde); }
 @media (prefers-reduced-motion:reduce) { .pasto .ptesta, .ban .nome, .frec, .tredot i, .pcorpo, .pcorpo > div, .pasto.aperto .pcorpo > div, .striscia > div { transition:none; } }
+.famT{font-size:12px;margin:18px 4px 8px;color:var(--muto);text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
 </style>
 </head>
 <body>
@@ -1411,6 +1412,37 @@ function sezFissa(f) {
   const v = f[3], q = [v[1] * 4, v[2] * 4, v[3] * 9];
   return q[1] >= q[0] && q[1] >= q[2] ? "c" : q[0] >= q[2] ? "p" : "g";
 }
+/* v42: gli alimenti divisi per famiglia (carne, pesce, uova…) nei fogli dove si sceglie: un riquadro per famiglia.
+   L'ordine dei controlli conta (es. "Cioccolato al latte" è un dolce, "Fesa di tacchino affettata" un salume). */
+const FAMIGLIE = [
+  ["Dolci e creme", /\bcrema\b|cioccolat|\bgelato|miele|marmellat/i],
+  ["Uova", /^(albume|uova|uovo)/i],
+  ["Salumi", /affettat|bresaola|prosciutto|speck|mortadella|salame/i],
+  ["Pesce", /pesce|tonno|salmone|merluzzo|nasello|orata|branzino|spada|gamber|polpo|calamar|seppi|sgombro|alici|sardin|platessa|sogliola|trota|cozze|vongole/i],
+  ["Proteine in polvere, tofu e seitan", /whey|in polvere|tofu|seitan/i],
+  ["Latte, yogurt e formaggi", /latte|yogurt|skyr|ricotta|mozzarella|primo sale|stracchino|crescenza|\bfeta\b|scamorza|provola|parmigiano|grana|burrata|gorgonzola|emmental|asiago|caciotta|pecorino|philadelphia|formagg|trueblend/i],
+  ["Carne", /pollo|tacchino|manzo|vitello|maiale|coniglio|bistecca|hamburger|agnello|salsiccia|macinato/i],
+  ["Legumi", /ceci|lenticchie|\bfagioli\b|piselli|\bfave\b|edamame/i],
+  ["Patate", /^patat/i],
+  ["Pane, gallette e prodotti da forno", /\bpane\b|\bpan\b|pancake|piadina|gallette|fette biscottate|cracker|grissini|taralli|biscott|cornetto|brioche|pizza/i],
+  ["Pasta, riso e cereali", /pasta|riso|cous|farro|orzo|quinoa|saraceno|polenta|mais|gnocchi|tortellini|ravioli|farina|avena|muesli|corn flakes/i],
+  ["Frutta secca e semi", /mandorl|\bnoci\b|nocciol|pistacch|anacard|arachid|^semi/i],
+  ["Frutta", /banana|\bmela\b|\bpera\b|kiwi|arancia|mandarin|agrumi|datter|uvetta|frutti di bosco|fragole|pesca|albicocca|\buva\b|anguria|melone|ananas|ciliegie|cachi|fichi|succo/i],
+  ["Verdura", /verdur|passata|pomodor|insalata|broccol|zucchin|spinaci|bietol|peperon|melanzan|funghi|carot|fagiolini|cavol|cipoll|finocch|cetriol|zucca|verza|asparag|carciof|rucola|grigliat|ortagg|minestrone/i],
+  ["Olio, olive e condimenti", /olio|burro|maionese|pesto|panna|oliv|avocado/i],
+  ["Birra e vino", /birra|vino/i],
+];
+const famiglia = (nome) => { for (const [f, re] of FAMIGLIE) if (re.test(nome)) return f; return "Altro"; };
+// le famiglie più adatte a ogni sezione vengono prima, le altre dopo nell'ordine di FAMIGLIE
+const FAM_SEZ = { p: ["Carne", "Pesce", "Uova", "Latte, yogurt e formaggi", "Salumi", "Proteine in polvere, tofu e seitan", "Legumi"],
+  c: ["Pasta, riso e cereali", "Pane, gallette e prodotti da forno", "Patate", "Legumi", "Frutta", "Dolci e creme"],
+  g: ["Olio, olive e condimenti", "Frutta secca e semi", "Latte, yogurt e formaggi", "Dolci e creme"], v: ["Verdura"] };
+function perFamiglia(el, nomeDi, s) {
+  const ord = [...new Set((FAM_SEZ[s] || []).concat(FAMIGLIE.map((x) => x[0]), ["Altro"]))], gr = {};
+  for (const x of el) { const f = famiglia(nomeDi(x)); (gr[f] = gr[f] || []).push(x); }
+  return ord.filter((f) => gr[f]).map((f) => ({ f, el: gr[f] }));
+}
+const titFam = (t) => `<h3 class="famT">${t}</h3>`;
 function vCibo() {
   const d = dC(), on = modoOn(d), k = on ? 0 : 1, N = CIBO[on ? "on" : "off"], r = recCibo(d), T = totali(d), resta = Math.round(N.kcal - T[0]), R = ricalcolo(d), vecchio = totaliV2(d)[0];
   let h = `<div class="riga testata">${freccia("apriSub(null)")}<div><div class="sopra">${APP.versione}</div><h1 class="tcibo">Alimentazione</h1></div>
@@ -1442,7 +1474,11 @@ function vCibo() {
       const z = sezOggi(r, k, p.id, s), key = p.id + "." + s, vv = slotDi(r, key), base = z.T, fs = fisse.filter((x) => sezF(x) === s);
       const Ts = R.t[key] || 0, a = R.agg[key], i = SEZ[s][1], coperto = !vv.length && base && Ts < base * 0.15;
       const ric = a ? ` <span class="ric">ricalcolato ${a > 0 ? "+" : "−"}${Math.round(Math.abs(a))}</span>` : "", righeF = fs.map((x) => rigaF(p, x.f, selF(x), x.q)).join("");
-      const tit = `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base ? " · " + Math.round(vv.length ? base : Ts) + " g" : s === "v" || fs.length ? "" : " · fuori piano"}${ric}</h3>`;
+      // v42: le voci fisse di una sezione (il latte nelle proteine della colazione) contano nei grammi della sezione
+      const fsTot = s === "v" ? 0 : fs.reduce((n, x) => n + (x.f[3][i] || 0), 0), fsSi = s === "v" ? 0 : fs.filter(selF).reduce((n, x) => n + (x.f[3][i] || 0), 0);
+      const hoG = vv.reduce((n, x) => n + (vecA(x)[i] || 0), 0) + fsSi, nomiF = fs.map((x) => String(x.f[1]).replace(/<[^>]*>/g, "").split(/[ ,]/)[0]).join(" e ");
+      const tit = `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base && fsTot >= 1 ? " · " + Math.round(hoG) + " di " + Math.round((vv.length ? base : Ts) + fsTot) + " g" : base ? " · " + Math.round(vv.length ? base : Ts) + " g" : s === "v" || fs.length ? "" : " · fuori piano"}${ric}</h3>`;
+      const notaF = fsTot >= 1 ? `<br><small class="muto">${nomiF}: ${fsSi >= 1 ? "già " + Math.round(fsSi) + " g contati" : Math.round(fsTot) + " g, da spuntare"}</small>` : "";
       if (base && s !== "v") { nSez++; if (vv.length || coperto) nOk++; punti += `<i class="${vv.length || coperto ? "on" : ""}"></i>`; }
       if (vv.length) {
         corpo += tit + `<ul>` + vv.map((x, n) => { const v = vecA(x), o = optA(x); kc += v[0];
@@ -1450,7 +1486,7 @@ function vCibo() {
             <input class="qta" inputmode="decimal" aria-label="Quantità di ${esc(nomeA(x))}" value="${it(Math.round((o ? x.g / o.pz : x.g) * 10) / 10)}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="qtaSlot('${p.id}','${s}',${n},this.value)"><em>${o ? "pz" : "g"}</em></li>`; }).join("") +
           righeF + `</ul><button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Cambia o aggiungi</button>`;
       } else if (coperto) corpo += tit + `<p class="muto" style="margin:4px 0 0">Già coperti dalle altre scelte di oggi: qui non serve aggiungere niente.</p>` + (righeF ? `<ul>${righeF}</ul>` : "") + `<button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Aggiungi lo stesso</button>`;
-      else if (base) corpo += `<button class="slot snello" onclick="scegliSlot('${p.id}','${s}')"><i class="tg tg-${s}"></i><span><b>Scegli ${SEZ[s][3]}</b>${ric}</span><small>${Math.round(Ts)} g</small><em>›</em></button>` + (righeF ? `<ul class="sottoSlot">${righeF}</ul>` : "");
+      else if (base) corpo += `<button class="slot snello" onclick="scegliSlot('${p.id}','${s}')"><i class="tg tg-${s}"></i><span><b>Scegli ${SEZ[s][3]}</b>${ric}${notaF}</span><small>${Math.round(Ts)} g</small><em>›</em></button>` + (righeF ? `<ul class="sottoSlot">${righeF}</ul>` : "");
       else corpo += (righeF ? tit + `<ul>${righeF}</ul>` : "") + `<button class="slot snello fuori" onclick="scegliSlot('${p.id}','${s}')"><i class="tg tg-${s}"></i><span>${s === "v" ? (righeF ? "Altra verdura" : "Aggiungi verdura") : "Aggiungi " + SEZ[s][2]}</span><small>${s === "v" ? "" : "fuori piano"}</small><em>+</em></button>`;
     }
     if (p.id !== "int" && !sp[p.id] && (Object.keys(p.sez).length || (p.sempre || []).length)) corpo += `<button class="largo sposta" onclick="spostaPasto('${p.id}')">Non riesci a mangiarlo? Spostalo a un altro pasto</button>`;
@@ -1481,9 +1517,12 @@ function scegliSlot(pid, s) {
   const p = pastoDi(pid), r = recCibo(dC()), z = Object.assign({}, p.sez[s] || {}, sezOggi(r, modoOn(dC()) ? 0 : 1, pid, s)), vv = slotDi(r, pid + "." + s), parz = vv.some((y) => y.man), i = SEZ[s][1];
   const T = bersaglioSlot(pid, s), Tv = T || z.T || PREP_T[s] || 10, fuori = !z.T && s !== "v";
   apri(testaFoglio(p.nome + " · " + SEZ[s][2]) + `<p class="muto" style="margin:2px 0 4px">${parz ? "Hai corretto le quantità a mano: quello che scegli si aggiunge, per i <b>" + Math.round(T) + " g di " + SEZ[s][2] + "</b> che mancano." : s === "v" ? "Verdura libera: tocca quella che mangi e correggi i grammi." : (fuori ? "Di solito qui non ci sono " + SEZ[s][2] + ": quello che aggiungi entra nel conto e l'app lo toglie dal resto della giornata. " : "") + "Obiettivo: <b>" + Math.round(Tv) + " g di " + SEZ[s][2] + "</b>. Tocca quello che mangi: i grammi sono già calcolati, poi li puoi correggere."}${z.nota ? " " + z.nota + "." : ""}</p>
-    <div class="card pasto"><ul>` + z.v.map((id) => { const x = { k: id, g: 0 }; x.g = s === "v" ? ALIM[id][1] : grammi(a100(x), i, Tv, optA(x)); const sel = vv.some((y) => y.k === id);
-      return `<li class="sp ${sel ? "on" : ""}" onclick="mettiSlot('${pid}','${s}','${id}')"><i class="chk tondo1"></i><span>${esc(ALIM[id][0])}<br><small class="muto">${macroA(vecA(x))}</small></span><b>${qtaA(x)}</b></li>`; }).join("") +
-    `</ul></div><button class="largo piuCibo" onclick="aggiungiCibo('${pid}','${s}')">+ Un altro alimento: codice a barre, elenco o a mano</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+` + ((riga) => { const delP = [...new Set([pid].concat(presoDa(r, pid)).flatMap((q) => ((pastoDi(q).sez[s] || {}).v || [])))].filter((id) => z.v.includes(id)), altri = z.v.filter((id) => !delP.includes(id));
+      return (delP.length ? titFam("Nel tuo piano") + `<div class="card pasto"><ul>${delP.map(riga).join("")}</ul></div>` : "") +
+        perFamiglia(altri, (id) => ALIM[id][0], s).map((g) => titFam(g.f) + `<div class="card pasto"><ul>${g.el.map(riga).join("")}</ul></div>`).join(""); })((id) => {
+      const x = { k: id, g: 0 }; x.g = s === "v" ? ALIM[id][1] : grammi(a100(x), i, Tv, optA(x)); const sel = vv.some((y) => y.k === id);
+      return `<li class="sp ${sel ? "on" : ""}" onclick="mettiSlot('${pid}','${s}','${id}')"><i class="chk tondo1"></i><span>${esc(ALIM[id][0])}<br><small class="muto">${macroA(vecA(x))}</small></span><b>${qtaA(x)}</b></li>`; }) +
+    `<button class="largo piuCibo" onclick="aggiungiCibo('${pid}','${s}')">+ Un altro alimento: codice a barre, elenco o a mano</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
 
 /* ---- MEAL PREP: il ricettario. S.prep = [{ id, nome, ing: [{ k: id di ALIM | x: { nome, per100 }, g: grammi }] }].
@@ -1502,6 +1541,7 @@ function catalogoCibi() {
   const out = [];
   for (const a of S.alimenti || []) out.push({ nome: a.nome, it: { x: { nome: a.nome, per100: a.per100 } }, g: a.porz || 100 });
   for (const k in ALIM) out.push({ nome: cortoA(ALIM[k][0]), it: { k }, g: ALIM[k][1] });
+  for (const p of prodVisibili()) if (!(S.alimenti || []).some((a) => a.codice === p[0])) out.push({ nome: p[1], it: { x: { nome: p[1], per100: p[2].concat([0, 0, 0, 0, 0]) } }, g: p[3] || 100 });
   for (const { b } of baseVisibili()) out.push({ nome: b[0], it: { x: { nome: b[0], per100: b[2].concat([0, 0, 0, 0, 0]) } }, g: b[3] });
   return out;
 }
@@ -1571,8 +1611,9 @@ function scegliIng(c) {
 // senza ricerca: gli alimenti di quella categoria. Con la ricerca: tutto quello che corrisponde, prima quelli della categoria
 function listaPrep(q) {
   const cerca = String(q || "").trim().length >= 2, della = (c) => sezDi(a100(c.it)) === catPrep;
-  RIS = cerca ? cercaCibi(q).sort((a, b) => della(b) - della(a)).slice(0, 30) : catalogoCibi().filter(della);
-  $("prLista").innerHTML = RIS.map((c, i) => `<li class="sp" onclick="piuIng(${i})"><span>${esc(c.nome)}</span><b>${Math.round(a100(c.it)[0])} kcal / 100 g</b></li>`).join("") || `<li class="muto" style="padding:10px 0">Non c'è: tocca "Non lo trovo" qui sotto.</li>`;
+  const gr = cerca ? [{ f: "", el: cercaCibi(q).sort((a, b) => della(b) - della(a)).slice(0, 30) }] : perFamiglia(catalogoCibi().filter(della), (c) => c.nome, catPrep);
+  RIS = gr.flatMap((g) => g.el); let n = 0;
+  $("prLista").innerHTML = gr.map((g) => (g.f ? `<li style="padding:12px 0 4px"><b class="sopra">${g.f}</b></li>` : "") + g.el.map((c) => `<li class="sp" onclick="piuIng(${n++})"><span>${esc(c.nome)}</span><b>${Math.round(a100(c.it)[0])} kcal / 100 g</b></li>`).join("")).join("") || `<li class="muto" style="padding:10px 0">Non c'è: tocca "Non lo trovo" qui sotto.</li>`;
 }
 function piuIng(i) { const c = RIS[i]; if (!c) return; DP.ing.push(Object.assign({ g: c.g, s: catPrep }, c.it)); editPrep(); }
 function altroPrep() {
@@ -1627,16 +1668,16 @@ const CAT = { carbo: "Carboidrato", prot: "Proteina", legumi: "Legumi", altro: "
 const nomeDove = () => pastoDi(dove.p).nome.toLowerCase() + ", " + SEZ[dove.s][2];
 const bersaglio = () => { const T = manca(dove.p, dove.s); return T || (pastoDi(dove.p).sez[dove.s] || { t: [0] }).t[0] || PREP_T[dove.s] || 0; };
 function listaBase(q) {
-  q = String(q || "").toLowerCase().trim(); let h = "", ult = ""; const i = SEZ[dove.s][1], T = bersaglio();
-  const adatti = { p: ["prot"], c: ["carbo", "legumi"], g: ["altro"], v: [] }[dove.s], ord = (c) => (adatti.includes(c) ? 0 : 1);      // prima gli alimenti adatti alla sezione, con i grammi; gli altri restano in elenco senza
-  const gr = Object.keys(GRUPPI_BASE);
-  for (const { b, i: n } of baseVisibili().sort((x, y) => ord(x.b[1]) - ord(y.b[1]) || gr.indexOf(x.b[1]) - gr.indexOf(y.b[1]))) {
-    if (q && !b[0].toLowerCase().includes(q)) continue;
-    if (b[1] !== ult) { ult = b[1]; h += `<li style="padding:12px 0 4px"><b class="sopra">${GRUPPI_BASE[ult]}</b></li>`; }
-    const g = adatti.includes(b[1]) ? grammi(b[2], i, T) : 0;
-    h += `<li class="sp" onclick="formAlimento(baseCibo(${n}))"><span>${b[0]}</span><b>${g && g <= 700 ? it(g) + " g" : b[2][0] + " kcal / 100 g"}</b></li>`;
-  }
-  return h || `<li class="muto" style="padding:10px 0">Non c'è: tocca "Scrivi i valori a mano" e copia quelli dell'etichetta.</li>`;
+  q = String(q || "").toLowerCase().trim(); const i = SEZ[dove.s][1], T = bersaglio();
+  const adatti = { p: ["prot", "legumi"], c: ["carbo", "legumi"], g: ["altro"], v: [] }[dove.s];       // a destra i grammi per la sezione, solo per gli alimenti adatti
+  // anche i prodotti confezionati del nostro archivio (PRODOTTI), nella loro famiglia
+  const el = baseVisibili().map(({ b, i: n }) => ({ nome: b[0], v: b[2], ok: adatti.includes(b[1]), js: `formAlimento(baseCibo(${n}))` }))
+    .concat(prodVisibili().map((p, n) => ({ nome: p[1], v: p[2], ok: dove.s !== "v" && sezDi(p[2]) === dove.s, js: `formAlimento(Object.assign({ trovato: 1 }, prodNostro(prodVisibili()[${n}])))` })))
+    .filter((x) => !q || x.nome.toLowerCase().includes(q));
+  return perFamiglia(el, (x) => x.nome, dove.s).map((gr) => titFam(gr.f) + `<div class="card pasto"><ul>` + gr.el.map((x) => {
+    const g = x.ok ? grammi(x.v, i, T) : 0;
+    return `<li class="sp" onclick="${x.js}"><span>${esc(x.nome)}</span><b>${g && g <= 700 ? it(g) + " g" : x.v[0] + " kcal / 100 g"}</b></li>`; }).join("") + `</ul></div>`).join("")
+    || `<p class="muto" style="padding:10px 0">Non c'è: tocca "Scrivi i valori a mano" e copia quelli dell'etichetta.</p>`;
 }
 function aggiungiCibo(pid, s) {
   if (pid) { dove = { p: pid, s }; perPrep = false; } else if (perPrep) { editPrep(); return; }
@@ -1649,10 +1690,10 @@ function aggiungiCibo(pid, s) {
     <div class="riga"><input id="cNome" placeholder="patatine, yogurt, la marca…" autocomplete="off" enterkeyhint="search" onkeydown="if(event.key==='Enter')cercaNome(this.value)"><button onclick="cercaNome($('cNome').value)">Cerca</button></div><div id="rNome"></div>
     <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button>` +
     (miei.length ? `<h2>I tuoi alimenti</h2><div class="card pasto"><ul>` + miei.map((a, n) => { const g = grammi(a.per100, SEZ[dove.s][1], bersaglio()); return `<li class="sp" onclick="formAlimento(S.alimenti[${n}])"><span>${esc(a.nome)}</span><b>${g && g <= 700 ? it(g) + " g" : Math.round(a.per100[0]) + " kcal / 100 g"}</b></li>`; }).join("") + `</ul></div>` : "") +
-    `<h2>Senza codice: carne, pesce, legumi, formaggi…</h2>
+    `<h2>Dall'elenco: carne, pesce, verdure, prodotti…</h2>
     <input id="cBase" placeholder="Cerca: ceci, mozzarella, patate…" autocomplete="off" oninput="$('lBase').innerHTML=listaBase(this.value)">
     <p class="muto">A destra i grammi che servono in questa sezione, a crudo.</p>
-    <div class="card pasto"><ul id="lBase">${listaBase("")}</ul></div>
+    <div id="lBase">${listaBase("")}</div>
     <button class="largo" onclick="scegliSlot(dove.p,dove.s)">Indietro</button>`, true);
 }
 async function scansiona() {
@@ -2853,7 +2894,9 @@ const SENZA_GLUTINE = false;
    [codice a barre, "Marca · Nome", per 100 g: [kcal, proteine, carboidrati, grassi, fibra], porzione in g o null, 1 se contiene glutine]
    Si riempie dalle etichette che gli atleti mandano in chat: i valori sono quelli della confezione. La ricerca per codice e per nome
    guarda prima qui (funziona anche senza rete), poi su Open Food Facts. */
-const PRODOTTI = [];
+const PRODOTTI = [
+  ["8003100819161", "Selex · Contorno grigliato surgelato, verdure miste (patate 40%, melanzane, zucchine, peperoni)", [71, 2, 14, 0, 3.4], null, 0],
+];
 const prodVisibili = () => PRODOTTI.filter((p) => !(SENZA_GLUTINE && p[4]));
 const prodNostro = (p) => ({ codice: p[0], nome: p[1], kcal: p[2][0], per100: p[2].concat([0, 0, 0, 0, 0]), porz: p[3] || null, nostro: 1 });
 const BASE = [
