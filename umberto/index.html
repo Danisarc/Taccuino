@@ -551,16 +551,16 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
   box-shadow:0 8px 22px rgba(0,0,0,.45); font-size:12.5px; color:var(--muto); white-space:nowrap; opacity:0; transform:translateY(-14px); transition:opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1); cursor:pointer; }
 .striscia.su > div { opacity:1; transform:none; pointer-events:auto; } .striscia b { color:var(--testo); font-variant-numeric:tabular-nums; } .striscia .sk b { font-family:var(--tit, inherit); font-size:16px; color:var(--verde); }
 @media (prefers-reduced-motion:reduce) { .pasto .ptesta, .ban .nome, .frec, .tredot i, .pcorpo, .pcorpo > div, .pasto.aperto .pcorpo > div, .striscia > div { transition:none; } }
-.reparti{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}
-.rep{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:3px;min-height:88px;padding:12px 14px;border-radius:18px;text-align:left;background:var(--card)}
-.rep b{font-family:var(--tit);font-size:16px;line-height:1.15}
-.rep small{color:var(--muto);font-size:12px}
+.reparti{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}
+.rep{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:1px;min-height:76px;padding:8px 9px;border-radius:14px;text-align:left;background:var(--card)}
+.rep b{font-family:var(--tit);font-size:13px;line-height:1.15;hyphens:auto;overflow-wrap:anywhere}
+.rep small{color:var(--muto);font-size:10.5px}
 .rep.piano{border-color:rgba(61,220,132,.55);background:var(--verde3)}
-.rep.foto{position:relative;overflow:hidden;min-height:112px;border:0;background-size:cover;background-position:center;background-color:var(--card2)}
-.rep.foto::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 25%,rgba(0,0,0,.82))}
-.rep.foto b,.rep.foto small{position:relative;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
-.rep.foto small{color:rgba(255,255,255,.82)}
-.rep.foto.piano{box-shadow:inset 0 0 0 2px var(--verde)}
+.rep.rfoto{position:relative;overflow:hidden;min-height:84px;border:0;background-size:cover;background-position:center;background-color:var(--card2)}
+.rep.rfoto::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 25%,rgba(0,0,0,.82))}
+.rep.rfoto b,.rep.rfoto small{position:relative;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.rep.rfoto small{color:rgba(255,255,255,.82)}
+.rep.rfoto.piano{box-shadow:inset 0 0 0 2px var(--verde)}
 .g2.dove button{min-height:50px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;font-size:15px}
 .g2.dove .cons{flex-basis:100%;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--verde);margin-top:-4px}
 .g2.dove button.pri .cons{color:#04130a}
@@ -820,9 +820,13 @@ if (window.visualViewport) { visualViewport.addEventListener("resize", ancoraPoi
 window.addEventListener("resize", ancoraPoi); window.addEventListener("scroll", ancoraPoi, { passive: true }); window.addEventListener("pageshow", ancoraPoi);
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
 // foglioSu dice se il foglio è aperto: quando si chiude scivola giù per un attimo, ma per l'app è già chiuso
-let foglioSu = false, tChiudi = null;
+let foglioSu = false, tChiudi = null, foglioPadre = null;
 function apri(html, pagina) {
   fermaCamera(); clearTimeout(tChiudi); const f = $("foglio"), w = $("velo"); f.classList.remove("via"); w.classList.remove("via");
+  // v46: il tasto indietro del telefono dentro un foglio fa quello che fa il suo tasto "Indietro" / "‹ Tutti i reparti" / "Annulla"
+  // (l'ultimo che c'è): così torna al passo prima invece di chiudere tutto. Se quel tasto chiude, il foglio si chiude.
+  const m = [...html.matchAll(/onclick="([^"]+)"[^>]*>\s*(?:‹ )?(?:Indietro|Tutti i reparti|Annulla)\s*</g)].pop();
+  foglioPadre = m && m[1].trim() !== "chiudi()" ? m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'") : null;
   f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; w.style.display = "block"; foglioSu = true; allinea();
 }
 function chiudi() {
@@ -1583,7 +1587,7 @@ function scegliSlot(pid, s, rep) {
   const R0 = rep && reps.find((x) => x.id === rep);
   if (!R0) {
     apri(testaFoglio(p.nome + " · " + SEZ[s][2]) + intro + `<input id="cRep" placeholder="Cerca in tutti i reparti…" autocomplete="off" enterkeyhint="search" oninput="cercaRep(this.value)"><div id="rRep"></div>
-      <div class="reparti" id="gRep">` + reps.map((x, n) => `<button class="rep foto ${x.id === "piano" ? "piano" : ""}" ${fotoRep(x.id, pid) ? `style="background-image:url(${fotoRep(x.id, pid)})"` : ""} onclick="scegliSlot('${pid}','${s}',${JSON.stringify(x.id).replace(/"/g, "&quot;")})"><b>${x.nome}</b><small>${x.nn.length} ${x.nn.length === 1 ? "scelta" : "scelte"}</small></button>`).join("") + `</div>` + fine, true);
+      <div class="reparti" id="gRep">` + reps.map((x, n) => `<button class="rep rfoto ${x.id === "piano" ? "piano" : ""}" ${fotoRep(x.id, pid) ? `style="background-image:url(${fotoRep(x.id, pid)})"` : ""} onclick="scegliSlot('${pid}','${s}',${JSON.stringify(x.id).replace(/"/g, "&quot;")})"><b>${x.nome}</b><small>${x.nn.length} ${x.nn.length === 1 ? "scelta" : "scelte"}</small></button>`).join("") + `</div>` + fine, true);
     return;
   }
   const corpo = R0.id === "altro" ? perFamiglia(R0.nn, (n) => VS[n].nome, s).map((g) => titFam(g.f) + listaV(g.el)).join("") : listaV(R0.nn);
@@ -3469,7 +3473,7 @@ async function inviaSett(lun) {
    Si tiene sempre una voce in più nella cronologia: il tasto indietro la consuma, l'app chiude ciò che è aperto
    e la rimette. Solo dalla home, senza nulla di aperto, il tasto esce dall'app. */
 function passoIndietro() {
-  if (foglioSu) { chiudi(); return true; }
+  if (foglioSu) { const p = foglioPadre; foglioPadre = null; if (p) { try { new Function(p)(); } catch (e) { chiudi(); } } else chiudi(); return true; }
   if (tab === "allena" && S.corso && esAperto != null) { chiudiEs(); return true; }
   if (tab === "allena" && S.corso) { indietro(); return true; }
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
