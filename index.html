@@ -551,6 +551,11 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
   box-shadow:0 8px 22px rgba(0,0,0,.45); font-size:12.5px; color:var(--muto); white-space:nowrap; opacity:0; transform:translateY(-14px); transition:opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1); cursor:pointer; }
 .striscia.su > div { opacity:1; transform:none; pointer-events:auto; } .striscia b { color:var(--testo); font-variant-numeric:tabular-nums; } .striscia .sk b { font-family:var(--tit, inherit); font-size:16px; color:var(--verde); }
 @media (prefers-reduced-motion:reduce) { .pasto .ptesta, .ban .nome, .frec, .tredot i, .pcorpo, .pcorpo > div, .pasto.aperto .pcorpo > div, .striscia > div { transition:none; } }
+.reparti{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}
+.rep{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:3px;min-height:88px;padding:12px 14px;border-radius:18px;text-align:left;background:var(--card)}
+.rep b{font-family:var(--tit);font-size:16px;line-height:1.15}
+.rep small{color:var(--muto);font-size:12px}
+.rep.piano{border-color:rgba(61,220,132,.55);background:var(--verde3)}
 .famT{font-size:12px;margin:18px 4px 8px;color:var(--muto);text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
 </style>
 </head>
@@ -1218,7 +1223,7 @@ function vInteg() {
 }
 const MENU = [
   { id: "col", ora: "8:00", nome: "Colazione",
-    sempre: [["latte", "Latte parzialmente scremato o delattosato", "250 ml", [115, 8, 12, 4, 0, 300, 0.1, 28, 375, 2]], ["orzo", "Orzo solubile", "5 g", [18, 0, 4, 0, 0.3, 2, 0.1, 4, 50, 0]]],
+    sempre: [["latte", "Latte parzialmente scremato o delattosato", "250 ml", [115, 8, 12, 4, 0, 300, 0.1, 28, 375, 2], { s: "p", sc: 1 }], ["orzo", "Orzo solubile", "5 g", [18, 0, 4, 0, 0.3, 2, 0.1, 4, 50, 0]]],
     sez: { p: { t: [22, 22], piano: [[22, 1, 0.5], [22, 1, 0.5]], v: ["whey", "skyr", "greco", "fiocchi", "albume"] },
            c: { t: [22, 22], piano: [[5, 22, 2], [5, 22, 2]], v: ["pancake", "bauletto", "fette", "avena", "gallette", "pane"] },
            g: { t: [5, 5], piano: [[1, 3, 5], [1, 3, 5]], v: ["crema", "arachidi", "mandorle", "fondente"] } } },
@@ -1296,6 +1301,15 @@ function sezOggi(r, k, pid, s) {
 const primeDi = (r, k, pid, s) => [pid].concat(presoDa(r, pid)).map((q) => pastoDi(q).sez[s]).filter((z) => z && z.t[k]).map((z) => ({ k: z.v[0], t: z.t[k] }));
 const sonoPrime = (vv, pr) => vv.length === pr.length && vv.every((x, i) => x.k === pr[i].k);
 // le voci fisse che un pasto mostra oggi: le sue più quelle dei pasti spostati qui (q = pasto a cui appartiene la spunta)
+// v44: voci fisse che contano come SCELTA della loro sezione (quinto elemento { sc: 1 }: il latte della colazione).
+// fp = macro [p, c, g] che il piano si aspetta da loro, fa = quelli spuntati oggi, si = almeno una spuntata.
+// Spuntate, riempiono la sezione come un alimento scelto: il resto si aggiunge sopra e il ricalcolo recupera quello che manca.
+function scDi(r, pid, s, on) {
+  const o = { fp: [0, 0, 0], fa: [0, 0, 0], si: false }; if (s === "v") return o;
+  for (const { q, f } of fisseDi(r, pid, on)) { if (!(f[4] && f[4].sc) || ((f[4] && f[4].s) || sezFissa(f)) !== s) continue;
+    const sel = !!(r.f && r.f[q + ":" + f[0]]); [1, 2, 3].forEach((j, n) => { o.fp[n] += f[3][j]; if (sel) o.fa[n] += f[3][j]; }); if (sel) o.si = true; }
+  return o;
+}
 const fisseDi = (r, pid, on) => (spDi(r)[pid] ? [] : [pid].concat(presoDa(r, pid))).flatMap((q) => (pastoDi(q).sempre || []).filter((f) => fissaOn(f, on)).map((f) => ({ q, f })));
 
 function totali(d) {
@@ -1310,10 +1324,12 @@ function ricalcolo(d) {
   for (const p of MENU) {
     dev[p.id] = [0, 0, 0];
     for (const s of ["p", "c", "g", "v"]) {
-      const z = sezOggi(r, k, p.id, s), key = p.id + "." + s, vv = slotDi(r, key), T = z.T, a = [0, 0, 0];
+      const z = sezOggi(r, k, p.id, s), key = p.id + "." + s, vv = slotDi(r, key), T = z.T, a = [0, 0, 0], sc = scDi(r, p.id, s, !k);
       for (const x of vv) { const v = vecA(x); a[0] += v[1]; a[1] += v[2]; a[2] += v[3]; }
-      if (T) { out.t[key] = out.base[key] = T; if (vv.length) z.piano.forEach((n, i) => (dev[p.id][i] += a[i] - n)); else aperti.push({ key, p: p.id, s, T, a: 0 }); }
-      else a.forEach((n, i) => (dev[p.id][i] += n));        // sezione non prevista oggi: quello che c'è dentro è tutto in più
+      sc.fa.forEach((n, i) => (a[i] += n));                 // v44: il latte spuntato è una scelta della sezione
+      if (T) { if (vv.length || sc.si) { out.t[key] = out.base[key] = T + (sc.fp[SEZ[s][1] - 1] || 0); z.piano.forEach((n, i) => (dev[p.id][i] += a[i] - n - sc.fp[i])); }
+               else { out.t[key] = out.base[key] = T; aperti.push({ key, p: p.id, s, T, a: 0 }); } }
+      else a.forEach((n, i) => (dev[p.id][i] += n - (sc.si ? sc.fp[i] : 0)));        // sezione non prevista oggi: quello che c'è dentro è tutto in più
     }
   }
   ["p", "c", "g"].forEach((s, i) => {
@@ -1338,7 +1354,8 @@ function ricalcolo(d) {
 // quanto manca a una sezione: l'obiettivo ricalcolato se è vuota, altrimenti quello che resta dopo ciò che c'è già
 function manca(pid, s, R) {
   const r = recCibo(dC()), key = pid + "." + s, vv = slotDi(r, key), i = SEZ[s][1]; R = R || ricalcolo(dC());
-  const T = R.t[key] || 0; return vv.length ? Math.max(0, T - vv.reduce((n, x) => n + vecA(x)[i], 0)) : T;
+  const T = R.t[key] || 0, sc = scDi(r, pid, s, modoOn(dC()));
+  return vv.length || sc.si ? Math.max(0, T - vv.reduce((n, x) => n + vecA(x)[i], 0) - (sc.fa[i - 1] || 0)) : T;
 }
 // mette un alimento in una sezione: prende il posto di quello che c'era, a meno che le quantità siano state corrette a mano (allora si aggiunge)
 function mettiItem(pid, s, x) {
@@ -1349,7 +1366,8 @@ function mettiItem(pid, s, x) {
 function bersaglioSlot(pid, s) {
   const r = recCibo(dC()), key = pid + "." + s, vv = slotDi(r, key);
   if (!vv.length || vv.some((y) => y.man)) return manca(pid, s);
-  const tmp = r.s[key]; delete r.s[key]; const T = ricalcolo(dC()).t[key] || 0; r.s[key] = tmp; return T;
+  const tmp = r.s[key]; delete r.s[key]; const T = ricalcolo(dC()).t[key] || 0; r.s[key] = tmp;
+  return Math.max(0, T - (scDi(r, pid, s, modoOn(dC())).fa[SEZ[s][1] - 1] || 0));
 }
 function mettiSlot(pid, s, id) {
   const i = SEZ[s][1]; let T = bersaglioSlot(pid, s);
@@ -1385,11 +1403,11 @@ function comePiano(pid, zitto, togli) {
     for (const s of ["p", "c", "g"]) { const z = sezOggi(r, k, pid, s), key = pid + "." + s, vv = slotDi(r, key); if (z.T && sonoPrime(vv, primeDi(r, k, pid, s))) delete r.s[key]; }
     for (const { q, f } of fisseDi(r, pid, true)) delete r.f[q + ":" + f[0]];
   } else {
+    for (const { q, f } of fisseDi(r, pid, on)) r.f[q + ":" + f[0]] = 1;      // prima le voci fisse: il latte spuntato fa già parte delle proteine
     for (const s of ["p", "c", "g"]) { const z = sezOggi(r, k, pid, s); if (!z.T || slotDi(r, pid + "." + s).length) continue;
-      const T = ricalcolo(dC()).t[pid + "." + s] || 0; if (T < z.T * 0.15) continue;
+      const T = (ricalcolo(dC()).t[pid + "." + s] || 0) - (scDi(r, pid, s, on).fa[SEZ[s][1] - 1] || 0); if (T < z.T * 0.15) continue;
       const xx = primeDi(r, k, pid, s).map((q) => { const x = { k: q.k, g: 0 }; x.g = grammi(a100(x), SEZ[s][1], (T * q.t) / z.T, optA(x)); return x; }).filter((x) => x.g);
       if (xx.length) r.s[pid + "." + s] = xx; }
-    for (const { q, f } of fisseDi(r, pid, on)) r.f[q + ":" + f[0]] = 1;
   }
   delete r.cp;
   if (!zitto) { vib(); salva(); tieni(disegna); avvisa(togli ? "Tolto da " + p.nome.toLowerCase() : p.nome + " come da piano"); }
@@ -1533,21 +1551,20 @@ function vCibo() {
     // v40: tutte e quattro le sezioni in ogni pasto; quelle che il piano qui non prevede restano su una riga, da aprire se servono
     else for (const s of ["p", "c", "g", "v"]) {
       const z = sezOggi(r, k, p.id, s), key = p.id + "." + s, vv = slotDi(r, key), base = z.T, fs = fisse.filter((x) => sezF(x) === s);
-      const Ts = R.t[key] || 0, a = R.agg[key], i = SEZ[s][1], coperto = !vv.length && base && Ts < base * 0.15;
+      // v44: il latte spuntato (voce fissa con sc) riempie la sezione come un alimento scelto
+      const sc = scDi(r, p.id, s, on), pieno = vv.length > 0 || sc.si;
+      const Ts = R.t[key] || 0, a = R.agg[key], i = SEZ[s][1], coperto = !pieno && base && Ts < base * 0.15;
       const ric = a ? ` <span class="ric">ricalcolato ${a > 0 ? "+" : "−"}${Math.round(Math.abs(a))}</span>` : "", righeF = fs.map((x) => rigaF(p, x.f, selF(x), x.q)).join("");
-      // v42: le voci fisse di una sezione (il latte nelle proteine della colazione) contano nei grammi della sezione
-      const fsTot = s === "v" ? 0 : fs.reduce((n, x) => n + (x.f[3][i] || 0), 0), fsSi = s === "v" ? 0 : fs.filter(selF).reduce((n, x) => n + (x.f[3][i] || 0), 0);
-      const hoG = vv.reduce((n, x) => n + (vecA(x)[i] || 0), 0) + fsSi, nomiF = fs.map((x) => String(x.f[1]).replace(/<[^>]*>/g, "").split(/[ ,]/)[0]).join(" e ");
-      const tit = `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base && fsTot >= 1 ? " · " + Math.round(hoG) + " di " + Math.round((vv.length ? base : Ts) + fsTot) + " g" : base ? " · " + Math.round(vv.length ? base : Ts) + " g" : s === "v" || fs.length ? "" : " · fuori piano"}${ric}</h3>`;
-      const notaF = fsTot >= 1 ? `<br><small class="muto">${nomiF}: ${fsSi >= 1 ? "già " + Math.round(fsSi) + " g contati" : Math.round(fsTot) + " g, da spuntare"}</small>` : "";
-      if (base && s !== "v") { nSez++; if (vv.length || coperto) nOk++; punti += `<i class="${vv.length || coperto ? "on" : ""}"></i>`; }
-      if (vv.length) {
+      const hoG = vv.reduce((n, x) => n + (vecA(x)[i] || 0), 0) + (sc.fa[i - 1] || 0);
+      const tit = `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base ? " · " + (sc.si ? Math.round(hoG) + " di " : "") + Math.round(Ts) + " g" : s === "v" || fs.length ? "" : " · fuori piano"}${ric}</h3>`;
+      if (base && s !== "v") { nSez++; if (pieno || coperto) nOk++; punti += `<i class="${pieno || coperto ? "on" : ""}"></i>`; }
+      if (pieno) {
         corpo += tit + `<ul>` + vv.map((x, n) => { const v = vecA(x), o = optA(x); kc += v[0];
           return `<li class="sp on" onclick="togliSlot('${p.id}','${s}',${n})"><i class="chk"></i><span>${esc(nomeA(x))}<br><small class="muto">${macroA(v)}</small></span>
             <input class="qta" inputmode="decimal" aria-label="Quantità di ${esc(nomeA(x))}" value="${it(Math.round((o ? x.g / o.pz : x.g) * 10) / 10)}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="qtaSlot('${p.id}','${s}',${n},this.value)"><em>${o ? "pz" : "g"}</em></li>`; }).join("") +
-          righeF + `</ul><button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Cambia o aggiungi</button>`;
+          righeF + `</ul><button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">${vv.length ? "Cambia o aggiungi" : "Aggiungi altro"}</button>`;
       } else if (coperto) corpo += tit + `<p class="muto" style="margin:4px 0 0">Già coperti dalle altre scelte di oggi: qui non serve aggiungere niente.</p>` + (righeF ? `<ul>${righeF}</ul>` : "") + `<button class="largo piuCibo" onclick="scegliSlot('${p.id}','${s}')">Aggiungi lo stesso</button>`;
-      else if (base) corpo += `<button class="slot snello" onclick="scegliSlot('${p.id}','${s}')"><i class="tg tg-${s}"></i><span><b>Scegli ${SEZ[s][3]}</b>${ric}${notaF}</span><small>${Math.round(Ts)} g</small><em>›</em></button>` + (righeF ? `<ul class="sottoSlot">${righeF}</ul>` : "");
+      else if (base) corpo += `<button class="slot snello" onclick="scegliSlot('${p.id}','${s}')"><i class="tg tg-${s}"></i><span><b>Scegli ${SEZ[s][3]}</b>${ric}</span><small>${Math.round(Ts)} g</small><em>›</em></button>` + (righeF ? `<ul class="sottoSlot">${righeF}</ul>` : "");
       else corpo += (righeF ? tit + `<ul>${righeF}</ul>` : "") + `<button class="slot snello fuori" onclick="scegliSlot('${p.id}','${s}')"><i class="tg tg-${s}"></i><span>${s === "v" ? (righeF ? "Altra verdura" : "Aggiungi verdura") : "Aggiungi " + SEZ[s][2]}</span><small>${s === "v" ? "" : "fuori piano"}</small><em>+</em></button>`;
     }
     if (p.id !== "int" && !sp[p.id] && (Object.keys(p.sez).length || (p.sempre || []).length)) corpo += `<button class="largo sposta" onclick="spostaPasto('${p.id}')">Non riesci a mangiarlo? Spostalo a un altro pasto</button>`;
@@ -1573,17 +1590,66 @@ function vCibo() {
   requestAnimationFrame(strisciaCibo);
   return h;
 }
-// foglio con le alternative di una sezione: ogni riga ha già i suoi grammi
-function scegliSlot(pid, s) {
-  const p = pastoDi(pid), r = recCibo(dC()), z = Object.assign({}, p.sez[s] || {}, sezOggi(r, modoOn(dC()) ? 0 : 1, pid, s)), vv = slotDi(r, pid + "." + s), parz = vv.some((y) => y.man), i = SEZ[s][1];
-  const T = bersaglioSlot(pid, s), Tv = T || z.T || PREP_T[s] || 10, fuori = !z.T && s !== "v";
-  apri(testaFoglio(p.nome + " · " + SEZ[s][2]) + `<p class="muto" style="margin:2px 0 4px">${parz ? "Hai corretto le quantità a mano: quello che scegli si aggiunge, per i <b>" + Math.round(T) + " g di " + SEZ[s][2] + "</b> che mancano." : s === "v" ? "Verdura libera: tocca quella che mangi e correggi i grammi." : (fuori ? "Di solito qui non ci sono " + SEZ[s][2] + ": quello che aggiungi entra nel conto e l'app lo toglie dal resto della giornata. " : "") + "Obiettivo: <b>" + Math.round(Tv) + " g di " + SEZ[s][2] + "</b>. Tocca quello che mangi: i grammi sono già calcolati, poi li puoi correggere."}${z.nota ? " " + z.nota + "." : ""}</p>
-` + ((riga) => { const delP = [...new Set([pid].concat(presoDa(r, pid)).flatMap((q) => ((pastoDi(q).sez[s] || {}).v || [])))].filter((id) => z.v.includes(id)), altri = z.v.filter((id) => !delP.includes(id));
-      return (delP.length ? titFam("Nel tuo piano") + `<div class="card pasto"><ul>${delP.map(riga).join("")}</ul></div>` : "") +
-        perFamiglia(altri, (id) => ALIM[id][0], s).map((g) => titFam(g.f) + `<div class="card pasto"><ul>${g.el.map(riga).join("")}</ul></div>`).join(""); })((id) => {
-      const x = { k: id, g: 0 }; x.g = s === "v" ? ALIM[id][1] : grammi(a100(x), i, Tv, optA(x)); const sel = vv.some((y) => y.k === id);
-      return `<li class="sp ${sel ? "on" : ""}" onclick="mettiSlot('${pid}','${s}','${id}')"><i class="chk tondo1"></i><span>${esc(ALIM[id][0])}<br><small class="muto">${macroA(vecA(x))}</small></span><b>${qtaA(x)}</b></li>`; }) +
-    `<button class="largo piuCibo" onclick="aggiungiCibo('${pid}','${s}')">+ Un altro alimento: codice a barre, elenco o a mano</button><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+// v44: il foglio di una sezione si apre sui REPARTI (quadrati: Nel tuo piano, I tuoi prodotti, Carne, Pesce, Uova…);
+// toccandone uno escono le scelte, con i grammi già calcolati. Dentro ci sono gli alimenti del piano (ALIM), quelli salvati
+// con il codice a barre (S.alimenti), il nostro archivio (PRODOTTI) e l'elenco senza codice (BASE).
+let VS = [], TV = 0;
+function vociSlot(pid, s) {
+  const r = recCibo(dC()), z = sezOggi(r, modoOn(dC()) ? 0 : 1, pid, s), out = [], visti = new Set();
+  const delP = new Set([pid].concat(presoDa(r, pid)).flatMap((q) => ((pastoDi(q).sez[s] || {}).v || [])));
+  const metti = (o) => { const c = o.nome.toLowerCase(); if (visti.has(c)) return; visti.add(c); o.fam = famiglia(o.nome); out.push(o); };
+  const x100 = (nome, v, codice) => ({ x: { nome, per100: v.length >= 10 ? v.slice() : v.concat([0, 0, 0, 0, 0]), codice: codice || undefined } });
+  z.v.forEach((id) => metti({ nome: ALIM[id][0], it: { k: id }, piano: delP.has(id) }));
+  (S.alimenti || []).forEach((a) => metti({ nome: a.nome, it: x100(a.nome, a.per100, a.codice), mio: 1, porz: a.porz }));
+  prodVisibili().forEach((p) => metti({ nome: p[1], it: x100(p[1], p[2], p[0]), porz: p[3] }));
+  baseVisibili().forEach(({ b }) => metti({ nome: b[0], it: x100(b[0], b[2]), porz: b[3], base: 1 }));
+  return out;
+}
+// in quali reparti sta una voce: il piano, i tuoi prodotti, e la sua famiglia (se non è adatta alla sezione, in "Altro")
+const repDi = (v, s) => (v.piano ? ["piano"] : []).concat(v.mio ? ["mio"] : [], [(FAM_SEZ[s] || []).includes(v.fam) ? v.fam : "altro"]);
+// grammi proposti per una voce nella sezione; 0 = troppi o nessuno: li scrivi tu
+function gVoce(v, s, T) {
+  if (v.it.k) { const x = { k: v.it.k, g: 0 }; return s === "v" ? ALIM[v.it.k][1] : grammi(a100(x), SEZ[s][1], T, optA(x)); }
+  if (s === "v") return v.porz || 250;
+  const g = grammi(v.it.x.per100, SEZ[s][1], T); return g && g <= 700 ? g : 0;
+}
+function rigaV(n) {
+  const v = VS[n], s = dove.s, g = gVoce(v, s, TV), x = v.it.k ? { k: v.it.k, g } : { x: v.it.x, g };
+  const sel = v.it.k && slotDi(recCibo(dC()), dove.p + "." + s).some((y) => y.k === v.it.k);
+  return `<li class="sp ${sel ? "on" : ""}" onclick="mettiVoce(${n})"><i class="chk tondo1"></i><span>${esc(v.nome)}<br><small class="muto">${g ? macroA(vecA(x)) : Math.round(a100(x)[0]) + " kcal per 100 g"}</small></span><b>${g ? qtaA(x) : "scrivi i g"}</b></li>`;
+}
+const listaV = (nn) => `<div class="card pasto"><ul>${nn.map(rigaV).join("")}</ul></div>`;
+function scegliSlot(pid, s, rep) {
+  dove = { p: pid, s }; perPrep = false;
+  const p = pastoDi(pid), r = recCibo(dC()), z = Object.assign({}, p.sez[s] || {}, sezOggi(r, modoOn(dC()) ? 0 : 1, pid, s)), vv = slotDi(r, pid + "." + s), parz = vv.some((y) => y.man);
+  const T = bersaglioSlot(pid, s), fuori = !z.T && s !== "v"; TV = T || z.T || PREP_T[s] || 10; VS = vociSlot(pid, s);
+  const adatte = FAM_SEZ[s] || [], nn = VS.map((v, n) => n);
+  const reps = [["piano", "Nel tuo piano"], ["mio", "I tuoi prodotti"]].concat(adatte.map((f) => [f, f]), [["altro", "Tutto il resto"]])
+    .map(([id, nome]) => ({ id, nome, nn: nn.filter((n) => repDi(VS[n], s).includes(id)) })).filter((x) => x.nn.length);
+  const intro = `<p class="muto" style="margin:2px 0 4px">${parz ? "Hai corretto le quantità a mano: quello che scegli si aggiunge, per i <b>" + Math.round(T) + " g di " + SEZ[s][2] + "</b> che mancano." : s === "v" ? "Verdura libera: tocca quella che mangi e correggi i grammi. Quello che porta in più entra nel conto e l'app lo toglie dal resto della giornata." : (fuori ? "Di solito qui non ci sono " + SEZ[s][2] + ": quello che aggiungi entra nel conto e l'app lo toglie dal resto della giornata. " : "") + (T || !z.T ? "Obiettivo: <b>" + Math.round(TV) + " g di " + SEZ[s][2] + "</b>. " : "") + "I grammi sono già calcolati, poi li puoi correggere."}${z.nota ? " " + z.nota + "." : ""}</p>`;
+  const fine = `<button class="largo piuCibo" onclick="aggiungiCibo('${pid}','${s}')">+ Alimento nuovo: codice a barre o a mano</button><button class="largo" onclick="chiudi()">Chiudi</button>`;
+  const R0 = rep && reps.find((x) => x.id === rep);
+  if (!R0) {
+    apri(testaFoglio(p.nome + " · " + SEZ[s][2]) + intro + `<input id="cRep" placeholder="Cerca in tutti i reparti…" autocomplete="off" enterkeyhint="search" oninput="cercaRep(this.value)"><div id="rRep"></div>
+      <div class="reparti" id="gRep">` + reps.map((x, n) => `<button class="rep ${x.id === "piano" ? "piano" : ""}" onclick="scegliSlot('${pid}','${s}',${JSON.stringify(x.id).replace(/"/g, "&quot;")})"><b>${x.nome}</b><small>${x.nn.length} ${x.nn.length === 1 ? "scelta" : "scelte"}</small></button>`).join("") + `</div>` + fine, true);
+    return;
+  }
+  const corpo = R0.id === "altro" ? perFamiglia(R0.nn, (n) => VS[n].nome, s).map((g) => titFam(g.f) + listaV(g.el)).join("") : listaV(R0.nn);
+  apri(testaFoglio(R0.nome) + `<button class="pic" style="margin:2px 0 6px" onclick="scegliSlot('${pid}','${s}')">‹ Tutti i reparti</button>` + intro + corpo +
+    `<button class="largo" onclick="scegliSlot('${pid}','${s}')">‹ Tutti i reparti</button>` + fine, true);
+}
+function cercaRep(q) {
+  q = String(q || "").toLowerCase().trim(); const b = $("rRep"), g = $("gRep"); if (!b || !g) return;
+  g.style.display = q.length >= 2 ? "none" : ""; if (q.length < 2) { b.innerHTML = ""; return; }
+  const nn = VS.map((v, n) => n).filter((n) => VS[n].nome.toLowerCase().includes(q)).slice(0, 40);
+  b.innerHTML = nn.length ? listaV(nn) : `<p class="muto">Non c'è: tocca "Alimento nuovo" qui sotto.</p>`;
+}
+function mettiVoce(n) {
+  const v = VS[n]; if (!v) return; const { p: pid, s } = dove;
+  if (v.it.k) { mettiSlot(pid, s, v.it.k); return; }
+  const g = gVoce(v, s, TV);
+  if (!g) { formAlimento({ nome: v.nome, per100: v.it.x.per100, codice: v.it.x.codice, base: v.base }); return; }
+  mettiItem(pid, s, { x: Object.assign({}, v.it.x), g }); vib(); salva(); chiudi(); tieni(disegna); avvisa("Aggiunto a " + nomeDove());
 }
 
 /* ---- MEAL PREP: il ricettario. S.prep = [{ id, nome, ing: [{ k: id di ALIM | x: { nome, per100 }, g: grammi }] }].
@@ -1728,34 +1794,16 @@ function menuCibo() {
 const CAT = { carbo: "Carboidrato", prot: "Proteina", legumi: "Legumi", altro: "Altro" };
 const nomeDove = () => pastoDi(dove.p).nome.toLowerCase() + ", " + SEZ[dove.s][2];
 const bersaglio = () => { const T = manca(dove.p, dove.s); return T || (pastoDi(dove.p).sez[dove.s] || { t: [0] }).t[0] || PREP_T[dove.s] || 0; };
-function listaBase(q) {
-  q = String(q || "").toLowerCase().trim(); const i = SEZ[dove.s][1], T = bersaglio();
-  const adatti = { p: ["prot", "legumi"], c: ["carbo", "legumi"], g: ["altro"], v: [] }[dove.s];       // a destra i grammi per la sezione, solo per gli alimenti adatti
-  // anche i prodotti confezionati del nostro archivio (PRODOTTI), nella loro famiglia
-  const el = baseVisibili().map(({ b, i: n }) => ({ nome: b[0], v: b[2], ok: adatti.includes(b[1]), js: `formAlimento(baseCibo(${n}))` }))
-    .concat(prodVisibili().map((p, n) => ({ nome: p[1], v: p[2], ok: dove.s !== "v" && sezDi(p[2]) === dove.s, js: `formAlimento(Object.assign({ trovato: 1 }, prodNostro(prodVisibili()[${n}])))` })))
-    .filter((x) => !q || x.nome.toLowerCase().includes(q));
-  return perFamiglia(el, (x) => x.nome, dove.s).map((gr) => titFam(gr.f) + `<div class="card pasto"><ul>` + gr.el.map((x) => {
-    const g = x.ok ? grammi(x.v, i, T) : 0;
-    return `<li class="sp" onclick="${x.js}"><span>${esc(x.nome)}</span><b>${g && g <= 700 ? it(g) + " g" : x.v[0] + " kcal / 100 g"}</b></li>`; }).join("") + `</ul></div>`).join("")
-    || `<p class="muto" style="padding:10px 0">Non c'è: tocca "Scrivi i valori a mano" e copia quelli dell'etichetta.</p>`;
-}
 function aggiungiCibo(pid, s) {
   if (pid) { dove = { p: pid, s }; perPrep = false; } else if (perPrep) { editPrep(); return; }
-  const miei = S.alimenti || [];
-  apri(testaFoglio("Un altro alimento") + `<p class="muto">Entra in <b>${nomeDove()}</b>. ${dove.s === "v" ? "Scrivi tu i grammi che mangi." : `L'app calcola i grammi che servono per i ${Math.round(bersaglio())} g di ${SEZ[dove.s][2]} di questa sezione.`}</p>
+  apri(testaFoglio("Alimento nuovo") + `<p class="muto">Entra in <b>${nomeDove()}</b>. ${dove.s === "v" ? "Scrivi tu i grammi che mangi." : `L'app calcola i grammi che servono per i ${Math.round(bersaglio())} g di ${SEZ[dove.s][2]} di questa sezione.`} Lo trovi poi sempre nel reparto «I tuoi prodotti».</p>
     <button class="pri largo" onclick="scansiona()">Scansiona il codice a barre</button>
     <label>Oppure scrivi il numero sotto il codice a barre</label>
     <div class="riga"><input id="cCod" inputmode="numeric" placeholder="8001234567890" autocomplete="off"><button onclick="cercaCodice($('cCod').value)">Cerca</button></div>
     <label>Oppure cerca per nome e marca</label>
     <div class="riga"><input id="cNome" placeholder="patatine, yogurt, la marca…" autocomplete="off" enterkeyhint="search" onkeydown="if(event.key==='Enter')cercaNome(this.value)"><button onclick="cercaNome($('cNome').value)">Cerca</button></div><div id="rNome"></div>
-    <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button>` +
-    (miei.length ? `<h2>I tuoi alimenti</h2><div class="card pasto"><ul>` + miei.map((a, n) => { const g = grammi(a.per100, SEZ[dove.s][1], bersaglio()); return `<li class="sp" onclick="formAlimento(S.alimenti[${n}])"><span>${esc(a.nome)}</span><b>${g && g <= 700 ? it(g) + " g" : Math.round(a.per100[0]) + " kcal / 100 g"}</b></li>`; }).join("") + `</ul></div>` : "") +
-    `<h2>Dall'elenco: carne, pesce, verdure, prodotti…</h2>
-    <input id="cBase" placeholder="Cerca: ceci, mozzarella, patate…" autocomplete="off" oninput="$('lBase').innerHTML=listaBase(this.value)">
-    <p class="muto">A destra i grammi che servono in questa sezione, a crudo.</p>
-    <div id="lBase">${listaBase("")}</div>
-    <button class="largo" onclick="scegliSlot(dove.p,dove.s)">Indietro</button>`, true);
+    <button class="largo" onclick="formAlimento({})">Scrivi i valori a mano</button>
+    <button class="largo" onclick="scegliSlot(dove.p,dove.s)">‹ Tutti i reparti</button>`, true);
 }
 async function scansiona() {
   if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { avvisa("Questo browser non legge i codici: scrivi il numero"); return; }
