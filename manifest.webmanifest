@@ -1,6 +1,6 @@
 {
-  "name": "Taccuino palestra",
-  "short_name": "Taccuino",
+  "name": "Arise",
+  "short_name": "Arise",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

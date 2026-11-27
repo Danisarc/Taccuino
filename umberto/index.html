@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Taccuino palestra</title>
+<title>Arise</title>
 <style>
 :root { --bg:#070b09; --solido:#111815; --card:rgba(255,255,255,.055); --card2:rgba(255,255,255,.09); --linea:rgba(255,255,255,.10);
         --testo:#f2f6f3; --muto:#93a39a; --verde:#3ddc84; --verde2:#1f8f55; --verde3:rgba(61,220,132,.15);
@@ -747,11 +747,22 @@ svg.corpo .an { stroke:#FF6B6B; stroke-width:3.2; } svg.corpo .np { fill:#FF6B6B
   radial-gradient(70% 50% at 95% 95%, rgba(217,180,255,.6), transparent 70%), linear-gradient(160deg,#0B1F4D,#1d3a86 50%,#5a5bb0); }
 /* v62: logo di avvio a linee (manubrio con il battito, come l'icona): più grande perché è sottile */
 #avvio svg { width:180px; height:180px; }
+/* v63: nome Arise. Avvio: manubrio con il battito dentro una bolla lucida (come nel riferimento di Daniele), nome sotto; sfondo luminoso della palette */
+#avvio { gap:26px; background:radial-gradient(60% 45% at 85% 10%, rgba(142,197,255,.75), transparent 70%), radial-gradient(60% 45% at 5% 96%, rgba(255,224,178,.75), transparent 70%),
+  radial-gradient(70% 55% at 96% 96%, rgba(217,180,255,.85), transparent 70%), linear-gradient(150deg,#0B1F4D 5%,#2c56b8 45%,#8f8ef0 80%,#c9a7ff); }
+#avvio .bollaA { position:relative; width:190px; height:190px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 26px 60px rgba(50,30,150,.45), 0 0 0 1px rgba(255,255,255,.35) inset; animation:avvioLogo .5s cubic-bezier(.2,1.3,.4,1); }
+#avvio .bollaA::before { content:""; position:absolute; inset:-12%; filter:blur(14px); background:radial-gradient(circle at 24% 28%, #3f7ff0 0 18%, transparent 46%),
+  radial-gradient(circle at 70% 20%, #ffffff 0 10%, transparent 38%), radial-gradient(circle at 80% 48%, #f7a9ff 0 10%, transparent 42%),
+  radial-gradient(circle at 30% 80%, #ffcfa6 0 12%, transparent 42%), radial-gradient(circle at 74% 78%, #7351ee 0 12%, transparent 44%), #a690f4; }
+#avvio .bollaA::after { content:""; position:absolute; inset:0; border-radius:50%; box-shadow:inset 0 0 22px rgba(255,255,255,.55), inset -14px -18px 40px rgba(80,40,190,.35); }
+#avvio .bollaA svg { position:relative; z-index:1; width:134px; height:66px; animation:none; }
+#avvio b { font-size:42px; letter-spacing:-.5px; color:#fff; text-shadow:0 2px 12px rgba(40,20,120,.4); }
 </style>
 </head>
 <body>
-<div id="avvio" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="avT" gradientUnits="userSpaceOnUse" x1="60" y1="100" x2="452" y2="420"><stop offset="0" stop-color="#F2F8FF"/><stop offset=".5" stop-color="#8EC5FF"/><stop offset="1" stop-color="#D9B4FF"/></linearGradient><filter id="avG"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-  <g fill="none" stroke="url(#avT)" stroke-linecap="round" stroke-linejoin="round" filter="url(#avG)" stroke-width="19"><path d="M62 230V282"/><rect x="80" y="196" width="30" height="120" rx="13"/><path d="M110 256H178L202 212L230 306L256 226L276 270L290 256H402"/><rect x="402" y="196" width="30" height="120" rx="13"/><path d="M450 230V282"/></g></svg><b>Taccuino</b></div>
+<div id="avvio" aria-hidden="true"><div class="bollaA"><svg viewBox="40 150 432 212"><defs><linearGradient id="avT" gradientUnits="userSpaceOnUse" x1="60" y1="100" x2="452" y2="420"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#F3EBFF"/></linearGradient><filter id="avG"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g fill="none" stroke="url(#avT)" stroke-linecap="round" stroke-linejoin="round" filter="url(#avG)" stroke-width="20"><path d="M62 230V282"/><rect x="80" y="196" width="30" height="120" rx="13"/><path d="M110 256H178L202 212L230 306L256 226L276 270L290 256H402"/><rect x="402" y="196" width="30" height="120" rx="13"/><path d="M450 230V282"/></g></svg></div><b>Arise</b></div>
 <div id="vista"></div>
 
 <div id="pan"><div class="dentro">
@@ -2826,7 +2837,7 @@ function vEsporta() {
   <p class="muto">Foto della home: Shixart1985, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · da Wikimedia Commons. Foto dei pasti: Douglas Perkins, CC BY 4.0 · T.Tseng, CC BY 2.0 · HaJunkiyada, CC BY-SA 4.0 · Ella Olsson, CC BY 2.0. Foto dei reparti: Samsule2, Peachyeung316, Bff, David Adam Kess, Maksym Kozlenko, CC BY-SA 4.0 · DryPot, CC BY-SA 3.0 · Ella Olsson, Karen and Brad Emerson, formulatehealth, CC BY 2.0 · Vyacheslav Argenberg, CC BY 4.0 · kakyusei, FULVIO_TOGNON, Alexschneider250, Baileynorwood, Hans Braxmeier, margenauer, Mx. Granger, CC0 · Jon Sullivan, pubblico dominio. Carattere dei titoli: Archivo, licenza OFL.</p>`;
 }
 async function copia() { try { await navigator.clipboard.writeText(testoCoach(daQuando())); avvisa("Copiato: incollalo nella chat"); } catch (e) { avvisa("Non riesco a copiare: seleziona il testo a mano"); } }
-async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Taccuino palestra", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
+async function condividi() { if (navigator.share) { try { await navigator.share({ title: "Arise", text: testoCoach(daQuando()) }); } catch (e) {} } else copia(); }
 function segnaInviato() { S.inviatoFino = oggi(); salva(); periodo = "nuovi"; disegna(); avvisa("Segnato come inviato"); }
 function scarica() {
   const a = document.createElement("a");
