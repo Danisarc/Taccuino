@@ -787,11 +787,16 @@ svg.corpo .an { stroke:#FF6B6B; stroke-width:3.2; } svg.corpo .np { fill:#FF6B6B
 /* v65: bolla senza contorni (niente bordo né alone bianco al bordo, scelta di Daniele): solo i colori, che arrivano fino al bordo */
 #avvio .bollaA { box-shadow:0 26px 60px rgba(50,30,150,.45); }
 #avvio .bollaA::after { display:none; }
+/* v66: la bolla dell'avvio è lo stesso disegno dell'icona e della presentazione (colori pieni e accesi), un SVG senza contorni */
+#avvio .bollaA { overflow:visible; box-shadow:0 26px 60px rgba(50,30,150,.45); }
+#avvio .bollaA::before, #avvio .bollaA::after { display:none; }
+#avvio .bollaA svg { width:190px; height:190px; }
 </style>
 </head>
 <body>
-<div id="avvio" aria-hidden="true"><div class="bollaA"><svg viewBox="40 150 432 212"><defs><linearGradient id="avT" gradientUnits="userSpaceOnUse" x1="60" y1="100" x2="452" y2="420"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#F3EBFF"/></linearGradient><filter id="avG"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-  <g fill="none" stroke="url(#avT)" stroke-linecap="round" stroke-linejoin="round" filter="url(#avG)" stroke-width="20"><path d="M62 230V282"/><rect x="80" y="196" width="30" height="120" rx="13"/><path d="M110 256H178L202 212L230 306L256 226L276 270L290 256H402"/><rect x="402" y="196" width="30" height="120" rx="13"/><path d="M450 230V282"/></g></svg></div><b>Arise</b></div>
+<div id="avvio" aria-hidden="true"><div class="bollaA"><svg viewBox="0 0 420 420"><defs><clipPath id="avC"><circle cx="210" cy="210" r="210"/></clipPath><filter id="avS" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="34"/></filter><filter id="avG" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g clip-path="url(#avC)"><rect width="420" height="420" fill="#A690F4"/><g filter="url(#avS)"><circle cx="80" cy="100" r="150" fill="#3F7FF0"/><circle cx="310" cy="70" r="105" fill="#FFFFFF"/><circle cx="370" cy="210" r="115" fill="#F7A9FF"/><circle cx="100" cy="350" r="130" fill="#FFCFA6"/><circle cx="330" cy="350" r="130" fill="#7351EE"/></g></g>
+  <g transform="translate(210 210) scale(0.6) translate(-256 -256)" fill="none" stroke="#FFFFFF" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" filter="url(#avG)"><path d="M62 230V282"/><rect x="80" y="196" width="30" height="120" rx="13"/><path d="M110 256H178L202 212L230 306L256 226L276 270L290 256H402"/><rect x="402" y="196" width="30" height="120" rx="13"/><path d="M450 230V282"/></g></svg></div><b>Arise</b></div>
 <div id="vista"></div>
 
 <div id="pan"><div class="dentro">
