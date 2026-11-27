@@ -745,11 +745,13 @@ svg.corpo .omb { fill:#7d83c9; }
 svg.corpo .an { stroke:#FF6B6B; stroke-width:3.2; } svg.corpo .np { fill:#FF6B6B; } svg.corpo .fl { stroke:#FF8A8A; }
 #avvio { background:radial-gradient(60% 45% at 85% 10%, rgba(142,197,255,.55), transparent 70%), radial-gradient(60% 45% at 10% 95%, rgba(255,224,178,.45), transparent 70%),
   radial-gradient(70% 50% at 95% 95%, rgba(217,180,255,.6), transparent 70%), linear-gradient(160deg,#0B1F4D,#1d3a86 50%,#5a5bb0); }
+/* v62: logo di avvio a linee (manubrio con il battito, come l'icona): più grande perché è sottile */
+#avvio svg { width:180px; height:180px; }
 </style>
 </head>
 <body>
-<div id="avvio" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="avA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E3F0FF"/><stop offset="1" stop-color="#8EC5FF"/></linearGradient><linearGradient id="avB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0E4FF"/><stop offset="1" stop-color="#B98BF2"/></linearGradient></defs>
-  <g transform="rotate(-32 256 256)"><rect x="150" y="238" width="212" height="36" rx="18" fill="url(#avB)"/><rect x="98" y="214" width="34" height="84" rx="15" fill="url(#avB)"/><rect x="380" y="214" width="34" height="84" rx="15" fill="url(#avB)"/><rect x="124" y="186" width="44" height="140" rx="19" fill="url(#avA)"/><rect x="344" y="186" width="44" height="140" rx="19" fill="url(#avA)"/></g></svg><b>Taccuino</b></div>
+<div id="avvio" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="avT" gradientUnits="userSpaceOnUse" x1="60" y1="100" x2="452" y2="420"><stop offset="0" stop-color="#F2F8FF"/><stop offset=".5" stop-color="#8EC5FF"/><stop offset="1" stop-color="#D9B4FF"/></linearGradient><filter id="avG"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g fill="none" stroke="url(#avT)" stroke-linecap="round" stroke-linejoin="round" filter="url(#avG)" stroke-width="19"><path d="M62 230V282"/><rect x="80" y="196" width="30" height="120" rx="13"/><path d="M110 256H178L202 212L230 306L256 226L276 270L290 256H402"/><rect x="402" y="196" width="30" height="120" rx="13"/><path d="M450 230V282"/></g></svg><b>Taccuino</b></div>
 <div id="vista"></div>
 
 <div id="pan"><div class="dentro">

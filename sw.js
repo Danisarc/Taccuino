@@ -1,6 +1,6 @@
 // Taccuino palestra: funziona anche senza rete. Cambia VERSIONE a ogni aggiornamento dell'app.
 // Cancella solo le proprie copie vecchie (taccuino-v…): le altre app della stessa origine, come rosa/, hanno le loro.
-const VERSIONE = "taccuino-v61";
+const VERSIONE = "taccuino-v62";
 const FILE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "img/allenamento.jpg", "img/alimentazione.jpg", "font/archivo.woff2", "img/pasti/col.jpg", "img/pasti/spu.jpg", "img/pasti/pra.jpg", "img/pasti/mer.jpg", "img/pasti/cen.jpg", "img/pasti/prep.jpg", "img/rep/bevande.jpg", "img/rep/carne.jpg", "img/rep/dolci.jpg", "img/rep/frutta.jpg", "img/rep/frutta_secca.jpg", "img/rep/latticini.jpg", "img/rep/legumi.jpg", "img/rep/mio.jpg", "img/rep/olio.jpg", "img/rep/pane.jpg", "img/rep/pasta.jpg", "img/rep/patate.jpg", "img/rep/pesce.jpg", "img/rep/polveri.jpg", "img/rep/resto.jpg", "img/rep/salumi.jpg", "img/rep/uova.jpg", "img/rep/verdura.jpg",
   "img/trazione-basso.png", "img/trazione-alto.png", "img/foto-alto.jpg", "img/foto-da-dietro.jpg"]
   // foto degli esercizi (img/es): servono anche senza rete, in palestra
