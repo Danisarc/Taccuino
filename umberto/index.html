@@ -2363,14 +2363,17 @@ const tgCibo = (d) => (APP.onoff === false ? CIBO.on : CIBO[modoOn(d) ? "on" : "
 // per ogni voce: true raggiunto, false segnato ma non raggiunto, null non segnato
 function giornoR(d) {
   const sed = S.sedute.filter((s) => s.data === d), t = totali(d), tg = tgCibo(d), x = S.diario[d] || {}, ac = (S.cibo[d] || {}).acqua || 0;
-  return { d, sed, t, tg, x, ac, ob: [sed.length > 0, x.passi != null ? x.passi >= PASSI_MIN : null, t[0] > 0 ? Math.abs(t[0] - tg.kcal) <= tg.kcal * 0.1 : null, ac ? ac >= ACQUA_ML : null] };
+  return { d, sed, t, tg, x, ac, ob: [sed.length > 0, x.passi != null ? x.passi >= PASSI_MIN : null, t[0] > 0 ? Math.abs(t[0] - tg.kcal) <= tg.kcal * 0.1 : null, ac ? ac >= ACQUA_ML : null],
+    pr: [sed.length ? 1 : 0, (x.passi || 0) / PASSI_MIN, t[0] / tg.kcal, ac / ACQUA_ML] };
 }
 const COL_R = ["#C9C2E3", "#8B7CC7", "#5A3B8C", "#7CC6F2"];
 // il giorno come cerchio in 4 spicchi (allenamento in alto a destra, poi in senso orario passi, calorie, acqua): pieno se raggiunto, appena accennato se no
-function spicchiR(ob) {
-  const p = (i) => { const a0 = (-90 + i * 90 + 3) * Math.PI / 180, a1 = (-90 + (i + 1) * 90 - 3) * Math.PI / 180, r = 22, c = 24;
-    return `M${c} ${c} L${(c + r * Math.cos(a0)).toFixed(2)} ${(c + r * Math.sin(a0)).toFixed(2)} A${r} ${r} 0 0 1 ${(c + r * Math.cos(a1)).toFixed(2)} ${(c + r * Math.sin(a1)).toFixed(2)} Z`; };
-  return `<svg viewBox="0 0 48 48" aria-hidden="true">${ob.map((v, i) => `<path d="${p(i)}" fill="${v ? COL_R[i] : "rgba(201,194,227,.07)"}"/>`).join("")}</svg>`;
+// v52: ogni spicchio si riempie man mano (pr = 0…1, in senso orario dentro lo spicchio); pieno quando l'obiettivo è raggiunto
+function spicchiR(pr) {
+  const r = 22, c = 24, pt = (a) => `${(c + r * Math.cos(a * Math.PI / 180)).toFixed(2)} ${(c + r * Math.sin(a * Math.PI / 180)).toFixed(2)}`;
+  const fetta = (a0, a1) => `M${c} ${c} L${pt(a0)} A${r} ${r} 0 0 1 ${pt(a1)} Z`;
+  return `<svg viewBox="0 0 48 48" aria-hidden="true">${pr.map((v, i) => { const a0 = -90 + i * 90 + 3, a1 = a0 + 84, q = Math.max(0, Math.min(1, v || 0));
+    return `<path d="${fetta(a0, a1)}" fill="rgba(201,194,227,.07)"/>` + (q > 0.01 ? `<path d="${fetta(a0, a0 + 84 * q)}" fill="${COL_R[i]}"/>` : ""); }).join("")}</svg>`;
 }
 const pallR = (k) => `<i class="pR ${k}"></i>`;
 function resoconto() {
@@ -2383,7 +2386,7 @@ function resoconto() {
     const R = giornoR(d); nGiorni++;
     R.ob.forEach((v, k) => { if (v != null) seg[k]++; if (v) si[k]++; });
     if (R.x.passi != null) passi.push(R.x.passi);
-    g += `<button class="${d === d0 ? "oggi" : ""}" onclick="giornoRes('${d}')" aria-label="${i} ${MESI_R[m - 1]}">${spicchiR(R.ob)}<b>${i}</b></button>`;
+    g += `<button class="${d === d0 ? "oggi" : ""}" onclick="giornoRes('${d}')" aria-label="${i} ${MESI_R[m - 1]}">${spicchiR(R.pr.map((v, k) => (R.ob[k] ? 1 : v)))}<b>${i}</b></button>`;
   }
   const gg = (n) => n + (n === 1 ? " giorno" : " giorni");
   const recap = [
@@ -2395,7 +2398,7 @@ function resoconto() {
       <b style="font-size:17px">${MESI_R[m - 1]} ${a}</b><button class="ico" aria-label="Mese dopo" onclick="cambiaMeseR(1)" ${mm >= d0.slice(0, 7) ? "disabled" : ""}>›</button></div>
     <div class="legR">${VOCI_R.map((v) => `<span>${pallR(v[0])}${v[1]}</span>`).join("")}</div>
     <div class="calR">${g}</div>
-    <p class="muto" style="font-size:12.5px;margin:10px 0 0">Ogni giorno ha quattro spicchi: si colora quello dell'obiettivo raggiunto. Tocca un giorno per vedere i numeri.</p></div>
+    <p class="muto" style="font-size:12.5px;margin:10px 0 0">Ogni giorno ha quattro spicchi che si riempiono man mano: pieno = obiettivo raggiunto. Tocca un giorno per vedere i numeri.</p></div>
     <h2>Com'è andato ${m === +d0.slice(5, 7) && a === +d0.slice(0, 4) ? "il mese finora" : MESI_R[m - 1]}</h2><div class="card recapR">` +
     recap.map((r, k) => `<div>${pallR(VOCI_R[k][0])}<span><b>${VOCI_R[k][1]}</b><small>${r[1]}</small></span><em>${k && !seg[k] ? "–" : r[0]}</em></div>`).join("") + `</div>`;
 }
