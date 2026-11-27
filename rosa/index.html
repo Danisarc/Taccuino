@@ -1167,7 +1167,7 @@ function vScheda() {
     const sotto = fatte[x] ? "✓ " + nomeGiorno(fatte[x].data).slice(0, 3) : x === pross ? "prossima" : TAB[x][1];
     h += `<button class="${x === k ? "qui" : ""} ${fatte[x] ? "fatta" : ""} ${TAB[x][0].length > 1 ? "parola" : ""}" onclick="vediSeduta('${x}')"><b>${TAB[x][0]}</b><small>${sotto}</small></button>`;
   }
-  h += `</div><div class="card sedEroe"><div class="sedRiga">${foto ? `<i class="sedFoto" style="background-image:url(${foto})"></i>` : ""}<div class="sedTesto">
+  h += `</div><div class="card sedEroe"><div class="sedRiga"><div class="sedTesto">
       <div class="eti">${gia ? "Già fatta " + nomeGiorno(gia.data) : k === pross ? "Prossima consigliata" : pesi ? "Seduta di pesi" : "In più"}</div>
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>${se.es.length === 1 ? "esercizio" : "esercizi"}</div><div><b>${nSerie}</b>serie</div>${pesi ? `<div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div>` : ""}</div></div></div>
