@@ -784,6 +784,9 @@ svg.corpo .an { stroke:#FF6B6B; stroke-width:3.2; } svg.corpo .np { fill:#FF6B6B
 #avvio b { font-size:42px; letter-spacing:-.5px; color:#fff; text-shadow:0 2px 12px rgba(40,20,120,.4); }
 /* v64: l'avvio resta un attimo di più (1 s invece di 0,65) e sfuma più morbido (0,5 s): si vede il passaggio da Arise all'app */
 #avvio { animation:avvioVia .5s ease-in-out 1s forwards; }
+/* v65: bolla senza contorni (niente bordo né alone bianco al bordo, scelta di Daniele): solo i colori, che arrivano fino al bordo */
+#avvio .bollaA { box-shadow:0 26px 60px rgba(50,30,150,.45); }
+#avvio .bollaA::after { display:none; }
 </style>
 </head>
 <body>
