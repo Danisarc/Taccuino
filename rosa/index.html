@@ -782,6 +782,8 @@ svg.corpo .an { stroke:#FF6B6B; stroke-width:3.2; } svg.corpo .np { fill:#FF6B6B
 #avvio .bollaA::after { content:""; position:absolute; inset:0; border-radius:50%; box-shadow:inset 0 0 22px rgba(255,255,255,.55), inset -14px -18px 40px rgba(80,40,190,.35); }
 #avvio .bollaA svg { position:relative; z-index:1; width:134px; height:66px; animation:none; }
 #avvio b { font-size:42px; letter-spacing:-.5px; color:#fff; text-shadow:0 2px 12px rgba(40,20,120,.4); }
+/* v64: l'avvio resta un attimo di più (1 s invece di 0,65) e sfuma più morbido (0,5 s): si vede il passaggio da Arise all'app */
+#avvio { animation:avvioVia .5s ease-in-out 1s forwards; }
 </style>
 </head>
 <body>
