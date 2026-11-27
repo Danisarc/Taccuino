@@ -566,18 +566,24 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .g2.dove button.pri .cons{color:#04130a}
 .famT{font-size:12px;margin:18px 4px 8px;color:var(--muto);text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
 /* v34: Personal (ciclo). Solo verde: ciclo pieno, previsto tratteggiato, finestra fertile in verde chiaro */
+/* Sezione calendario con la palette viola scelta da Daniele (2026-11-27): #0E0B1D #2A1E4D #5A3B8C #8B7CC7 #C9C2E3 #3A3A52. Solo qui. */
+.card.viola { background:linear-gradient(165deg,#2A1E4D 0%,#0E0B1D 70%); border-color:#3A3A52; color:#C9C2E3; }
+.card.viola .ico { background:rgba(201,194,227,.08); border-color:#3A3A52; color:#C9C2E3; }
+.card.viola > .riga b { color:#F3F0FB; }
+.card.viola .muto, .card.viola .gs { color:#8B7CC7; }
 .calCI { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:6px; }
-.calCI .gs { text-align:center; font-size:12px; color:var(--muto); padding:4px 0; }
-.calCI button { aspect-ratio:1; min-height:0; padding:0; border-radius:50%; background:transparent; border:1.5px solid transparent; position:relative; font-size:15px; font-variant-numeric:tabular-nums; }
-.calCI button.fe { background:var(--verde3); }
-.calCI button.ov { box-shadow:0 0 0 2px rgba(61,220,132,.55) inset; }
-.calCI button.pr { border:1.5px dashed var(--verde); background:transparent; }
-.calCI button.f { background:var(--verde); border-color:var(--verde); color:#06210f; font-weight:700; }
-.calCI button.oggi { outline:2px solid var(--testo); outline-offset:1px; font-weight:800; }
-.calCI button.dot::after { content:""; position:absolute; bottom:3px; left:50%; width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:var(--muto); }
-.calCI button.f.dot::after { background:#06210f; }
-.calCI button:disabled { opacity:.6; cursor:default; }
-.legCI { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12.5px; color:var(--muto); }
+.calCI .gs { text-align:center; font-size:12px; padding:4px 0; }
+.calCI button { aspect-ratio:1; min-height:0; padding:0; border-radius:50%; background:transparent; border:1.5px solid transparent; position:relative; font-size:15px; font-variant-numeric:tabular-nums; color:#F3F0FB; }
+.calCI button.fe, .legCI i.lfe { background:rgba(90,59,140,.6); }
+.calCI button.ov, .legCI i.lov { background:#5A3B8C; box-shadow:0 0 0 2px #C9C2E3 inset; }
+.calCI button.pr, .legCI i.lpr { border:1.5px dashed #8B7CC7; background:transparent; }
+.calCI button.f, .legCI i.lf { background:#8B7CC7; border-color:#8B7CC7; color:#0E0B1D; font-weight:700; }
+.calCI button.oggi { outline:2px solid #F3F0FB; outline-offset:1px; font-weight:800; }
+.calCI button.dot::after, .legCI i.ldot { content:""; position:absolute; bottom:3px; left:50%; width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:#C9C2E3; }
+.legCI i.ldot { position:static; margin:0; width:6px; height:6px; }
+.calCI button.f.dot::after { background:#0E0B1D; }
+.calCI button:disabled { opacity:.5; cursor:default; }
+.legCI { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12.5px; color:#C9C2E3; }
 .legCI span { display:flex; align-items:center; gap:6px; }
 .legCI i { width:14px; height:14px; border-radius:50%; display:inline-block; border:1.5px solid transparent; }
 .statoCI { text-align:center; }
@@ -2662,7 +2668,7 @@ function vCiclo() {
     ${selCI ? `<div class="card statoCI selCI"><div class="grande">${nSel} ${nSel === 1 ? "giorno" : "giorni"}</div><p>Tocca nel calendario i giorni del ciclo, dal primo all'ultimo. Se è cominciato il mese scorso, passa al mese prima con ‹.</p>
       <div class="g2" style="margin-top:12px"><button onclick="esciSelCI()">Annulla</button><button class="pri" onclick="salvaSelCI()">Salva</button></div></div>` : `<div class="card statoCI">${st.giorno ? `<div class="sopra">Oggi</div><div class="grande">Giorno ${st.giorno}</div>` : ""}<p>${esc(st.testo)}</p>
       <button class="pri largo" style="margin-top:12px" onclick="entraSelCI()">Registra l'ultimo ciclo</button></div>`}
-    <div class="card"><div class="riga tra"><button class="ico" aria-label="Mese prima" onclick="cambiaMeseCI(-1)">‹</button><b style="font-size:17px">${MESI[m - 1]} ${a}</b>
+    <div class="card viola"><div class="riga tra"><button class="ico" aria-label="Mese prima" onclick="cambiaMeseCI(-1)">‹</button><b style="font-size:17px">${MESI[m - 1]} ${a}</b>
       <button class="ico" aria-label="Mese dopo" onclick="cambiaMeseCI(1)">›</button></div><div class="calCI">` + ["L", "M", "M", "G", "V", "S", "D"].map((x) => `<div class="gs">${x}</div>`).join("") + "<div></div>".repeat(vuoti);
   for (let i = 1; i <= nG; i++) {
     const d = mm + "-" + String(i).padStart(2, "0"), r = CI.g[d] || {}, c = [];
@@ -2670,8 +2676,8 @@ function vCiclo() {
     if (d === d0) c.push("oggi"); if (!selCI && ((r.s && r.s.length) || r.u || r.r || r.n)) c.push("dot");
     h += `<button class="${c.join(" ")}" ${d > d0 ? "disabled" : `onclick="${selCI ? "tocSelCI" : "giornoCI"}('${d}')"`} aria-label="${i} ${MESI[m - 1]}">${i}</button>`;
   }
-  h += `</div><div class="legCI"><span><i style="background:var(--verde)"></i>ciclo</span><span><i style="border:1.5px dashed var(--verde)"></i>previsto</span>
-      <span><i style="background:var(--verde3)"></i>fertile (stima)</span><span><i style="background:var(--verde3);box-shadow:0 0 0 2px rgba(61,220,132,.55) inset"></i>ovulazione (stima)</span><span><i style="background:var(--muto);width:6px;height:6px"></i>hai segnato qualcosa</span></div>
+  h += `</div><div class="legCI"><span><i class="lf"></i>ciclo</span><span><i class="lpr"></i>previsto</span>
+      <span><i class="lfe"></i>fertile (stima)</span><span><i class="lov"></i>ovulazione (stima)</span><span><i class="ldot"></i>hai segnato qualcosa</span></div>
       <p class="muto" style="font-size:12.5px;margin:10px 0 0">I giorni fertili sono una <b>stima indicativa</b> fatta sul calendario: <b>non è un metodo contraccettivo</b>.</p></div>`;
   if (C.irreg) h += `<div class="card consiglioCoach"><b>Cicli di durata diversa</b>Negli ultimi cicli la durata è cambiata di più di una settimana: le previsioni sono meno affidabili.</div>`;
   h += `<h2>I tuoi cicli</h2>`;

@@ -565,21 +565,26 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .g2.dove .cons{flex-basis:100%;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--verde);margin-top:-4px}
 .g2.dove button.pri .cons{color:#04130a}
 .famT{font-size:12px;margin:18px 4px 8px;color:var(--muto);text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
-/* Resoconto del mese (Storico): un colore per voce, solo qui (scelta di Daniele) */
-.pR { display:inline-block; flex:none; width:8px; height:8px; border-radius:50%; }
-.pR.all { background:#3ddc84; } .pR.pas { background:#f5c451; } .pR.cal { background:#ff8a65; } .pR.acq { background:#4fc3f7; }
-.legR { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 10px; margin:12px 0 4px; font-size:13px; color:var(--muto); }
-.legR span { display:flex; align-items:center; gap:6px; } .legR .pR { width:10px; height:10px; }
+/* Sezione calendario con la palette viola scelta da Daniele (2026-11-27): #0E0B1D #2A1E4D #5A3B8C #8B7CC7 #C9C2E3 #3A3A52. Solo qui. */
+.card.viola { background:linear-gradient(165deg,#2A1E4D 0%,#0E0B1D 70%); border-color:#3A3A52; color:#C9C2E3; }
+.card.viola .ico { background:rgba(201,194,227,.08); border-color:#3A3A52; color:#C9C2E3; }
+.card.viola > .riga b { color:#F3F0FB; }
+.card.viola .muto, .card.viola .gs { color:#8B7CC7; }
+/* Resoconto del mese (Storico): ogni giorno è un cerchio in 4 spicchi, uno per obiettivo (palette viola) */
+.pR { display:inline-block; flex:none; width:10px; height:10px; border-radius:50%; }
+.pR.all { background:#C9C2E3; } .pR.pas { background:#8B7CC7; } .pR.cal { background:#5A3B8C; } .pR.acq { background:#3A3A52; box-shadow:0 0 0 1px #5d5d80 inset; }
+.legR { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 10px; margin:12px 0 4px; font-size:13px; color:#C9C2E3; }
+.legR span { display:flex; align-items:center; gap:6px; }
 .calR { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:6px; }
-.calR .gs { text-align:center; font-size:12px; color:var(--muto); padding:4px 0; }
-.calR button { min-height:0; height:50px; padding:6px 0 0; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid transparent; display:flex; flex-direction:column; align-items:center; gap:5px; }
-.calR button b { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; line-height:1; }
-.calR button span { display:flex; gap:3px; } .pR.no { visibility:hidden; } .calR button .pR { width:7px; height:7px; }
-.calR button.oggi { border-color:var(--testo); } .calR button.oggi b { font-weight:800; }
-.calR button.fut { opacity:.3; cursor:default; background:transparent; }
+.calR .gs { text-align:center; font-size:12px; padding:4px 0; }
+.calR button { aspect-ratio:1; min-height:0; padding:0; border-radius:50%; background:transparent; border:0; position:relative; display:flex; align-items:center; justify-content:center; color:#F3F0FB; }
+.calR button svg { position:absolute; inset:0; width:100%; height:100%; }
+.calR button b { position:relative; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; text-shadow:0 1px 3px #0E0B1D; }
+.calR button.oggi::after { content:""; position:absolute; inset:-2px; border-radius:50%; border:2px solid #F3F0FB; }
+.calR button.fut { opacity:.35; cursor:default; }
 .recapR > div { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.07); }
 .recapR > div:first-child { padding-top:0; } .recapR > div:last-child { border-bottom:0; padding-bottom:0; }
-.recapR .pR { width:12px; height:12px; }
+.recapR .pR { width:14px; height:14px; }
 .recapR span { flex:1; min-width:0; } .recapR span b { display:block; font-size:15px; } .recapR small { color:var(--muto); font-size:13px; line-height:1.35; }
 .recapR em { flex:none; font-style:normal; font-family:var(--tit); font-weight:800; font-size:18px; font-variant-numeric:tabular-nums; }
 </style>
@@ -2332,6 +2337,13 @@ function giornoR(d) {
   const sed = S.sedute.filter((s) => s.data === d), t = totali(d), tg = tgCibo(d), x = S.diario[d] || {}, ac = (S.cibo[d] || {}).acqua || 0;
   return { d, sed, t, tg, x, ac, ob: [sed.length > 0, x.passi != null ? x.passi >= PASSI_MIN : null, t[0] > 0 ? Math.abs(t[0] - tg.kcal) <= tg.kcal * 0.1 : null, ac ? ac >= ACQUA_ML : null] };
 }
+const COL_R = ["#C9C2E3", "#8B7CC7", "#5A3B8C", "#3A3A52"];
+// il giorno come cerchio in 4 spicchi (allenamento in alto a destra, poi in senso orario passi, calorie, acqua): pieno se raggiunto, appena accennato se no
+function spicchiR(ob) {
+  const p = (i) => { const a0 = (-90 + i * 90 + 3) * Math.PI / 180, a1 = (-90 + (i + 1) * 90 - 3) * Math.PI / 180, r = 22, c = 24;
+    return `M${c} ${c} L${(c + r * Math.cos(a0)).toFixed(2)} ${(c + r * Math.sin(a0)).toFixed(2)} A${r} ${r} 0 0 1 ${(c + r * Math.cos(a1)).toFixed(2)} ${(c + r * Math.sin(a1)).toFixed(2)} Z`; };
+  return `<svg viewBox="0 0 48 48" aria-hidden="true">${ob.map((v, i) => `<path d="${p(i)}" fill="${v ? COL_R[i] : "rgba(201,194,227,.07)"}"/>`).join("")}</svg>`;
+}
 const pallR = (k) => `<i class="pR ${k}"></i>`;
 function resoconto() {
   const d0 = oggi(), mm = meseR || d0.slice(0, 7), [a, m] = mm.split("-").map(Number), nG = new Date(a, m, 0).getDate(), vuoti = (new Date(a, m - 1, 1).getDay() + 6) % 7;
@@ -2339,11 +2351,11 @@ function resoconto() {
   let g = ["L", "M", "M", "G", "V", "S", "D"].map((x) => `<div class="gs">${x}</div>`).join("") + "<div></div>".repeat(vuoti);
   for (let i = 1; i <= nG; i++) {
     const d = mm + "-" + String(i).padStart(2, "0");
-    if (d > d0) { g += `<button disabled class="fut"><b>${i}</b><span></span></button>`; continue; }
+    if (d > d0) { g += `<button disabled class="fut">${spicchiR([0, 0, 0, 0])}<b>${i}</b></button>`; continue; }
     const R = giornoR(d); nGiorni++;
     R.ob.forEach((v, k) => { if (v != null) seg[k]++; if (v) si[k]++; });
     if (R.x.passi != null) passi.push(R.x.passi);
-    g += `<button class="${d === d0 ? "oggi" : ""}" onclick="giornoRes('${d}')" aria-label="${i} ${MESI_R[m - 1]}"><b>${i}</b><span>${R.ob.map((v, k) => pallR(v ? VOCI_R[k][0] : "no")).join("")}</span></button>`;
+    g += `<button class="${d === d0 ? "oggi" : ""}" onclick="giornoRes('${d}')" aria-label="${i} ${MESI_R[m - 1]}">${spicchiR(R.ob)}<b>${i}</b></button>`;
   }
   const gg = (n) => n + (n === 1 ? " giorno" : " giorni");
   const recap = [
@@ -2351,11 +2363,11 @@ function resoconto() {
     [`${si[1]} su ${seg[1]}`, seg[1] ? `giorni con almeno ${mila(PASSI_MIN)} passi · media ${mila(Math.round(passi.reduce((s, v) => s + v, 0) / passi.length))} al giorno` : "non hai ancora segnato i passi in questo mese"],
     [`${si[2]} su ${seg[2]}`, seg[2] ? `giorni con le calorie in linea con il piano (entro il 10%)` : "non hai ancora segnato l'alimentazione in questo mese"],
     [`${si[3]} su ${seg[3]}`, seg[3] ? `giorni in cui hai bevuto almeno ${litri(ACQUA_ML)} L` : "non hai ancora segnato l'acqua in questo mese"]];
-  return `<h2>Il mese</h2><div class="card"><div class="riga tra"><button class="ico" aria-label="Mese prima" onclick="cambiaMeseR(-1)">‹</button>
+  return `<h2>Il mese</h2><div class="card viola"><div class="riga tra"><button class="ico" aria-label="Mese prima" onclick="cambiaMeseR(-1)">‹</button>
       <b style="font-size:17px">${MESI_R[m - 1]} ${a}</b><button class="ico" aria-label="Mese dopo" onclick="cambiaMeseR(1)" ${mm >= d0.slice(0, 7) ? "disabled" : ""}>›</button></div>
     <div class="legR">${VOCI_R.map((v) => `<span>${pallR(v[0])}${v[1]}</span>`).join("")}</div>
     <div class="calR">${g}</div>
-    <p class="muto" style="font-size:12.5px;margin:10px 0 0">Un pallino per ogni obiettivo raggiunto quel giorno. Tocca un giorno per vedere i numeri.</p></div>
+    <p class="muto" style="font-size:12.5px;margin:10px 0 0">Ogni giorno ha quattro spicchi: si colora quello dell'obiettivo raggiunto. Tocca un giorno per vedere i numeri.</p></div>
     <h2>Com'è andato ${m === +d0.slice(5, 7) && a === +d0.slice(0, 4) ? "il mese finora" : MESI_R[m - 1]}</h2><div class="card recapR">` +
     recap.map((r, k) => `<div>${pallR(VOCI_R[k][0])}<span><b>${VOCI_R[k][1]}</b><small>${r[1]}</small></span><em>${k && !seg[k] ? "–" : r[0]}</em></div>`).join("") + `</div>`;
 }
