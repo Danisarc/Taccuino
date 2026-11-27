@@ -1527,7 +1527,7 @@ function vCibo() {
       // v44: il latte spuntato (voce fissa con sc) riempie la sezione come un alimento scelto
       const sc = scDi(r, p.id, s, on), pieno = vv.length > 0 || sc.si;
       const Ts = R.t[key] || 0, a = R.agg[key], i = SEZ[s][1], coperto = !pieno && base && Ts < base * 0.15;
-      const ric = a ? ` <span class="ric">ricalcolato ${a > 0 ? "+" : "−"}${Math.round(Math.abs(a))}</span>` : "", righeF = fs.map((x) => rigaF(p, x.f, selF(x), x.q)).join("");
+      const ric = a ? ` <span class="ric">ricalcolato ${a > 0 ? "+" : "−"}${Math.round(Math.abs(a))}</span>` : "", righeF = fs.filter(selF).map((x) => rigaF(p, x.f, true, x.q)).join("");      // v51: solo quelle messe, le altre si aggiungono da "Nel tuo piano" o con Come da piano
       const hoG = vv.reduce((n, x) => n + (vecA(x)[i] || 0), 0) + (sc.fa[i - 1] || 0);
       const tit = `<h3><i class="tg tg-${s}"></i>${SEZ[s][0]}${base ? " · " + (sc.si ? Math.round(hoG) + " di " : "") + Math.round(Ts) + " g" : s === "v" || fs.length ? "" : " · fuori piano"}${ric}</h3>`;
       if (base && s !== "v") { nSez++; if (pieno || coperto) nOk++; punti += `<i class="${pieno || coperto ? "on" : ""}"></i>`; }
@@ -1571,6 +1571,7 @@ function vociSlot(pid, s) {
   const r = recCibo(dC()), z = sezOggi(r, modoOn(dC()) ? 0 : 1, pid, s), out = [], visti = new Set();
   const delP = new Set([pid].concat(presoDa(r, pid)).flatMap((q) => ((pastoDi(q).sez[s] || {}).v || [])));
   const metti = (o) => { const c = o.nome.toLowerCase(); if (visti.has(c)) return; visti.add(c); o.fam = famiglia(o.nome); out.push(o); };
+  fisseDi(r, pid, modoOn(dC())).filter(({ f }) => ((f[4] && f[4].s) || sezFissa(f)) === s).forEach(({ q, f }) => metti({ nome: f[1].replace(/<[^>]+>/g, " ").trim(), fissa: q + ":" + f[0], f, piano: true }));
   const x100 = (nome, v, codice) => ({ x: { nome, per100: v.length >= 10 ? v.slice() : v.concat([0, 0, 0, 0, 0]), codice: codice || undefined } });
   z.v.forEach((id) => metti({ nome: ALIM[id][0], it: { k: id }, piano: delP.has(id) }));
   (S.alimenti || []).forEach((a) => metti({ nome: a.nome, it: x100(a.nome, a.per100, a.codice), mio: 1, porz: a.porz }));
@@ -1592,6 +1593,8 @@ function gVoce(v, s, T) {
   const g = grammi(v.it.x.per100, SEZ[s][1], T); return g && g <= 700 ? g : 0;
 }
 function rigaV(n) {
+  if (VS[n] && VS[n].fissa) { const v = VS[n], r = recCibo(dC()), sel = !!(r.f && r.f[v.fissa]);
+    return `<li class="sp ${sel ? "on" : ""}" onclick="mettiVoce(${n})"><i class="chk tondo1"></i><span>${esc(v.nome)}<br><small class="muto">${macroA(v.f[3])}</small></span><b>${esc(v.f[2])}</b></li>`; }
   const v = VS[n], s = dove.s, g = gVoce(v, s, TV), x = v.it.k ? { k: v.it.k, g } : { x: v.it.x, g };
   const sel = v.it.k && slotDi(recCibo(dC()), dove.p + "." + s).some((y) => y.k === v.it.k);
   return `<li class="sp ${sel ? "on" : ""}" onclick="mettiVoce(${n})"><i class="chk tondo1"></i><span>${esc(v.nome)}<br><small class="muto">${g ? macroA(vecA(x)) : Math.round(a100(x)[0]) + " kcal per 100 g"}</small></span><b>${g ? qtaA(x) : "scrivi i g"}</b></li>`;
@@ -1624,6 +1627,8 @@ function cercaRep(q) {
 }
 function mettiVoce(n) {
   const v = VS[n]; if (!v) return; const { p: pid, s } = dove;
+  if (v.fissa) { const r = recCibo(dC(), true); r.f = r.f || {}; const via = !!r.f[v.fissa]; if (via) delete r.f[v.fissa]; else r.f[v.fissa] = 1;
+    vib(); salva(); chiudi(); tieni(disegna); avvisa((via ? "Tolto da " : "Aggiunto a ") + nomeDove()); return; }
   if (v.it.k) { mettiSlot(pid, s, v.it.k); return; }
   const g = gVoce(v, s, TV);
   if (!g) { formAlimento({ nome: v.nome, per100: v.it.x.per100, codice: v.it.x.codice, base: v.base }); return; }
@@ -1759,11 +1764,34 @@ function inserisciPrep(pid, ing) {
 function dopoInserito(pid) { prepPasto = null; sub = "cibo"; pastoAperto = pid; disegna(); const c = $("pasto-" + pid); if (c) c.scrollIntoView({ block: "start" }); window.scrollBy(0, -12); avvisa("Inserito a " + pastoDi(pid).nome.toLowerCase() + ": giornata aggiornata"); }
 function inserisciU() { const pid = U.pasto; inserisciPrep(pid, U.ing); U = null; chiudi(); dopoInserito(pid); }
 function togliPrep(n) { if (!confirm("Elimino questo piatto dal ricettario?")) return; piatti().splice(n, 1); salva(); chiudi(); disegna(); }
+/* v51: "La tua dieta" (tre linee dell'Alimentazione): il piano com'è, da guardare e basta. Per ogni pasto le voci fisse e, sezione per sezione,
+   la prima scelta con i grammi calcolati dall'app (gli stessi di "Come da piano") e le alternative. Non cambia niente nella giornata. */
+function laDieta() {
+  const due = APP.onoff !== false, gr = (id, s, t) => { const x = { k: id, g: 0 }; x.g = s === "v" ? ALIM[id][1] : grammi(a100(x), SEZ[s][1], t, optA(x)); return x.g ? qtaA(x) : ""; };
+  const tg = (n) => `${n.kcal} kcal · P ${n.p} · C ${n.c} · G ${n.g}`;
+  let h = testaFoglio("La tua dieta") + `<p class="muto" style="margin:2px 0 8px">${esc(APP.versione)}. È il piano da consultare: per segnare quello che mangi usa i pasti, o "Come da piano".</p>
+    <div class="card spi">${due ? `<div><b>Giorno ON</b><span>${tg(CIBO.on)}<br><small class="muto">nei giorni di pesi</small></span></div><div><b>Giorno OFF</b><span>${tg(CIBO.off)}<br><small class="muto">nei giorni di riposo</small></span></div>` : `<div><b>Ogni giorno</b><span>${tg(CIBO.on)}</span></div>`}</div>`;
+  for (const p of MENU) {
+    if (p.id === "int") continue;
+    h += `<h2>${esc(p.nome)}${p.ora ? ` <small class="muto">· ${esc(p.ora)}</small>` : ""}</h2><div class="card pasto"><ul>`;
+    for (const f of p.sempre || []) { const solo = f[4] && f[4].on ? " · solo giorni ON" : ""; h += `<li><span>${f[1]}<br><small class="muto">sempre${solo}</small></span><b>${esc(f[2])}</b></li>`; }
+    for (const s of ["p", "c", "g"]) {
+      const z = p.sez[s]; if (!z || !z.v.length || (!z.t[0] && !(due && z.t[1]))) continue;
+      const on = z.t[0] ? gr(z.v[0], s, z.t[0]) : "", off = due && z.t[1] ? gr(z.v[0], s, z.t[1]) : "";
+      const q = !due || on === off ? on || off : (on ? "ON " + on : "ON niente") + "<br>" + (off ? "OFF " + off : "OFF niente");
+      const alt = z.v.slice(1).map((id) => cortoA(ALIM[id][0]));
+      h += `<li><span>${SEZ[s][0]}: <b style="color:var(--testo)">${esc(cortoA(ALIM[z.v[0]][0]))}</b>${alt.length ? `<br><small class="muto">oppure ${esc(alt.join(", "))}</small>` : ""}${z.nota ? `<br><small class="muto">${esc(z.nota)}</small>` : ""}</span><b style="text-align:right">${q}</b></li>`;
+    }
+    h += `</ul></div>`;
+  }
+  apri(h + `<p class="muto">Le alternative hanno i grammi calcolati quando le scegli nel pasto: coprono la stessa quota di proteine, carboidrati o grassi.</p><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
+}
 // le tre linee in alto a destra nell'Alimentazione: ricettario e lista della spesa
 function menuCibo() {
   const da = listaS().filter((x) => !x.x).length;
   apri(testaFoglio("Alimentazione") + `<button class="blocco" onclick="chiudi();prepPasto=null;apriSub('prep')"><span><b>Meal prep</b><small>Il tuo ricettario: ${piatti().length ? piatti().length + (piatti().length === 1 ? " piatto salvato" : " piatti salvati") : "ancora nessun piatto"}</small></span><em>›</em></button>
     <button class="blocco" onclick="chiudi();apriSub('spesa')"><span><b>Lista della spesa</b><small>${da ? da + " da prendere" : "Vuota: ci aggiungi tu quello che serve"}</small></span><em>›</em></button>
+    <button class="blocco" onclick="laDieta()"><span><b>La tua dieta</b><small>Il piano del coach, pasto per pasto, con le alternative</small></span><em>›</em></button>
     <button class="blocco" onclick="chiudi();apriSub('integ')"><span><b>Integratori</b><small>Cosa prendere, quando, e cosa non serve</small></span><em>›</em></button>`);
 }
 
