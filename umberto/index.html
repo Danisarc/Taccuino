@@ -572,7 +572,7 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .card.viola .muto, .card.viola .gs { color:#8B7CC7; }
 /* Resoconto del mese (Storico): ogni giorno è un cerchio in 4 spicchi, uno per obiettivo (palette viola) */
 .pR { display:inline-block; flex:none; width:10px; height:10px; border-radius:50%; }
-.pR.all { background:#C9C2E3; } .pR.pas { background:#8B7CC7; } .pR.cal { background:#5A3B8C; } .pR.acq { background:#3A3A52; box-shadow:0 0 0 1px #5d5d80 inset; }
+.pR.all { background:#C9C2E3; } .pR.pas { background:#8B7CC7; } .pR.cal { background:#5A3B8C; } .pR.acq { background:#7CC6F2; }
 .legR { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 10px; margin:12px 0 4px; font-size:13px; color:#C9C2E3; }
 .legR span { display:flex; align-items:center; gap:6px; }
 .calR { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:6px; }
@@ -2337,7 +2337,7 @@ function giornoR(d) {
   const sed = S.sedute.filter((s) => s.data === d), t = totali(d), tg = tgCibo(d), x = S.diario[d] || {}, ac = (S.cibo[d] || {}).acqua || 0;
   return { d, sed, t, tg, x, ac, ob: [sed.length > 0, x.passi != null ? x.passi >= PASSI_MIN : null, t[0] > 0 ? Math.abs(t[0] - tg.kcal) <= tg.kcal * 0.1 : null, ac ? ac >= ACQUA_ML : null] };
 }
-const COL_R = ["#C9C2E3", "#8B7CC7", "#5A3B8C", "#3A3A52"];
+const COL_R = ["#C9C2E3", "#8B7CC7", "#5A3B8C", "#7CC6F2"];
 // il giorno come cerchio in 4 spicchi (allenamento in alto a destra, poi in senso orario passi, calorie, acqua): pieno se raggiunto, appena accennato se no
 function spicchiR(ob) {
   const p = (i) => { const a0 = (-90 + i * 90 + 3) * Math.PI / 180, a1 = (-90 + (i + 1) * 90 - 3) * Math.PI / 180, r = 22, c = 24;
