@@ -932,12 +932,19 @@ window.addEventListener("resize", ancoraPoi); window.addEventListener("scroll", 
 function tieni(f) { const y = window.scrollY; f(); window.scrollTo(0, y); }
 // foglioSu dice se il foglio è aperto: quando si chiude scivola giù per un attimo, ma per l'app è già chiuso
 let foglioSu = false, tChiudi = null, foglioPadre = null;
+// v55: ogni passo di un foglio ha la sua voce nella cronologia (foglioLiv), creata durante il tocco: Chrome su Android salta al tasto indietro
+// le voci create senza un tocco, e prima il passo dopo un "Indietro" del telefono finiva sulla pagina sotto. foglioTorna: si sta tornando indietro.
+let foglioLiv = 0, foglioTorna = false;
 function apri(html, pagina) {
   fermaCamera(); clearTimeout(tChiudi); const f = $("foglio"), w = $("velo"); f.classList.remove("via"); w.classList.remove("via");
   // v46: il tasto indietro del telefono dentro un foglio fa quello che fa il suo tasto "Indietro" / "‹ Tutti i reparti" / "Annulla"
   // (l'ultimo che c'è): così torna al passo prima invece di chiudere tutto. Se quel tasto chiude, il foglio si chiude.
   const m = [...html.matchAll(/onclick="([^"]+)"[^>]*>\s*(?:‹ )?(?:Indietro|Tutti i reparti|Annulla)\s*</g)].pop();
-  foglioPadre = m && m[1].trim() !== "chiudi()" ? m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'") : null;
+  const padre = m && m[1].trim() !== "chiudi()" ? m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'") : null;
+  const ev = window.event, bt = ev && ev.target && ev.target.closest ? ev.target.closest("button") : null;
+  const torna = foglioTorna || (!!bt && !!foglioPadre && bt.getAttribute("onclick") === foglioPadre);   // il tasto Indietro del foglio o quello del telefono
+  foglioLiv = !foglioSu || !padre ? 1 : torna ? Math.max(1, foglioLiv - 1) : foglioLiv + 1;
+  foglioPadre = padre;
   f.innerHTML = html; f.classList.toggle("pagina", !!pagina); f.style.display = "block"; f.scrollTop = 0; w.style.display = "block"; foglioSu = true; allinea();
 }
 function chiudi() {
@@ -3884,7 +3891,7 @@ async function inviaSett(lun) {
    Si tiene sempre una voce in più nella cronologia: il tasto indietro la consuma, l'app chiude ciò che è aperto
    e la rimette. Solo dalla home, senza nulla di aperto, il tasto esce dall'app. */
 function passoIndietro() {
-  if (foglioSu) { const p = foglioPadre; foglioPadre = null; if (p) { try { new Function(p)(); } catch (e) { chiudi(); } } else chiudi(); return true; }
+  if (foglioSu) { const p = foglioPadre; foglioPadre = null; if (p) { foglioTorna = true; try { new Function(p)(); } catch (e) { chiudi(); } foglioTorna = false; } else chiudi(); return true; }
   if (tab === "allena" && S.corso && esAperto != null) { chiudiEs(); return true; }
   if (tab === "allena" && S.corso) { indietro(); return true; }
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
@@ -3901,7 +3908,7 @@ function livelli() {
   if (tab !== "allena") n++; else if (S.corso) n += esAperto != null ? 2 : 1; else if (sub) n += sub === "spesa" || sub === "prep" || sub === "integ" ? 2 : 1;
   if (tab === "tecnica" && guida) n++;
   if (tab === "diario" && vistaFoto) n++;
-  if (foglioSu) n++;
+  if (foglioSu) n += Math.max(1, foglioLiv);
   return n;
 }
 let profondo = 0, saltaPop = 0, inCoda = false;
