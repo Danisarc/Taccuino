@@ -2555,6 +2555,7 @@ function apriGuida(g) { guida = g; disegna(); window.scrollTo(0, 0); }
 const GUIDE = [
   ["addome", "Addome", "Meno gonfia, più forte: il percorso in tre leve", '<path d="M8 3h8v18H8zM8 9h8M8 15h8M12 3v18"/>', "img/es/pallof-2.jpg"],
   ["gonfiore", "Gonfiore: una proposta", "Cosa può gonfiare nel piano e una prova di 2 settimane, da decidere insieme", '<path d="M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v5M12 16h.01"/>', "img/pasti/mer.jpg"],
+  ["tavola", "Stare bene a tavola", "Cosa preferire e cosa limitare: stomaco, intestino, energia, glutine", '<path d="M7 3v8M5 3v5a2 2 0 004 0V3M7 11v10M17 3c-2 0-3 2-3 6s1 5 3 5v7"/>', "img/pasti/pra.jpg"],
   ["regole", "Prima e durante la seduta", "Quando mangiare, cosa portare, quando fermarsi", '<path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.800-1.200-8-4.500-8-9V6zM9 12l2 2 4-4"/>', "img/allenamento.jpg"],
   ["esercizi", "Esercizi della scheda", "Come si fa ogni esercizio, dove sentirlo, cosa evitare", '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>', "img/es/leg-press-1.jpg"],
   ["casa", "Allenarsi a casa", "Casa A e Casa B, e cosa fare quando i manubri sono leggeri", '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>', "img/es/goblet-1.jpg"],
@@ -2569,6 +2570,7 @@ function vTecnica() {
   if (guida === "cambi") return vCambi();
   if (guida === "addome") return vAddome();
   if (guida === "gonfiore") return vGonfiore();
+  if (guida === "tavola") return vTavola();
   return `<h1>Guide</h1><p class="muto">Spiegazioni da consultare prima o durante la seduta.</p>` +
     GUIDE.map((g) => `<button class="blocco" onclick="apriGuida('${g[0]}')">${g[4] ? `<i class="th" style="background-image:url(${g[4]})"></i>` : `<i><svg viewBox="0 0 24 24">${g[3]}</svg></i>`}<span><b>${g[1]}</b><small>${g[2]}</small></span><em>›</em></button>`).join("");
 }
@@ -2627,6 +2629,45 @@ function vAddome() {
 }
 /* Guida Gonfiore: una PROPOSTA del coach, non ancora nel piano. Si decide insieme. Testo generale: niente riferimenti a condizioni di salute.
    Se viene accettata, diventa parte del piano alimentare e questa guida va riscritta di conseguenza. */
+/* v39: guida "Stare bene a tavola", copia in breve della sezione "Reflusso, intestino ed energia" e "Senza glutine" di atleti/rosa/piano/alimentazione.md.
+   Il sito è pubblico: niente nomi di disturbi né farmaci, si parla di bruciore, acidità, intestino, cali di energia. Se cambia il .md, aggiorna qui. */
+function vTavola() {
+  const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
+  const tab = (t, r) => `<div class="card"><table><tr>${t.map((x) => `<th style="text-align:left">${x}</th>`).join("")}</tr>${r.map((x) => `<tr>${x.map((y, i) => `<td>${i ? y : "<b>" + y + "</b>"}</td>`).join("")}</tr>`).join("")}</table></div>`;
+  return testaGuida("Stare bene a tavola") + fotoGuida("img/pasti/pra.jpg", "Cosa preferire e cosa limitare", "Stomaco leggero, intestino regolare, energia stabile") +
+  `<div class="card consiglioCoach"><b>Dal coach</b>Non è una lista di divieti. Sono le scelte che ti aiutano a stare bene con il piano che hai già: prova, e tieni quello che su di te funziona.</div>
+  <h2>Stomaco leggero</h2><p class="muto">Se senti bruciore o acidità.</p>` + lista([
+    "<b>5 pasti piccoli</b> invece di 2-3 grandi: il tuo piano è già così.",
+    "<b>Cena almeno 2-3 ore prima</b> di andare a letto, e niente spuntino prima di dormire. Dopo pranzo non sdraiarti subito.",
+    "<b>Di notte</b>, se dà fastidio, alza di qualche centimetro la testata del letto.",
+    "<b>Perdere il grasso in più</b> è la cosa che aiuta di più: è l'unica con prove solide. Le altre sono consigliate ma con prove deboli.",
+    "<b>Prima dei pesi</b>: almeno 2 ore dopo un pasto principale."]) +
+  tab(["Da preferire", "Con prudenza"], [
+    ["Cotture semplici: vapore, forno, piastra, lessato", "fritti e piatti molto conditi"],
+    ["Carne bianca, pesce, uova", "piccante e alcol"],
+    ["Riso, patate, pane senza glutine", "pomodoro e passata: se danno fastidio, verdura cotta al loro posto"],
+    ["Verdura cotta", "agrumi e succhi: al loro posto kiwi o banana"],
+    ["Olio a crudo, nelle dosi del piano", "cioccolato, caffè, menta, bibite gassate"]]) +
+  `<p class="muto">I cibi che danno fastidio cambiano da persona a persona: provali <b>uno alla volta</b> e togli solo quelli che a te fanno male, non tutti.</p>
+  <h2>Intestino regolare</h2>` + lista([
+    "<b>Acqua 2 litri</b>: un bicchiere a ogni pasto e una bottiglia a scuola. La segni nella home.",
+    "<b>2 kiwi al giorno</b>, allo spuntino e alla merenda: in uno studio hanno funzionato come le prugne secche o lo psillio, con meno gonfiore.",
+    "<b>Fibra aumentata piano piano</b>, in 1-2 settimane: verdura cotta a pranzo e cena.",
+    "<b>8000 passi</b> e qualche minuto in bagno sempre alla stessa ora, meglio dopo colazione.",
+    "<b>Da limitare</b>: insalatoni di sola verdura cruda e prodotti \"senza zucchero\", che gonfiano.",
+    "Se dopo 2-3 settimane non cambia niente, dillo al medico."]) +
+  `<h2>Energia stabile</h2>` + lista([
+    "<b>Non saltare spuntino e merenda</b>: contano quanto gli altri pasti.",
+    "<b>Mai solo frutta</b>: sempre una proteina insieme (yogurt greco, skyr, bresaola).",
+    "<b>Se arrivano debolezza, giramenti di testa o sudore</b>: siediti, mangia subito qualcosa di dolce (un frutto, un succo piccolo, 2-3 cucchiaini di zucchero), poi qualcosa di più completo. Scrivilo nelle note del giorno.",
+    "<b>Pronto soccorso subito</b> se compaiono palpitazioni forti, dolore al petto, svenimento, la vista che si oscura, o un episodio che non passa dopo aver mangiato."]) +
+  `<h2>Senza glutine: dove si nasconde</h2>` + lista([
+    "<b>Spiga barrata</b> o scritta \"senza glutine\" su tutto il confezionato: proteine in polvere, bevanda d'avena, pane, pasta, gallette, creme.",
+    "<b>Avena</b>: solo quella certificata. È il cereale che si contamina più spesso.",
+    "<b>Attenzione a</b>: salse pronte, dadi e preparati per brodo, affettati e salsicce senza dicitura, spezie miste, birra, panature e fritture nello stesso olio di prodotti con glutine.",
+    "<b>Fuori casa</b>: meglio i locali con il marchio Spiga Barrata per la ristorazione; la pizza solo dove la fanno senza glutine in un forno o uno spazio separato."]) +
+  `<p class="muto">Gli integratori da evitare sono nella pagina Integratori (Alimentazione, tre linee in alto a destra).</p>`;
+}
 function vGonfiore() {
   const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
   const tab = (r) => `<div class="card"><table>${r.map((x) => `<tr><td><b>${x[0]}</b>${x[2] ? `<br><span class="muto">${x[2]}</span>` : ""}</td><td>${x[1]}</td></tr>`).join("")}</table></div>`;
