@@ -1133,15 +1133,14 @@ function vScheda() {
       <div class="eti">${gia ? "Già fatta " + nomeGiorno(gia.data) : k === pross ? "Prossima consigliata" : pesi ? "Seduta di pesi" : "In più, nei giorni senza pesi"}</div>
       <div class="grande">${esc(se.nome)}</div>
       <div class="num"><div><b>${se.es.length}</b>${se.es.length === 1 ? "esercizio" : "esercizi"}</div><div><b>${nSerie}</b>serie</div>${pesi ? `<div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div>` : ""}</div></div></div>
-      <button class="pri largo" onclick="inizia('${k}')">${dS() < oggi() ? "Segna la seduta di " + nomeGiorno(dS()) + " " + dataIt(dS()) : "Inizia la seduta"}</button>
-      ${pesi ? `<p class="sedNota">${esc(f.testo)}</p>` : ""}</div>
+      <button class="pri largo" onclick="inizia('${k}')">${dS() < oggi() ? "Segna la seduta di " + nomeGiorno(dS()) + " " + dataIt(dS()) : "Inizia la seduta"}</button></div>
     <h2>Gli esercizi</h2><div class="card lista"><ol class="piano esLista">`;
   for (const e of se.es) h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}${e.ss ? `<small>superserie</small>` : ""}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
   h += `</ol></div><button class="largo libera" onclick="inizia('L')">+ Seduta libera · scegli tu gli esercizi</button>`;
   return h;
 }
 function infoScheda() {
-  apri(testaFoglio("Come funziona la scheda") + `<h2>La settimana</h2><div class="card"><ul>
+  apri(testaFoglio("Come funziona la scheda") + `<h2>Questa fase</h2><div class="card"><b>${esc(quadro().f.nome)}</b><br>${esc(quadro().f.testo)}</div>` + `<h2>La settimana</h2><div class="card"><ul>
       <li><b>Seduta dimenticata</b>: tocca il giorno nella settimana, o usa le frecce ‹ › sotto, e la segni nel giorno giusto.</li>
       <li><b>3 sedute di pesi</b> a settimana, nei giorni che scegli tu.</li>
       <li>Meglio <b>un giorno di pausa</b> tra due sedute di pesi.</li>
