@@ -587,64 +587,89 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .recapR .pR { width:14px; height:14px; }
 .recapR span { flex:1; min-width:0; } .recapR span b { display:block; font-size:15px; } .recapR small { color:var(--muto); font-size:13px; line-height:1.35; }
 .recapR em { flex:none; font-style:normal; font-family:var(--tit); font-weight:800; font-size:18px; font-variant-numeric:tabular-nums; }
-/* v53: Spesa e scorte. Tre schede con tre facce: il carrello (righe con foto e cerchio), il frigo disegnato (congelatore in alto), la dispensa a scaffali con barattoli */
+/* v53-v54: Spesa, frigo e dispensa. Tre schede con tre facce e tre palette (scelte di Daniele, valgono solo qui; body[data-casa] lo mette disegna):
+   Spesa blu #0F2E7A #1857D6 #3B82F6 #93C5FD #E0F2FF · Frigo acqua marina chiaro #14A085 #2EC7A4 #6DE7C1 #B5F5DB #E8FFF5 · Dispensa marrone #3A2418 #6B4A2E #A88462 #D5C4AE */
+body[data-casa]::after { display:none; }
+body[data-casa=spesa] { --bg:#030a1f; --solido:#0b1a45; --card:rgba(147,197,253,.08); --card2:rgba(147,197,253,.15); --linea:rgba(147,197,253,.22);
+  --testo:#E0F2FF; --muto:#93C5FD; --verde:#3B82F6; --verde2:#1857D6; --verde3:rgba(59,130,246,.24); --sopraAcc:#fff; --priBg:linear-gradient(180deg,#3B82F6,#1857D6); }
+body[data-casa=spesa]::before { background:radial-gradient(70% 40% at 0% 0%, rgba(24,87,214,.6), transparent 70%), radial-gradient(40% 35% at 0% 85%, rgba(59,130,246,.45), transparent 70%),
+  radial-gradient(40% 35% at 100% 85%, rgba(59,130,246,.45), transparent 70%), linear-gradient(180deg,#0F2E7A 0%,#030a1f 50%); }
+body[data-casa=frigo] { --bg:#E8FFF5; --solido:#F4FFFA; --card:rgba(255,255,255,.8); --card2:#fff; --linea:rgba(20,160,133,.28);
+  --testo:#0A3D34; --muto:#3B7A6C; --verde:#14A085; --verde2:#2EC7A4; --verde3:rgba(46,199,164,.2); --sopraAcc:#fff; --priBg:linear-gradient(180deg,#2EC7A4,#14A085); color-scheme:light; }
+body[data-casa=frigo]::before { background:radial-gradient(70% 40% at 0% 0%, #B5F5DB, transparent 70%), radial-gradient(60% 40% at 100% 100%, rgba(109,231,193,.7), transparent 70%), linear-gradient(180deg,#E8FFF5,#d3f8e8); }
+body[data-casa=frigo] input { background:#fff; color:var(--testo); }
+body[data-casa=frigo] .chip { background:#fff; color:var(--testo); border:1px solid var(--linea); }
+body[data-casa=frigo] #velo { background:rgba(10,61,52,.35); }
+body[data-casa=frigo] #nav { background:rgba(10,61,52,.82); }
+body[data-casa=dispensa] { --bg:#120a05; --solido:#24170e; --card:rgba(213,196,174,.08); --card2:rgba(213,196,174,.15); --linea:rgba(213,196,174,.22);
+  --testo:#F4EBDF; --muto:#C4AB8C; --verde:#D5C4AE; --verde2:#6B4A2E; --verde3:rgba(168,132,98,.28); --sopraAcc:#3A2418; --priBg:linear-gradient(180deg,#D5C4AE,#A88462); }
+body[data-casa=dispensa]::before { background:radial-gradient(45% 45% at 0% 0%, rgba(204,128,66,.5), transparent 70%), radial-gradient(45% 45% at 100% 0%, rgba(204,128,66,.4), transparent 70%),
+  radial-gradient(70% 35% at 50% 100%, rgba(107,74,46,.55), transparent 70%), linear-gradient(180deg,#2a1a10,#120a05 55%); }
+body[data-casa] button.pri { background:var(--priBg); color:var(--sopraAcc); }
+body[data-casa] .barra i { background:var(--verde); }
 .casaTab { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0 14px; }
 .casaTab button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 4px 9px; border-radius:18px; background:var(--card); border:1px solid var(--linea); min-height:0; }
 .casaTab svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; color:var(--verde); margin-bottom:2px; }
 .casaTab b { font-family:var(--tit); font-size:15px; } .casaTab small { font-size:11px; color:var(--muto); white-space:nowrap; }
-.casaTab button.qui { background:var(--verde); border-color:var(--verde); color:#04130a; } .casaTab button.qui svg { color:#04130a; } .casaTab button.qui small { color:#04130a; opacity:.75; }
+.casaTab button.qui { background:var(--verde); border-color:var(--verde); color:var(--sopraAcc); } .casaTab button.qui svg, .casaTab button.qui small { color:var(--sopraAcc); } .casaTab button.qui small { opacity:.8; }
 .thC { flex:none; display:block; width:46px; height:46px; border-radius:50%; background:var(--card2) center/cover no-repeat; }
+.slotP { margin:12px 0 4px; } .slotP i.th { width:58px; height:58px; border-radius:16px; }
+.catP { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 4px; } .catP .rep { min-height:118px; } .catP .rep b { font-size:16px; }
 /* 1 · carrello */
-.scontrino { padding:16px 18px 14px; margin-bottom:12px; border-radius:22px; background:linear-gradient(150deg,rgba(61,220,132,.22),rgba(61,220,132,.07)); border:1px solid rgba(61,220,132,.3); }
+.scontrino { padding:16px 18px 14px; margin-bottom:12px; border-radius:22px; background:linear-gradient(150deg,var(--verde3),transparent); border:1px solid var(--linea); }
 .scontrino > div { display:flex; align-items:baseline; justify-content:space-between; }
 .scontrino > div small { font-size:13px; color:var(--testo); font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
 .scontrino > div b { font-family:var(--tit); font-size:34px; font-weight:800; line-height:1; } .scontrino u { text-decoration:none; font-size:17px; color:var(--muto); }
 .scontrino > small { display:block; margin-top:9px; color:var(--muto); font-size:13px; } .scontrino .barra { height:8px; }
-.ideeC { margin:10px 2px 2px; } .ideeC summary { color:var(--verde); font-weight:700; font-size:14px; cursor:pointer; padding:6px 0; }
 ul.listaC { list-style:none; margin:0; padding:0; }
-.spL { display:flex; align-items:center; gap:12px; padding:8px 10px 8px 8px; margin:6px 0; border-radius:20px; background:var(--card); cursor:pointer; transition:opacity .2s; }
+.spL { display:flex; align-items:center; gap:10px; padding:8px 10px 8px 8px; margin:6px 0; border-radius:20px; background:var(--card); border:1px solid transparent; cursor:pointer; transition:opacity .2s; }
 .spL span { flex:1; min-width:0; } .spL span b { display:block; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .spL span small { color:var(--muto); font-size:12.5px; }
-.spL .ico { flex:none; width:34px; height:34px; min-height:0; font-size:14px; color:var(--muto); background:transparent; border:0; }
-.chkC { flex:none; width:30px; height:30px; border-radius:50%; border:2px solid rgba(255,255,255,.3); display:flex; align-items:center; justify-content:center; font-style:normal; }
+.spL .ico { flex:none; width:30px; height:34px; min-height:0; font-size:14px; color:var(--muto); background:transparent; border:0; }
+.chkC { flex:none; width:30px; height:30px; border-radius:50%; border:2px solid var(--muto); display:flex; align-items:center; justify-content:center; font-style:normal; opacity:.8; }
 .spL.on { opacity:.5; } .spL.on span b { text-decoration:line-through; }
-.spL.on .chkC { background:var(--verde); border-color:var(--verde); } .spL.on .chkC::after { content:"✓"; color:#04130a; font-size:17px; font-weight:800; }
+.spL.on .chkC, .spL.sel .chkC { background:var(--verde); border-color:var(--verde); opacity:1; } .spL.on .chkC::after, .spL.sel .chkC::after { content:"✓"; color:var(--sopraAcc); font-size:17px; font-weight:800; }
+.spL.sel { border-color:var(--verde); background:var(--verde3); }
+button.qta { flex:none; min-height:32px; padding:3px 11px; border-radius:16px; font-size:13px; font-weight:700; background:var(--verde3); border:1px solid var(--linea); color:var(--testo); white-space:nowrap; }
+button.qta.vuota { background:transparent; font-weight:500; color:var(--muto); border-style:dashed; }
 h2 small.muto { font-family:inherit; font-size:14px; font-weight:600; margin-left:4px; }
-/* 2 · frigo */
-.avvisoC { padding:12px 16px; margin-bottom:12px; border-radius:18px; background:var(--verde3); border:1px solid rgba(61,220,132,.4); }
-.avvisoC b { display:block; color:var(--verde); font-size:14px; } .avvisoC small { font-size:14px; line-height:1.5; }
-.frigo { position:relative; padding:10px; border-radius:30px; background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.08)); border:1px solid rgba(255,255,255,.18); box-shadow:inset 0 1px 0 rgba(255,255,255,.2); }
-.frigo .maniglia { position:absolute; right:-4px; top:42px; width:7px; height:64px; border-radius:4px; background:rgba(255,255,255,.4); }
-.vano { padding:12px 10px 10px; border-radius:22px; background:rgba(0,0,0,.22); }
+.qBlocco { min-height:60px; margin:14px 0 10px; }
+/* 2 · frigo (sempre sulla palette chiara) */
+.avvisoC { padding:12px 16px; margin-bottom:12px; border-radius:18px; background:#fff; border:1.5px solid #2EC7A4; }
+.avvisoC b { display:block; color:#14A085; font-size:14px; } .avvisoC small { font-size:14px; line-height:1.5; }
+.frigo { position:relative; padding:10px; border-radius:30px; background:linear-gradient(180deg,#fff,#f1fff9); border:1.5px solid #6DE7C1; box-shadow:0 18px 40px rgba(20,160,133,.2); }
+.frigo .maniglia { position:absolute; right:-5px; top:42px; width:8px; height:64px; border-radius:4px; background:#2EC7A4; }
+.vano { padding:12px 10px 10px; border-radius:22px; background:#E8FFF5; border:1px solid #B5F5DB; }
 .vano + .vano { margin-top:10px; }
-.vano.gelo { background:linear-gradient(180deg,rgba(220,240,255,.16),rgba(220,240,255,.05)); border:1px solid rgba(220,240,255,.18); }
+.vano.gelo { background:linear-gradient(180deg,#B5F5DB,#E8FFF5); border-color:#6DE7C1; }
 .vtesta { display:flex; align-items:baseline; justify-content:space-between; padding:0 4px 8px; }
-.vtesta b { font-family:var(--tit); font-size:15px; letter-spacing:.8px; text-transform:uppercase; } .vtesta small { color:var(--muto); font-size:12px; }
+.vtesta b { font-family:var(--tit); font-size:15px; letter-spacing:.8px; text-transform:uppercase; color:#14A085; } .vtesta small { color:var(--muto); font-size:12px; }
 .cose { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.cosa { display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 4px 9px; min-height:0; border-radius:18px; background:rgba(255,255,255,.08); border:1px solid transparent; text-align:center; }
-.cosa .thC { width:50px; height:50px; margin-bottom:3px; }
+.cosa { display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 4px 9px; min-height:0; border-radius:18px; background:#fff; border:1.5px solid transparent; text-align:center; box-shadow:0 2px 8px rgba(20,160,133,.14); }
+.cosa .thC { width:50px; height:50px; margin-bottom:4px; }
 .cosa b { font-size:13px; line-height:1.2; max-width:100%; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow-wrap:anywhere; }
+.cosa em { font-style:normal; font-size:12px; font-weight:800; color:#14A085; }
 .cosa small { font-size:11px; color:var(--muto); line-height:1.2; }
 .cosa.s1 small { color:var(--testo); font-weight:700; } .cosa.s2 { opacity:.5; } .cosa.s2 .thC { filter:grayscale(1); }
-.cosa.presto { border-color:var(--verde); } .cosa.presto small { color:var(--verde); font-weight:700; }
-.cosa.piu { background:transparent; border:1.5px dashed rgba(255,255,255,.25); justify-content:center; color:var(--verde); min-height:110px; }
-.cosa.piu em { font-style:normal; font-size:30px; line-height:1; }
-/* 3 · dispensa */
+.cosa.presto { border-color:#14A085; } .cosa.presto small { color:#14A085; font-weight:700; }
+.cosa.piu { background:transparent; border:1.5px dashed #6DE7C1; box-shadow:none; justify-content:center; color:#14A085; min-height:110px; }
+.cosa.piu em { font-size:30px; line-height:1; font-weight:400; }
+/* 3 · dispensa (sempre sulla palette marrone) */
 .dispensa { padding:4px 0 2px; }
-.mensola { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:end; padding:0 6px; margin-bottom:24px; position:relative; }
-.mensola::after { content:""; position:absolute; left:0; right:0; bottom:-12px; height:9px; border-radius:5px; background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.1)); box-shadow:0 6px 12px rgba(0,0,0,.35); }
+.mensola { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:end; padding:0 6px; margin-bottom:26px; position:relative; }
+.mensola::after { content:""; position:absolute; left:0; right:0; bottom:-13px; height:10px; border-radius:4px; background:linear-gradient(180deg,#A88462,#6B4A2E 55%,#3A2418); box-shadow:0 8px 14px rgba(0,0,0,.5); }
 .vaso { display:flex; flex-direction:column; align-items:center; gap:0; padding:0; min-height:0; background:transparent; border:0; text-align:center; }
-.vaso .tappo { display:block; width:62%; height:9px; border-radius:4px 4px 2px 2px; background:var(--verde2); }
-.vaso .corpo { position:relative; display:flex; align-items:center; justify-content:center; width:100%; aspect-ratio:.82; border-radius:12px 12px 16px 16px; overflow:hidden; background:var(--card2) center/cover no-repeat; border:2px solid rgba(255,255,255,.28); }
-.vaso .vuotoC { position:absolute; left:0; right:0; top:0; height:0; background:rgba(7,11,9,.72); transition:height .3s; }
-.vaso .livC { position:absolute; left:0; right:0; height:3px; background:var(--verde); box-shadow:0 0 8px var(--verde); top:0; transition:top .3s; }
+.vaso .tappo { display:block; width:62%; height:9px; border-radius:4px 4px 2px 2px; background:#A88462; }
+.vaso .corpo { position:relative; display:flex; align-items:center; justify-content:center; width:100%; aspect-ratio:.82; border-radius:12px 12px 16px 16px; overflow:hidden; background:var(--card2) center/cover no-repeat; border:2px solid rgba(213,196,174,.45); }
+.vaso .vuotoC { position:absolute; left:0; right:0; top:0; height:0; background:rgba(18,10,5,.78); transition:height .3s; }
+.vaso .livC { position:absolute; left:0; right:0; height:3px; background:#D5C4AE; box-shadow:0 0 8px #D5C4AE; top:0; transition:top .3s; }
 .vaso.s0 .livC { display:none; } .vaso.s1 .vuotoC { height:60%; } .vaso.s1 .livC { top:60%; } .vaso.s2 .vuotoC { height:100%; } .vaso.s2 .livC { display:none; }
-.vaso.piu .corpo { background:transparent; border:1.5px dashed rgba(255,255,255,.25); } .vaso.piu .tappo { background:rgba(255,255,255,.18); }
-.vaso .corpo em { font-style:normal; font-size:30px; color:var(--verde); }
+.vaso.piu .corpo { background:transparent; border:1.5px dashed rgba(213,196,174,.4); } .vaso.piu .tappo { background:rgba(213,196,174,.25); }
+.vaso .corpo em { font-style:normal; font-size:30px; color:#D5C4AE; }
 .vaso b { margin-top:6px; font-size:12.5px; line-height:1.15; max-width:100%; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
 .vaso small { font-size:10.5px; color:var(--muto); } .vaso.s1 small { color:var(--testo); font-weight:700; } .vaso.s2 b { color:var(--muto); }
 .legendaC { display:flex; flex-wrap:wrap; gap:8px 16px; justify-content:center; color:var(--muto); font-size:12.5px; margin-top:4px; }
 .legendaC span { display:flex; align-items:center; gap:6px; }
-.mini { flex:none; display:inline-block; width:12px; height:16px; border-radius:3px 3px 5px 5px; border:1.5px solid rgba(255,255,255,.45); background:var(--verde); }
+.mini { flex:none; display:inline-block; width:12px; height:16px; border-radius:3px 3px 5px 5px; border:1.5px solid var(--muto); background:var(--verde); }
 .mini.s1 { background:linear-gradient(0deg,var(--verde) 0 40%,transparent 40%); } .mini.s2 { background:transparent; }
 /* il foglio di una cosa */
 .statiC { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
@@ -859,6 +884,7 @@ function toccaGraf(ev, id) {
 const giornoN = (d) => Math.round(new Date(d + "T12:00").getTime() / 864e5);
 function disegna() {
   navVetro.attiva(tab);
+  if (tab === "allena" && !S.corso && sub === "spesa") document.body.dataset.casa = casaTab; else delete document.body.dataset.casa;   // palette di spesa, frigo e dispensa
   const v = $("vista"), ch = chiaveVista(), pf = livelli() - (foglioSu ? 1 : 0), stessa = !!vistaPrima && vistaPrima.ch === ch, prima = stessa ? fotografa(v) : null;
   let dir = "";       // pagina nuova: avanti se si scende di un livello o si va a destra nella barra, indietro al contrario
   if (vistaPrima && !stessa && !CALMO) {
@@ -3457,29 +3483,33 @@ function salvaTest() {
 }
 function togliTest(d) { if (!confirm("Elimino il test del " + dataIt(d) + "?")) return; S.trazione.test = S.trazione.test.filter((x) => x.d !== d); salva(); tieni(disegna); }
 
-/* ---- Spesa e scorte (Daniele v53, Rosa v41, Umberto v33): una pagina (sub "spesa") con tre schede, casaTab = "spesa" | "frigo" | "dispensa".
-        In casa si mettono SOLO le cose che interessano, non tutto: S.casa = [{ n: nome, d: "f" frigo | "c" congelatore | "p" dispensa,
-        st: 0 c'è · 1 sta finendo · 2 finito, sc: scadenza AAAA-MM-GG (facoltativa, a mano), cg: congelato il, k: 1 se è già nel carrello }].
-        Quello che sta finendo o è finito compare da solo nella Spesa ("Manca in casa"); con "Ho finito la spesa" torna "c'è" al suo posto.
-        La lista scritta a mano resta S.spesa.l = [{ n, x: 1 se presa }]. Niente quantità automatiche dal piano. ---- */
+/* ---- Spesa, frigo e dispensa (Daniele v53-v54, Rosa v41-v42, Umberto v33-v34): una pagina (sub "spesa") con tre schede, casaTab = "spesa" | "frigo" | "dispensa".
+        Ogni scheda ha la sua palette e il suo sfondo (body[data-casa], messo da disegna): blu la spesa, acqua marina chiara il frigo, marrone la dispensa.
+        In casa si mettono le cose che interessano: S.casa = [{ n: nome, d: "f" frigo | "c" congelatore | "p" dispensa, st: 0 c'è · 1 sta finendo · 2 finito,
+        q + u: quantità ("pz" pezzi, "g" grammi, "ml"), sc: scadenza facoltativa scritta a mano, cg: congelato il, k: 1 se è già nel carrello }].
+        Quello che sta finendo o è finito compare da solo nella Spesa ("Manca in casa"). Con "Ho finito la spesa" quello che c'era torna "c'è",
+        e quello comprato dalla lista scritta a mano entra in casa da solo (frigo se è da frigo, altrimenti dispensa: luogoDi).
+        Lista scritta a mano: S.spesa.l = [{ n, q, u, x: 1 se presa }]. Gli alimenti del piano si scelgono per categoria (Proteine, Carboidrati, Grassi, Verdura). ---- */
 const cortoA = (n) => n.split(",")[0].split(" (")[0];
-const ideeSpesa = () => [...new Set(Object.values(ALIM).map((a) => cortoA(a[0])).concat(MENU.filter((p) => p.id !== "int").flatMap((p) => (p.sempre || []).map((f) => cortoA(f[1])))))];
 const listaS = () => { S.spesa = S.spesa || {}; return (S.spesa.l = S.spesa.l || []); };
 const casaL = () => (S.casa = S.casa || []);
-let casaTab = "spesa", spesaIdee = false;
+let casaTab = "spesa";
 const LUOGO = { f: "Frigo", c: "Congelatore", p: "Dispensa" };
+const DAL = { f: "dal frigo", c: "dal congelatore", p: "dalla dispensa" };
+const idDove = { f: "nel frigo", c: "nel congelatore", p: "in dispensa" };
 const FAM_FRIGO = ["Carne", "Pesce", "Uova", "Salumi", "Latte, yogurt e formaggi", "Verdura", "Frutta"];
 const FAM_GELO = ["Carne", "Pesce", "Verdura", "Frutta", "Legumi", "Pane, gallette e prodotti da forno", "Dolci e creme"];
+const FAM_AUTO_FRIGO = ["Carne", "Pesce", "Uova", "Salumi", "Latte, yogurt e formaggi", "Verdura"];      // dopo la spesa: questi in frigo, il resto in dispensa
 // l'ordine dei reparti al supermercato: la lista si legge mentre si cammina tra le corsie
 const CORSIE = ["Frutta", "Verdura", "Patate", "Pane, gallette e prodotti da forno", "Pasta, riso e cereali", "Legumi", "Olio, olive e condimenti", "Frutta secca e semi",
   "Carne", "Pesce", "Salumi", "Latte, yogurt e formaggi", "Uova", "Proteine in polvere, tofu e seitan", "Dolci e creme", "Birra e vino", "Altro"];
 // "banane", "zucchine": se il nome al plurale non trova la famiglia, si riprova al singolare
 const famC = (n) => { const f = famiglia(n); return f !== "Altro" ? f : famiglia(n.replace(/e$/i, "a").replace(/i$/i, "o")); };
 const corsia = (n) => CORSIE.indexOf(famC(n));
+const luogoDi = (n) => (FAM_AUTO_FRIGO.includes(famC(n)) ? "f" : "p");
 const fotoC = (n) => fotoRep(famC(n)) || fotoRep("altro");
 const thC = (n) => `<i class="thC" style="background-image:url(${fotoC(n)})"></i>`;
 const maiusc = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-const nomiDa = (t) => String(t || "").split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).map(maiusc);
 const giorniA = (d) => giornoN(d) - giornoN(oggi());
 const prestoC = (x) => !!x.sc && x.st < 2 && x.d !== "c" && giorniA(x.sc) <= 2;
 const scadeT = (x) => { if (!x.sc) return ""; const g = giorniA(x.sc); return g < 0 ? "scaduto" : g === 0 ? "scade oggi" : g === 1 ? "scade domani" : g <= 7 ? "scade tra " + g + " giorni" : "scade il " + dataIt(x.sc); };
@@ -3488,28 +3518,97 @@ const statoT = ["c'è", "sta finendo", "finito"];
 const mancaC = () => casaL().map((x, i) => [x, i]).filter(([x]) => x.st >= 1);
 const daPrendere = () => listaS().filter((x) => !x.x).length + mancaC().filter(([x]) => !x.k).length;
 
+/* ---- quantità: q numero, u "pz" | "g" | "ml". Si scrive anche nel nome: "pollo 500 g", "uova 6", "2 kg patate", "latte 1 l" ---- */
+const UNI = { pz: "Pezzi", g: "Grammi", ml: "Millilitri" };
+const numIt = (x) => String(Math.round(x * 100) / 100).replace(".", ",");
+const qT = (x) => (!x || !x.q ? "" : x.u === "g" ? (x.q >= 1000 ? numIt(x.q / 1000) + " kg" : numIt(x.q) + " g") : x.u === "ml" ? (x.q >= 1000 ? numIt(x.q / 1000) + " L" : numIt(x.q) + " ml") : numIt(x.q) + " pz");
+const UN_RE = "(kg|g|gr|grammi|pz|pezzi|pezzo|l|lt|litri|litro|ml)";
+function leggiQ(s) {
+  s = s.trim(); let m = s.match(new RegExp("^(.*?\\D)\\s*(\\d+(?:[.,]\\d+)?)\\s*" + UN_RE + "?\\.?$", "i")), n, q, u;
+  if (m && m[1].trim()) { n = m[1]; q = m[2]; u = m[3]; }
+  else if ((m = s.match(new RegExp("^(\\d+(?:[.,]\\d+)?)\\s*" + UN_RE + "?\\s+(?:di\\s+)?(.+)$", "i")))) { q = m[1]; u = m[2]; n = m[3]; }
+  else return { n: maiusc(s) };
+  q = parseFloat(String(q).replace(",", ".")); u = String(u || "").toLowerCase();
+  if (u === "kg") { q *= 1000; u = "g"; } else if (/^(l|lt|litri|litro)$/.test(u)) { q *= 1000; u = "ml"; } else if (/^(g|gr|grammi)$/.test(u)) u = "g"; else if (u !== "ml") u = "pz";
+  return q > 0 ? { n: maiusc(n.trim()), q, u } : { n: maiusc(n.trim()) };
+}
+const vociDa = (t) => String(t || "").split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).map(leggiQ);
+// k: "s3" = voce 3 della lista scritta a mano, "c5" = cosa 5 in casa
+const rifQ = (k) => (k[0] === "s" ? listaS() : casaL())[+k.slice(1)];
+function corpoQ(k) {
+  const x = rifQ(k); if (!x) return "";
+  const u = x.u || "pz", CH = { pz: [1, 2, 3, 4, 6, 12], g: [100, 200, 250, 500, 1000], ml: [250, 500, 1000, 1500] }[u];
+  const via = k[0] === "c" && casaL()[+k.slice(1)] && !qDaSpesa ? `<button onclick="apriCosa(${+k.slice(1)})">‹ Indietro</button>` : `<button onclick="chiudi()">Annulla</button>`;
+  return testaFoglio(esc(x.n)) + `<div class="eti" style="margin-top:12px">Quanto ne ${k[0] === "s" || x.st ? "compri" : "hai"}</div>
+    <div class="statiC">${Object.entries(UNI).map(([k2, t]) => `<button class="${u === k2 ? "qui" : ""}" onclick="unQ('${k}','${k2}')">${t}</button>`).join("")}</div>
+    <input id="qN" type="number" inputmode="decimal" min="0" step="any" value="${x.q || ""}" placeholder="${u === "pz" ? "Quanti pezzi?" : u === "g" ? "Quanti grammi?" : "Quanti ml?"}" style="margin-top:12px;font-size:24px;font-weight:800;text-align:center" onkeydown="if(event.key==='Enter')metQ('${k}')">
+    <div class="chips">${CH.map((n) => `<button class="chip ${x.q === n && x.u === u ? "ok" : ""}" onclick="$('qN').value=${n};metQ('${k}')">${qT({ q: n, u })}</button>`).join("")}</div>
+    <div class="g2" style="margin-top:16px">${via}<button class="pri" onclick="metQ('${k}')">Salva</button></div>
+    ${x.q ? `<button class="largo" onclick="$('qN').value='';metQ('${k}')">Togli la quantità</button>` : ""}`;
+}
+let qDaSpesa = false;
+function apriQ(k, spesa) { qDaSpesa = !!spesa; apri(corpoQ(k)); }
+function unQ(k, u) { const x = rifQ(k); if (!x) return; const v = $("qN").value; x.u = u; $("foglio").innerHTML = corpoQ(k); $("qN").value = v; }
+function metQ(k) {
+  const x = rifQ(k); if (!x) return; const v = parseFloat(String($("qN").value).replace(",", "."));
+  if (v > 0) { x.q = v; x.u = x.u || "pz"; } else { delete x.q; }
+  vib(); salva(); tieni(disegna);
+  if (k[0] === "c" && !qDaSpesa) apriCosa(+k.slice(1)); else chiudi();
+}
+const pillQ = (x, k) => `<button class="qta ${x.q ? "" : "vuota"}" onclick="event.stopPropagation();apriQ('${k}',1)">${qT(x) || "+ quantità"}</button>`;
+
 function apriCasa(t) { casaTab = t || "spesa"; if (sub === "spesa") tieni(disegna); else apriSub("spesa"); }
 function vSpesa() {
   const C = casaL(), nF = C.filter((x) => x.d !== "p").length, nP = C.filter((x) => x.d === "p").length, dp = daPrendere();
   const T = [["spesa", "Spesa", dp ? dp + " da prendere" : "tutto preso", '<path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>'],
     ["frigo", "Frigo", nF ? nF + (nF === 1 ? " cosa" : " cose") : "vuoto", '<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M6 9.5h12M9 5.5v2M9 12.5v3"/>'],
     ["dispensa", "Dispensa", nP ? nP + (nP === 1 ? " cosa" : " cose") : "vuota", '<path d="M3 8h18M3 15h18M4 8v13M20 8v13"/><rect x="6" y="3" width="4" height="5" rx="1"/><rect x="13" y="10" width="4" height="5" rx="1"/><rect x="7" y="17" width="3" height="4" rx=".8"/>']];
-  const sopra = { spesa: "Quello che ti manca", frigo: "Solo quello che vuoi tenere d'occhio", dispensa: "Solo quello che vuoi tenere d'occhio" }[casaTab];
+  const sopra = { spesa: "Quello che ti manca", frigo: "Quello che hai al fresco", dispensa: "Quello che hai sugli scaffali" }[casaTab];
   return `<div class="riga testata">${freccia("apriSub('cibo')")}<div><div class="sopra">${sopra}</div><h1>${{ spesa: "Lista della spesa", frigo: "Frigo e congelatore", dispensa: "Dispensa" }[casaTab]}</h1></div></div>
     <div class="casaTab">${T.map(([k, t, s, ico]) => `<button class="${casaTab === k ? "qui" : ""}" onclick="apriCasa('${k}')"><svg viewBox="0 0 24 24">${ico}</svg><b>${t}</b><small>${s}</small></button>`).join("")}</div>` +
     (casaTab === "frigo" ? vFrigo() : casaTab === "dispensa" ? vDispensa() : vLista());
 }
 
-/* ---- 1 · Spesa: il carrello. In cima il conto, poi "Manca in casa" (dal frigo e dalla dispensa), poi la lista a mano in ordine di corsia ---- */
-function suggSpesa(q) {
-  q = String(q || "").toLowerCase().trim(); const gia = listaS().map((x) => x.n.toLowerCase()).concat(mancaC().map(([x]) => x.n.toLowerCase()));
-  const v = ideeSpesa().filter((n) => !gia.includes(n.toLowerCase()) && (!q || n.toLowerCase().includes(q)));
-  return v.map((n) => `<button class="chip" data-n="${esc(n)}" onclick="piuSpesa(this.dataset.n)">+ ${esc(n)}</button>`).join("") || `<span class="muto">${q ? "Nessun suggerimento: tocca + per aggiungerlo così com'è." : "Hai già messo in lista tutti gli alimenti del piano."}</span>`;
+/* ---- gli alimenti del piano, divisi per categoria: un riquadro "Dal tuo piano" → quattro categorie → gli alimenti, che si toccano e vanno dove serve ---- */
+const CAT_P = [["p", "Proteine", "carne"], ["c", "Carboidrati", "pasta"], ["g", "Grassi", "olio"], ["v", "Verdura e altro", "verdura"]];
+function ciboPiano() {
+  const m = new Map(), metti = (n, s) => { if (!m.has(n.toLowerCase())) m.set(n.toLowerCase(), [n, s]); };
+  for (const a of Object.values(ALIM)) metti(cortoA(a[0]), sezDi(a[2]));
+  for (const p of MENU) if (p.id !== "int") for (const f of p.sempre || []) metti(cortoA(f[1]), (f[4] && f[4].s) || sezFissa(f));
+  return [...m.values()];
 }
+const haDest = (dest, n) => { n = n.toLowerCase(); return dest === "s" ? listaS().some((x) => x.n.toLowerCase() === n) || mancaC().some(([x]) => x.n.toLowerCase() === n) : casaL().some((x) => x.d === dest && x.n.toLowerCase() === n); };
+const slotPiano = (dest) => `<button class="blocco slotP" onclick="apri(corpoPianoCat('${dest}'))"><i class="th" style="background-image:url(img/alimentazione.jpg)"></i><span><b>Dal tuo piano</b><small>Proteine, carboidrati, grassi e verdura: scegli quello che ti serve</small></span><em>›</em></button>`;
+function corpoPianoCat(dest) {
+  const P = ciboPiano();
+  return testaFoglio("Dal tuo piano") + `<p class="muto">Scegli una categoria, poi tocca gli alimenti: vanno subito ${dest === "s" ? "nella lista della spesa" : idDove[dest]}.</p>
+    <div class="catP">${CAT_P.map(([k, t, f]) => { const V = P.filter((x) => x[1] === k), dentro = V.filter((x) => haDest(dest, x[0])).length;
+      return `<button class="rep rfoto" style="background-image:url(img/rep/${f}.jpg)" onclick="apri(corpoPianoVoci('${dest}','${k}'))"><b>${t}</b><small>${V.length} alimenti${dentro ? " · " + dentro + " già scelti" : ""}</small></button>`; }).join("")}</div>
+    ${dest === "s" ? `<button class="largo" onclick="chiudi()">Chiudi</button>` : `<button class="largo" onclick="foglioAgg('${dest}')">‹ Indietro</button>`}`;
+}
+function corpoPianoVoci(dest, cat) {
+  const c = CAT_P.find((x) => x[0] === cat), V = ciboPiano().filter((x) => x[1] === cat).sort((a, b) => a[0].localeCompare(b[0]));
+  return testaFoglio(c[1]) + `<p class="muto">Tocca quello che ti serve: va ${dest === "s" ? "nella lista della spesa" : idDove[dest]}. Un altro tocco lo toglie.</p>
+    <ul class="listaC">${V.map(([n]) => `<li class="spL ${haDest(dest, n) ? "sel" : ""}" data-n="${esc(n)}" onclick="togglePiano('${dest}','${cat}',this.dataset.n)">${thC(n)}<span><b>${esc(n)}</b></span><i class="chkC"></i></li>`).join("") || `<li class="muto">Nel tuo piano non ci sono alimenti di questa categoria.</li>`}</ul>
+    <div class="g2" style="margin-top:12px"><button onclick="apri(corpoPianoCat('${dest}'))">‹ Indietro</button><button class="pri" onclick="chiudi()">Fatto</button></div>`;
+}
+function togglePiano(dest, cat, n) {
+  const k = n.toLowerCase();
+  if (dest === "s") {
+    const L = listaS(), i = L.findIndex((x) => x.n.toLowerCase() === k);
+    if (i >= 0) L.splice(i, 1); else if (mancaC().some(([x]) => x.n.toLowerCase() === k)) { avvisa("È già nella spesa: manca in casa"); return; } else L.push({ n });
+  } else {
+    const C = casaL(), i = C.findIndex((x) => x.d === dest && x.n.toLowerCase() === k);
+    if (i >= 0) C.splice(i, 1); else C.push(Object.assign({ n, d: dest, st: 0 }, dest === "c" ? { cg: oggi() } : {}));
+  }
+  vib(); salva(); tieni(disegna); const y = $("foglio").scrollTop; $("foglio").innerHTML = corpoPianoVoci(dest, cat); $("foglio").scrollTop = y;
+}
+
+/* ---- 1 · Spesa: il carrello. In cima il conto, poi "Manca in casa" (dal frigo e dalla dispensa), poi la lista a mano in ordine di corsia ---- */
 function piuSpesa(t) {
-  const N = nomiDa(t); if (!N.length) { avvisa("Scrivi cosa ti serve"); return; }
+  const N = vociDa(t); if (!N.length) { avvisa("Scrivi cosa ti serve"); return; }
   const L = listaS(), gia = L.map((x) => x.n.toLowerCase()).concat(mancaC().map(([x]) => x.n.toLowerCase())); let n = 0;
-  for (const nome of N) if (!gia.includes(nome.toLowerCase())) { L.push({ n: nome }); gia.push(nome.toLowerCase()); n++; }
+  for (const v of N) if (!gia.includes(v.n.toLowerCase())) { L.push(v); gia.push(v.n.toLowerCase()); n++; }
   if (!n) { avvisa(N.length === 1 ? "È già in lista" : "Sono già in lista"); return; }
   vib(); salva(); tieni(disegna); const i = $("sNuovo"); if (i) i.focus();
 }
@@ -3518,40 +3617,43 @@ function spuntaCasa(i) { const x = casaL()[i]; if (!x) return; x.k = x.k ? 0 : 1
 function togliSpesa(i) { listaS().splice(i, 1); salva(); tieni(disegna); }
 function svuotaSpesa() { if (!confirm("Svuoto la lista scritta a mano? Le cose che mancano in casa restano.")) return; S.spesa.l = []; salva(); tieni(disegna); }
 function fineSpesa() {
-  const C = casaL(); let n = 0;
-  for (const x of C) if (x.st >= 1 && x.k) { x.st = 0; x.k = 0; delete x.sc; if (x.d === "c") x.cg = oggi(); n++; }
-  const L = listaS(), presi = L.filter((x) => x.x);
-  for (const p of presi) { const c = C.find((x) => x.n.toLowerCase() === p.n.toLowerCase()); if (c) { c.st = 0; c.k = 0; delete c.sc; } }
+  const C = casaL(); let tor = 0; const nuovi = { f: 0, p: 0 };
+  for (const x of C) if (x.st >= 1 && x.k) { x.st = 0; x.k = 0; delete x.sc; if (x.d === "c") x.cg = oggi(); tor++; }
+  const L = listaS();
+  for (const p of L.filter((x) => x.x)) {
+    const c = C.find((x) => x.n.toLowerCase() === p.n.toLowerCase());
+    if (c) { c.st = 0; c.k = 0; delete c.sc; if (c.d === "c") c.cg = oggi(); if (p.q) { c.q = p.q; c.u = p.u; } tor++; }
+    else { const d = luogoDi(p.n); C.push(Object.assign({ n: p.n, d, st: 0 }, p.q ? { q: p.q, u: p.u } : {})); nuovi[d]++; }
+  }
   S.spesa.l = L.filter((x) => !x.x); vib(); salva(); tieni(disegna);
-  avvisa(n ? "Spesa fatta: " + n + (n === 1 ? " cosa torna" : " cose tornano") + " in casa" : "Spesa fatta");
+  const parti = [nuovi.p ? nuovi.p + " in dispensa" : "", nuovi.f ? nuovi.f + " in frigo" : "", tor ? tor + " di nuovo a posto" : ""].filter(Boolean);
+  avvisa(parti.length ? "Spesa fatta: " + parti.join(", ") : "Spesa fatta");
 }
 function vLista() {
   const L = listaS(), M = mancaC(), tot = L.length + M.length, presi = L.filter((x) => x.x).length + M.filter(([x]) => x.k).length;
   const ord = (a, b) => corsia(a.n) - corsia(b.n) || a.n.localeCompare(b.n);
-  const rigaM = ([x, i]) => `<li class="spL ${x.k ? "on" : ""}" role="checkbox" aria-checked="${!!x.k}" onclick="spuntaCasa(${i})">${thC(x.n)}<span><b>${esc(x.n)}</b><small>${LUOGO[x.d]} · ${statoT[x.st]}</small></span><i class="chkC"></i></li>`;
-  const rigaL = (x) => { const i = L.indexOf(x); return `<li class="spL ${x.x ? "on" : ""}" role="checkbox" aria-checked="${!!x.x}" onclick="spuntaSpesa(${i})">${thC(x.n)}<span><b>${esc(x.n)}</b><small>${esc(famC(x.n).toLowerCase())}</small></span><button class="ico" aria-label="Togli dalla lista" onclick="event.stopPropagation();togliSpesa(${i})">✕</button><i class="chkC"></i></li>`; };
+  const rigaM = ([x, i]) => `<li class="spL ${x.k ? "on" : ""}" role="checkbox" aria-checked="${!!x.k}" onclick="spuntaCasa(${i})">${thC(x.n)}<span><b>${esc(x.n)}</b><small>${LUOGO[x.d]} · ${statoT[x.st]}</small></span>${pillQ(x, "c" + i)}<i class="chkC"></i></li>`;
+  const rigaL = (x) => { const i = L.indexOf(x); return `<li class="spL ${x.x ? "on" : ""}" role="checkbox" aria-checked="${!!x.x}" onclick="spuntaSpesa(${i})">${thC(x.n)}<span><b>${esc(x.n)}</b><small>${esc(famC(x.n).toLowerCase())}</small></span>${pillQ(x, "s" + i)}<button class="ico" aria-label="Togli dalla lista" onclick="event.stopPropagation();togliSpesa(${i})">✕</button><i class="chkC"></i></li>`; };
   const Ms = M.slice().sort((a, b) => (a[0].k || 0) - (b[0].k || 0) || ord(a[0], b[0])), Ls = L.slice().sort((a, b) => (a.x || 0) - (b.x || 0) || ord(a, b));
   let h = `<div class="scontrino"><div><small>Nel carrello</small><b>${presi}<u> di ${tot}</u></b></div><i class="barra"><i style="width:${tot ? Math.round((presi / tot) * 100) : 0}%"></i></i>
-      <small>${!tot ? "Lista vuota: scrivi qui sotto, oppure segna come finito quello che hai in frigo o in dispensa." : presi === tot ? "Hai preso tutto: tocca «Ho finito la spesa»." : "Tocca una riga quando la metti nel carrello."}</small></div>
-    <div class="riga"><input id="sNuovo" placeholder="Cosa ti serve? Anche più cose, con la virgola" autocomplete="off" enterkeyhint="done" oninput="$('sBox').open=true;$('sIdee').innerHTML=suggSpesa(this.value)" onkeydown="if(event.key==='Enter')piuSpesa(this.value)">
-      <button class="pri" style="flex:none;width:56px;padding:0;font-size:26px" aria-label="Aggiungi alla lista" onclick="piuSpesa($('sNuovo').value)">+</button></div>
-    <details class="ideeC" id="sBox" ${spesaIdee ? "open" : ""} ontoggle="spesaIdee=this.open"><summary>Idee dal tuo piano</summary><div class="chips" id="sIdee">${suggSpesa("")}</div></details>`;
+      <small>${!tot ? "Lista vuota: scrivi qui sotto o scegli dal tuo piano." : presi === tot ? "Hai preso tutto: tocca «Ho finito la spesa»." : "Tocca una riga quando la metti nel carrello."}</small></div>
+    <div class="riga"><input id="sNuovo" placeholder="Es. pollo 500 g, uova 6, latte 1 l" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter')piuSpesa(this.value)">
+      <button class="pri" style="flex:none;width:56px;padding:0;font-size:26px" aria-label="Aggiungi alla lista" onclick="piuSpesa($('sNuovo').value)">+</button></div>` + slotPiano("s");
   if (M.length) h += `<h2>Manca in casa <small class="muto">${M.length}</small></h2><ul class="listaC">${Ms.map(rigaM).join("")}</ul>`;
   if (L.length) h += `<h2>Da comprare <small class="muto">${L.length}</small></h2><ul class="listaC">${Ls.map(rigaL).join("")}</ul>`;
-  if (presi) h += `<button class="pri largo grosso" onclick="fineSpesa()">Ho finito la spesa</button>`;
+  if (presi) h += `<button class="pri largo grosso" onclick="fineSpesa()">Ho finito la spesa</button><p class="muto conta">Quello che hai preso finisce da solo in casa: in frigo le cose da frigo, il resto in dispensa.</p>`;
   if (L.length) h += `<button class="largo per" onclick="svuotaSpesa()">Svuota la lista scritta a mano</button>`;
-  if (!M.length && !casaL().length) h += `<p class="muto conta">Se in frigo o in dispensa metti le cose che compri sempre, quando finiscono compaiono qui da sole.</p>`;
   return h;
 }
 
 /* ---- 2 · Frigo: un frigorifero disegnato, congelatore in alto e frigo sotto, con le cose in riquadri con la foto ---- */
 function tessera(x, i) {
   const info = x.st === 2 ? "finito" : x.st === 1 ? "sta finendo" : x.d === "c" ? daQuanto(x.cg) : scadeT(x);
-  return `<button class="cosa s${x.st}${prestoC(x) ? " presto" : ""}" onclick="apriCosa(${i})"><i class="thC" style="background-image:url(${fotoC(x.n)})"></i><b>${esc(x.n)}</b><small>${info || "c'è"}</small></button>`;
+  return `<button class="cosa s${x.st}${prestoC(x) ? " presto" : ""}" onclick="apriCosa(${i})"><i class="thC" style="background-image:url(${fotoC(x.n)})"></i><b>${esc(x.n)}</b>${x.q && x.st < 2 ? `<em>${qT(x)}</em>` : ""}<small>${info || "c'è"}</small></button>`;
 }
 function vano(d, titolo, cls) {
-  const C = casaL(), V = C.map((x, i) => [x, i]).filter(([x]) => x.d === d)
-    .sort((a, b) => a[0].st - b[0].st || (a[0].sc || "9") .localeCompare(b[0].sc || "9") || a[0].n.localeCompare(b[0].n));
+  const V = casaL().map((x, i) => [x, i]).filter(([x]) => x.d === d)
+    .sort((a, b) => a[0].st - b[0].st || (a[0].sc || "9").localeCompare(b[0].sc || "9") || a[0].n.localeCompare(b[0].n));
   return `<div class="vano ${cls}"><div class="vtesta"><b>${titolo}</b><small>${V.length ? V.length + (V.length === 1 ? " cosa" : " cose") : "vuoto"}</small></div>
     <div class="cose">${V.map(([x, i]) => tessera(x, i)).join("")}<button class="cosa piu" onclick="foglioAgg('${d}')"><em>+</em><small>Aggiungi</small></button></div></div>`;
 }
@@ -3559,71 +3661,65 @@ function vFrigo() {
   const P = casaL().filter(prestoC);
   return (P.length ? `<div class="avvisoC"><b>Da usare presto</b><small>${P.map((x) => esc(x.n) + " · " + scadeT(x)).join("<br>")}</small></div>` : "") +
     `<div class="frigo"><i class="maniglia"></i>${vano("c", "Congelatore", "gelo")}${vano("f", "Frigo", "")}</div>
-    <p class="muto conta">Tocca una cosa per dire se sta finendo, metterci la scadenza o spostarla. Quando finisce va da sola nella spesa.</p>`;
+    <p class="muto conta">Tocca una cosa per dire se sta finendo, scrivere quanta ce n'è o la scadenza. Quando finisce va da sola nella spesa.</p>`;
 }
 
 /* ---- 3 · Dispensa: gli scaffali, ogni cosa è un barattolo pieno, a metà o vuoto ---- */
 function vDispensa() {
   const V = casaL().map((x, i) => [x, i]).filter(([x]) => x.d === "p").sort((a, b) => corsia(a[0].n) - corsia(b[0].n) || a[0].n.localeCompare(b[0].n));
-  const tutti = V.map(([x, i]) => `<button class="vaso s${x.st}" onclick="apriCosa(${i})"><i class="tappo"></i><i class="corpo" style="background-image:url(${fotoC(x.n)})"><i class="vuotoC"></i><i class="livC"></i></i><b>${esc(x.n)}</b><small>${statoT[x.st]}</small></button>`)
+  const tutti = V.map(([x, i]) => `<button class="vaso s${x.st}" onclick="apriCosa(${i})"><i class="tappo"></i><i class="corpo" style="background-image:url(${fotoC(x.n)})"><i class="vuotoC"></i><i class="livC"></i></i><b>${esc(x.n)}</b><small>${x.st ? statoT[x.st] : qT(x) || "c'è"}</small></button>`)
     .concat(`<button class="vaso piu" onclick="foglioAgg('p')"><i class="tappo"></i><i class="corpo"><em>+</em></i><b>Aggiungi</b><small>&nbsp;</small></button>`);
   let r = ""; for (let i = 0; i < tutti.length; i += 4) r += `<div class="mensola">${tutti.slice(i, i + 4).join("")}</div>`;
   return `<div class="dispensa">${r}</div>
     <div class="legendaC"><span><i class="mini s0"></i>c'è</span><span><i class="mini s1"></i>sta finendo</span><span><i class="mini s2"></i>finito: è nella spesa</span></div>`;
 }
 
-/* ---- aggiungere: un foglio che resta aperto, si scrive (anche più cose con la virgola) o si toccano le idee dal piano ---- */
-const idDove = { f: "al frigo", c: "al congelatore", p: "in dispensa" };
-function ideeCasa(d) {
-  const gia = casaL().filter((x) => x.d === d).map((x) => x.n.toLowerCase());
-  return ideeSpesa().filter((n) => !gia.includes(n.toLowerCase()) && (d === "f" ? FAM_FRIGO.includes(famC(n)) : d === "c" ? FAM_GELO.includes(famC(n)) : !FAM_FRIGO.includes(famC(n))));
-}
+/* ---- aggiungere in casa: si scrive (anche più cose con la virgola, con la quantità) o si sceglie dal piano per categoria ---- */
 function corpoAgg(d) {
-  const I = ideeCasa(d);
-  return testaFoglio("Aggiungi " + idDove[d]) + `<p class="muto">Metti solo le cose che vuoi tenere d'occhio, quelle che compri sempre. Puoi scriverne più di una, separate dalla virgola.</p>
-    <div class="riga"><input id="cNuovo" placeholder="${{ f: "Es. petto di pollo, yogurt, uova", c: "Es. merluzzo, verdure, piselli", p: "Es. riso, pasta, olio" }[d]}" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter')aggCasa(this.value,'${d}',1)">
-      <button class="pri" style="flex:none;width:56px;padding:0;font-size:26px" aria-label="Aggiungi" onclick="aggCasa($('cNuovo').value,'${d}',1)">+</button></div>` +
-    (I.length ? `<div class="eti" style="margin-top:16px">Dal tuo piano · un tocco e c'è</div><div class="chips">${I.map((n) => `<button class="chip" data-n="${esc(n)}" onclick="aggCasa(this.dataset.n,'${d}')">+ ${esc(n)}</button>`).join("")}</div>` : "") +
-    `<p class="muto" style="margin-top:14px">${d === "c" ? "La data in cui l'hai congelato la metto io: oggi. Si cambia toccando la cosa." : "La scadenza non serve: se la vuoi, tocca la cosa dopo averla aggiunta."}</p>
+  return testaFoglio("Aggiungi " + idDove[d]) + `<p class="muto">Metti le cose che vuoi tenere d'occhio. Puoi scriverne più di una con la virgola, anche con la quantità.</p>
+    <div class="riga"><input id="cNuovo" placeholder="${{ f: "Es. petto di pollo 500 g, uova 6", c: "Es. merluzzo 400 g, piselli", p: "Es. riso 1 kg, pasta, olio" }[d]}" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter')aggCasa(this.value,'${d}')">
+      <button class="pri" style="flex:none;width:56px;padding:0;font-size:26px" aria-label="Aggiungi" onclick="aggCasa($('cNuovo').value,'${d}')">+</button></div>` + slotPiano(d) +
+    `<p class="muto" style="margin-top:6px">${d === "c" ? "La data in cui l'hai congelato la metto io: oggi. Si cambia toccando la cosa." : "La scadenza non serve: se la vuoi, tocca la cosa dopo averla aggiunta."}</p>
     <button class="pri largo" onclick="chiudi()">Fatto</button>`;
 }
 function foglioAgg(d) { apri(corpoAgg(d)); }
-function aggCasa(t, d, daCampo) {
-  const N = nomiDa(t); if (!N.length) { avvisa("Scrivi cosa vuoi tenere d'occhio"); return; }
+function aggCasa(t, d) {
+  const N = vociDa(t); if (!N.length) { avvisa("Scrivi cosa vuoi tenere d'occhio"); return; }
   const C = casaL(); let n = 0;
-  for (const nome of N) {
-    const g = C.find((x) => x.n.toLowerCase() === nome.toLowerCase() && x.d === d);
-    if (g) { g.st = 0; g.k = 0; continue; }
-    C.push(Object.assign({ n: nome, d, st: 0 }, d === "c" ? { cg: oggi() } : {})); n++;
+  for (const v of N) {
+    const g = C.find((x) => x.n.toLowerCase() === v.n.toLowerCase() && x.d === d);
+    if (g) { g.st = 0; g.k = 0; if (v.q) { g.q = v.q; g.u = v.u; } continue; }
+    C.push(Object.assign({ n: v.n, d, st: 0 }, v.q ? { q: v.q, u: v.u } : {}, d === "c" ? { cg: oggi() } : {})); n++;
   }
   vib(); salva(); tieni(disegna); $("foglio").innerHTML = corpoAgg(d);
-  avvisa(n ? (n === 1 ? N[0] + " aggiunto " : n + " cose aggiunte ") + idDove[d] : "C'era già: segnato come presente");
-  if (daCampo) { const i = $("cNuovo"); if (i) i.focus(); }
+  avvisa(n ? (n === 1 ? N[0].n + " aggiunto " : n + " cose aggiunte ") + idDove[d] : "C'era già: segnato come presente");
+  const i = $("cNuovo"); if (i) i.focus();
 }
 
-/* ---- una cosa: quanto ce n'è, scadenza (o data del congelamento), dove sta ---- */
+/* ---- una cosa: quanto ce n'è, quantità, scadenza (o data del congelamento), dove sta ---- */
 function corpoCosa(i) {
   const x = casaL()[i]; if (!x) return "";
   const chipD = (g, t) => { const v = g == null ? "" : meno(oggi(), -g); return `<button class="chip ${(x.sc || "") === v ? "ok" : ""}" onclick="dataCosa(${i},'sc','${v}')">${t}</button>`; };
   return testaFoglio(esc(x.n)) +
     `<div class="eti" style="margin-top:12px">Quanto ce n'è</div><div class="statiC">${statoT.map((t, s) => `<button class="${x.st === s ? "qui" : ""}" onclick="statoCosa(${i},${s})"><i class="mini s${s}"></i>${maiusc(t)}</button>`).join("")}</div>
-    ${x.st >= 1 ? `<p class="muto">È nella lista della spesa, sotto «Manca in casa».</p>` : ""}` +
+    ${x.st >= 1 ? `<p class="muto">È nella lista della spesa, sotto «Manca in casa».</p>` : ""}
+    <button class="blocco qBlocco" onclick="apriQ('c${i}')"><span><b>Quantità</b><small>${qT(x) || "Non scritta: tocca per metterla, in pezzi o in grammi"}</small></span><em>›</em></button>` +
     (x.d === "c"
-      ? `<div class="eti" style="margin-top:16px">Congelato il</div><input type="date" value="${x.cg || ""}" max="${oggi()}" onchange="dataCosa(${i},'cg',this.value)">${x.cg ? `<p class="muto">${maiusc(daQuanto(x.cg))} nel congelatore.</p>` : ""}`
-      : `<div class="eti" style="margin-top:16px">Scadenza <small class="muto">· facoltativa</small></div><div class="chips">${chipD(null, "Nessuna")}${chipD(2, "Tra 2 giorni")}${chipD(5, "Tra 5 giorni")}${chipD(7, "Tra una settimana")}${chipD(30, "Tra un mese")}</div>
+      ? `<div class="eti" style="margin-top:6px">Congelato il</div><input type="date" value="${x.cg || ""}" max="${oggi()}" onchange="dataCosa(${i},'cg',this.value)">${x.cg ? `<p class="muto">${maiusc(daQuanto(x.cg))} nel congelatore.</p>` : ""}`
+      : `<div class="eti" style="margin-top:6px">Scadenza <small class="muto">· facoltativa</small></div><div class="chips">${chipD(null, "Nessuna")}${chipD(2, "Tra 2 giorni")}${chipD(5, "Tra 5 giorni")}${chipD(7, "Tra una settimana")}${chipD(30, "Tra un mese")}</div>
          <input type="date" style="margin-top:10px" value="${x.sc || ""}" onchange="dataCosa(${i},'sc',this.value)">${x.sc ? `<p class="muto">${maiusc(scadeT(x))}.</p>` : ""}`) +
     `<div class="eti" style="margin-top:16px">Dove sta</div><div class="statiC">${["f", "c", "p"].map((d) => `<button class="${x.d === d ? "qui" : ""}" onclick="spostaCosa(${i},'${d}')">${LUOGO[d]}</button>`).join("")}</div>
-    <div class="g2" style="margin-top:18px"><button class="per" onclick="togliCosa(${i})">Non seguirla più</button><button class="pri" onclick="chiudi()">Fatto</button></div>`;
+    <div class="g2" style="margin-top:18px"><button class="per" onclick="togliCosa(${i})">Togli ${DAL[x.d]}</button><button class="pri" onclick="chiudi()">Fatto</button></div>`;
 }
-function apriCosa(i) { apri(corpoCosa(i)); }
-function rifaiCosa(i) { salva(); tieni(disegna); if (foglioSu) $("foglio").innerHTML = corpoCosa(i); }
+function apriCosa(i) { qDaSpesa = false; apri(corpoCosa(i)); }
+function rifaiCosa(i) { salva(); tieni(disegna); if (foglioSu) { const f = $("foglio"), y = f.scrollTop; f.innerHTML = corpoCosa(i); f.scrollTop = y; } }
 function statoCosa(i, s) {
   const x = casaL()[i]; if (!x) return; const prima = x.st; x.st = s; if (!s) x.k = 0; vib(); rifaiCosa(i);
   if (s >= 1 && prima === 0) avvisa(x.n + ": aggiunto alla lista della spesa");
 }
 function dataCosa(i, k, v) { const x = casaL()[i]; if (!x) return; if (v) x[k] = v; else delete x[k]; rifaiCosa(i); }
 function spostaCosa(i, d) { const x = casaL()[i]; if (!x || x.d === d) return; x.d = d; if (d === "c") { x.cg = x.cg || oggi(); delete x.sc; } rifaiCosa(i); }
-function togliCosa(i) { const x = casaL()[i]; if (!x || !confirm("Non segui più " + x.n + "?")) return; casaL().splice(i, 1); salva(); chiudi(); tieni(disegna); }
+function togliCosa(i) { const x = casaL()[i]; if (!x || !confirm("Tolgo " + x.n + " " + DAL[x.d] + "? Non comparirà più nella spesa quando finisce.")) return; casaL().splice(i, 1); salva(); chiudi(); tieni(disegna); }
 
 /* ---- foto dei progressi: restano sul telefono, in IndexedDB (troppo grandi per localStorage). S.foto = [{d, posa}] è l'indice ---- */
 const POSE = [["fronte", "Fronte"], ["lato", "Lato"], ["retro", "Retro"]];
