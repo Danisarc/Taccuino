@@ -868,7 +868,7 @@ function chiudi() {
 /* La prima voce della barra ha tre livelli: home (riassunto e blocchi), e da lì la scheda o il piano alimentare.
    sub: schermata aperta dalla home · schedaSel: seduta scelta a mano nella scheda */
 let sub = null, schedaSel = null;
-function apriSub(s) { if (!s) { pastoAperto = undefined; giornoS = giornoC = null; } sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
+function apriSub(s) { selCI = null; if (!s) { pastoAperto = undefined; giornoS = giornoC = null; } sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
 function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : sub === "spesa" ? vSpesa() : sub === "prep" ? vPrep() : sub === "integ" ? vInteg() : sub === "ciclo" ? vCiclo() : vHome(); }
 function quadro() {
   const d = oggi(), f = fase(d), lun = lunedi(d), domenica = meno(lun, -6);
@@ -2656,18 +2656,19 @@ let meseCI = null;      // "AAAA-MM", null = mese di oggi
 function vCiclo() {
   const C = cicli(), P = previsti(C), st = statoCI(C), d0 = oggi(), mm = meseCI || d0.slice(0, 7), [a, m] = mm.split("-").map(Number);
   const nG = new Date(a, m, 0).getDate(), vuoti = (new Date(a, m - 1, 1).getDay() + 6) % 7;
-  const ieriF = (CI.g[meno(d0, 1)] || {}).f, oggiF = (CI.g[d0] || {}).f;
-  let h = `<div class="riga testata">${freccia("apriSub(null);profilo()")}<div><div class="sopra">Ciclo, sintomi e rapporti</div><h1>Personal</h1></div>
+    const nSel = selCI ? Object.keys(selCI).length : 0;
+  let h = `<div class="riga testata">${freccia(selCI ? "esciSelCI()" : "apriSub(null);profilo()")}<div><div class="sopra">Ciclo, sintomi e rapporti</div><h1>Personal</h1></div>
       <button class="info" aria-label="Come funziona" onclick="infoCiclo()">i</button></div>
-    <div class="card statoCI">${st.giorno ? `<div class="sopra">Oggi</div><div class="grande">Giorno ${st.giorno}</div>` : ""}<p>${esc(st.testo)}</p>
-      ${!oggiF ? `<button class="pri largo" style="margin-top:12px" onclick="cicloOggi()">${ieriF ? "Ciclo anche oggi" : "Il ciclo è iniziato oggi"}</button>` : ""}</div>
+    ${selCI ? `<div class="card statoCI selCI"><div class="grande">${nSel} ${nSel === 1 ? "giorno" : "giorni"}</div><p>Tocca nel calendario i giorni del ciclo, dal primo all'ultimo. Se è cominciato il mese scorso, passa al mese prima con ‹.</p>
+      <div class="g2" style="margin-top:12px"><button onclick="esciSelCI()">Annulla</button><button class="pri" onclick="salvaSelCI()">Salva</button></div></div>` : `<div class="card statoCI">${st.giorno ? `<div class="sopra">Oggi</div><div class="grande">Giorno ${st.giorno}</div>` : ""}<p>${esc(st.testo)}</p>
+      <button class="pri largo" style="margin-top:12px" onclick="entraSelCI()">Registra l'ultimo ciclo</button></div>`}
     <div class="card"><div class="riga tra"><button class="ico" aria-label="Mese prima" onclick="cambiaMeseCI(-1)">‹</button><b style="font-size:17px">${MESI[m - 1]} ${a}</b>
       <button class="ico" aria-label="Mese dopo" onclick="cambiaMeseCI(1)">›</button></div><div class="calCI">` + ["L", "M", "M", "G", "V", "S", "D"].map((x) => `<div class="gs">${x}</div>`).join("") + "<div></div>".repeat(vuoti);
   for (let i = 1; i <= nG; i++) {
     const d = mm + "-" + String(i).padStart(2, "0"), r = CI.g[d] || {}, c = [];
-    if (r.f) c.push("f"); else if (P[d]) c.push(P[d] === "ov" ? "fe ov" : P[d]);
-    if (d === d0) c.push("oggi"); if ((r.s && r.s.length) || r.u || r.r || r.n) c.push("dot");
-    h += `<button class="${c.join(" ")}" ${d > d0 ? "disabled" : `onclick="giornoCI('${d}')"`} aria-label="${i} ${MESI[m - 1]}">${i}</button>`;
+    if (selCI) { if (selCI[d]) c.push("f"); } else if (r.f) c.push("f"); else if (P[d]) c.push(P[d] === "ov" ? "fe ov" : P[d]);
+    if (d === d0) c.push("oggi"); if (!selCI && ((r.s && r.s.length) || r.u || r.r || r.n)) c.push("dot");
+    h += `<button class="${c.join(" ")}" ${d > d0 ? "disabled" : `onclick="${selCI ? "tocSelCI" : "giornoCI"}('${d}')"`} aria-label="${i} ${MESI[m - 1]}">${i}</button>`;
   }
   h += `</div><div class="legCI"><span><i style="background:var(--verde)"></i>ciclo</span><span><i style="border:1.5px dashed var(--verde)"></i>previsto</span>
       <span><i style="background:var(--verde3)"></i>fertile (stima)</span><span><i style="background:var(--verde3);box-shadow:0 0 0 2px rgba(61,220,132,.55) inset"></i>ovulazione (stima)</span><span><i style="background:var(--muto);width:6px;height:6px"></i>hai segnato qualcosa</span></div>
@@ -2687,6 +2688,19 @@ function vCiclo() {
 }
 function cambiaMeseCI(n) { const [a, m] = (meseCI || oggi().slice(0, 7)).split("-").map(Number), x = new Date(a, m - 1 + n, 1); meseCI = x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0"); tieni(disegna); }
 function rimandaCI(d) { if (S.inviatoFino && d <= S.inviatoFino) { S.inviatoFino = meno(d, 1); salva(); } }      // un ciclo segnato in un giorno già inviato torna da inviare
+/* "Registra l'ultimo ciclo": il calendario passa in modalità selezione (selCI = { data: true }), già con i giorni di flusso segnati;
+   si toccano i giorni del ciclo, anche cambiando mese, e Salva li segna con flusso medio (quelli già segnati tengono il loro) e toglie quelli spenti */
+let selCI = null;
+function entraSelCI() { selCI = {}; for (const d in CI.g) if (CI.g[d].f) selCI[d] = true; tieni(disegna); }
+function esciSelCI() { selCI = null; tieni(disegna); }
+function tocSelCI(d) { if (selCI[d]) delete selCI[d]; else selCI[d] = true; vib(); tieni(disegna); }
+function salvaSelCI() {
+  const cambiati = [];
+  for (const d in selCI) if (!(CI.g[d] || {}).f) { CI.g[d] = Object.assign(CI.g[d] || {}, { f: 2 }); cambiati.push(d); }
+  for (const d of Object.keys(CI.g)) if (CI.g[d].f && !selCI[d]) { delete CI.g[d].f; if (!Object.keys(CI.g[d]).length) delete CI.g[d]; cambiati.push(d); }
+  if (cambiati.length) rimandaCI(cambiati.sort()[0]);
+  salvaCI(); selCI = null; vib(); tieni(disegna); avvisa(cambiati.length ? "Ciclo salvato. Tocca un giorno per cambiare il flusso o segnare i sintomi" : "Nessun cambiamento");
+}
 function cicloOggi() { const d = oggi(), r = CI.g[d] || {}; r.f = r.f || 2; CI.g[d] = r; salvaCI(); vib(); tieni(disegna); avvisa("Segnato: flusso medio. Toccalo nel calendario per cambiarlo"); }
 let DC = null, dataCI = null;
 function giornoCI(d) {
@@ -2718,7 +2732,8 @@ function salvaGiornoCI() {
 function infoCiclo() {
   apri(testaFoglio("Come funziona") + `<div class="card"><ul>
       <li><b>Tocca un giorno</b> del calendario per segnare ciclo, sintomi, umore, rapporti e una nota. I giorni futuri non si toccano.</li>
-      <li><b>Il primo giorno</b> di flusso dopo almeno due giorni senza è l'inizio di un ciclo nuovo. Il tasto in alto lo segna per oggi con un tocco.</li>
+      <li><b>Registra l'ultimo ciclo</b>: tocca il tasto in alto, poi nel calendario i giorni del ciclo (anche nel mese prima, con ‹), e Salva. Servono per contare i giorni e stimare il prossimo.</li>
+      <li><b>Il primo giorno</b> di flusso dopo almeno due giorni senza è l'inizio di un ciclo nuovo.</li>
       <li><b>Le previsioni</b> usano la durata media dei tuoi ultimi cicli (fino a 6). Finché non ce ne sono due si parte da 28 giorni.</li>
       <li><b>Ovulazione e giorni fertili</b> sono stimati contando 14 giorni indietro dal ciclo previsto. Sono una stima indicativa: con cicli di durata diversa possono sbagliare di parecchi giorni. <b>Non è un metodo contraccettivo.</b></li>
       <li><b>Privacy</b>: tutto resta su questo telefono, in una memoria a parte. Al coach arriva solo il primo giorno di ogni ciclo, perché serve a leggere peso e gonfiore. Nella copia di sicurezza entrano solo i giorni di ciclo.</li>
@@ -3644,6 +3659,7 @@ function passoIndietro() {
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
   if (tab === "diario" && vistaFoto) { chiudiFoto(); return true; }
   if (tab !== "allena") { vai("allena"); return true; }
+  if (sub === "ciclo" && selCI) { esciSelCI(); return true; }
   if (sub === "ciclo") { apriSub(null); profilo(); return true; }
   if (sub) { apriSub(sub === "spesa" || sub === "prep" || sub === "integ" ? "cibo" : null); return true; }
   return false;
