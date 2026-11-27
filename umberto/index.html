@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#070b09">
+<meta name="theme-color" content="#0B1F4D">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -730,16 +730,25 @@ body[data-tema=scheda] .anello .aok { stroke:#E8F2FF; filter:drop-shadow(0 0 3px
 body[data-tema=scheda] .tredot i.on { box-shadow:0 0 6px rgba(142,197,255,.85); }
 body[data-tema=scheda] .torta { filter:drop-shadow(0 0 5px rgba(142,197,255,.4)); }
 body[data-tema=scheda] .tg-p { background:#8EC5FF; } body[data-tema=scheda] .tg-c { background:#D9B4FF; } body[data-tema=scheda] .tg-g { background:#FFE0B2; }
-body[data-tema=scheda] svg .braccio { stroke:#8EC5FF; } body[data-tema=scheda] svg .mano { fill:#8EC5FF; } body[data-tema=scheda] svg.corpo .musc { fill:#8EC5FF; }
+body[data-tema=scheda] svg .braccio { stroke:#8EC5FF; } body[data-tema=scheda] svg .mano { fill:#8EC5FF; }
 body[data-tema=scheda] .foto::before { background:linear-gradient(180deg,rgba(11,31,77,.05) 25%,rgba(11,31,77,.9)); }
 body[data-tema=scheda] .hero { border-color:rgba(142,197,255,.4); } body[data-tema=scheda] .hero::before { background:linear-gradient(165deg,rgba(11,31,77,.45),rgba(11,31,77,.88) 62%,rgba(11,31,77,.95)); }
 body[data-tema=scheda] .ban .sopra { color:#E8F2FF; } body[data-tema=scheda] .ban .pillola { background:rgba(11,31,77,.62); }
 body[data-tema=scheda] .blocco i, body[data-tema=scheda] .voceH i { color:var(--verde); }
 body[data-tema=scheda] .mini, body[data-tema=scheda] .blocco i.th, body[data-tema=scheda] .foto, body[data-tema=scheda] .fotoTesta, body[data-tema=scheda] img.prog { background-color:#142a62; }
+/* v61: figura del corpo più curata (pelle chiara sfumata, ombra interna, volumi sfumati, linee sottili) e schermata di avvio con la palette nuova */
+svg.corpo .pelle { fill:url(#cG); stroke:rgba(255,255,255,.6); stroke-width:.8; stroke-linejoin:round; }
+svg.corpo .musc { fill:#4b51b5; fill-opacity:.2; stroke:none; }
+svg.corpo .segni { fill:none; stroke:#1d2a6b; stroke-opacity:.36; stroke-width:1; stroke-linecap:round; }
+svg.corpo .capelli { fill:#2f3680; stroke:none; }
+svg.corpo .omb { fill:#7d83c9; }
+svg.corpo .an { stroke:#FF6B6B; stroke-width:3.2; } svg.corpo .np { fill:#FF6B6B; } svg.corpo .fl { stroke:#FF8A8A; }
+#avvio { background:radial-gradient(60% 45% at 85% 10%, rgba(142,197,255,.55), transparent 70%), radial-gradient(60% 45% at 10% 95%, rgba(255,224,178,.45), transparent 70%),
+  radial-gradient(70% 50% at 95% 95%, rgba(217,180,255,.6), transparent 70%), linear-gradient(160deg,#0B1F4D,#1d3a86 50%,#5a5bb0); }
 </style>
 </head>
 <body>
-<div id="avvio" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="avA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8af5ba"/><stop offset="1" stop-color="#2fc673"/></linearGradient><linearGradient id="avB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#52e696"/><stop offset="1" stop-color="#1f8f55"/></linearGradient></defs>
+<div id="avvio" aria-hidden="true"><svg viewBox="0 0 512 512"><defs><linearGradient id="avA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E3F0FF"/><stop offset="1" stop-color="#8EC5FF"/></linearGradient><linearGradient id="avB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0E4FF"/><stop offset="1" stop-color="#B98BF2"/></linearGradient></defs>
   <g transform="rotate(-32 256 256)"><rect x="150" y="238" width="212" height="36" rx="18" fill="url(#avB)"/><rect x="98" y="214" width="34" height="84" rx="15" fill="url(#avB)"/><rect x="380" y="214" width="34" height="84" rx="15" fill="url(#avB)"/><rect x="124" y="186" width="44" height="140" rx="19" fill="url(#avA)"/><rect x="344" y="186" width="44" height="140" rx="19" fill="url(#avA)"/></g></svg><b>Taccuino</b></div>
 <div id="vista"></div>
 
@@ -3414,7 +3423,7 @@ const SAGOME = {
     d: "M99.5 58H109.5C109.5 64 110 68 112 71C120 75 131 78 140 80C150 82 158 90 159 102C160 112 159 120 157.5 128C160 138 161.5 150 161 160C161 166 162 170 164 174C168 184 170 198 170.5 212C171 220 171.5 226 172 231C175 236 177.5 246 177 256C176.5 264 173 271 169 272C166 272.5 164.5 268 164.5 262C164 256 163.5 250 162.5 246C161 240 160.5 236 161 231C159.5 218 156.5 200 152.5 186C150.5 179 149 173 148 168C146.5 156 145 142 143.5 130C142.5 122 141.5 116 140.5 112C141 124 139.5 138 136.5 150C134 160 131.5 168 131 176C130.5 184 131.5 192 133 200C134.5 208 136 214 136.5 222C138 240 137.5 262 134.5 284C132.5 300 130 312 129.5 322C129 330 130 336 131.5 342C134.5 352 135 366 133 380C131.5 392 128.5 402 127.5 410C127.5 414 128.5 417 131 420C134 423 137 425 137 427.5H113C111.5 424 112.5 418 113.5 412C113 400 110 388 109.5 374C109 362 110.5 352 111.5 344C112 336 111.5 328 110.5 320C108.5 300 105.5 262 101.5 226L99.5 224",
     testa: "M100 9C113 9 119 19 119 32C119 36 118.5 40 117.5 44C116 53 109 61.5 100 62C91 61.5 84 53 82.5 44C81.5 40 81 36 81 32C81 19 87 9 100 9Z",
     muscoli: "M101.5 97C112 92 128 92 138 99C139.5 108 134 119 124 122C114 124 104 122 101.5 118ZM142 83C151 85 157 93 157.5 104C157 114 155 121 153 125C149 119 144.5 112 142 104C140 97 140 89 142 83ZM147 130C151 127 156 129 158 135C159.5 144 159 153 157 159C153.5 161 150.5 159 149 155C147.5 146 146.5 137 147 130ZM151 174C156 170 161.5 173 164 181C166.5 192 168 206 168.5 221L163.5 223C161.5 208 157 191 152 180ZM102 128H113C115 128 116 129.5 116 131.5V138C116 140 115 141 113 141H102ZM102 145H113C115 145 116 146.5 116 148.5V155C116 157 115 158 113 158H102ZM102 162H112.5C114.5 162 115.5 163.5 115.5 165.5V172C115.5 174 114.5 175 112.5 175H102ZM102 179H112C114 179 115 181 114.5 184C113.5 194 109 204 102 211ZM106.5 234C116 229 130 231 134 241C135.5 260 133.5 284 129.5 303C126 311 118 313 113.5 309C109.5 290 106.5 258 106.5 234ZM114 347C120 343 129.5 345 132 353C133.5 366 131.5 382 128.5 396L117 398C113 382 112 362 114 347Z",
-    linee: "M103 81C114 79.5 127 80 139 83M100 96V214M131.5 197C123 208 111 218 102.5 222M122 128C128 134 132 144 133 156M112.5 318C115 322 126 322 129 318M113 334C117 337 125 337 129 334M103.5 74L108 62M166 262V268M169.5 262V269M173 260V266",
+    linee: "M103 81C114 79.5 127 80 139 83M101 121C112 125.5 128 124 137.5 113M139 86C143 96 145.5 106 148 117M100 128V212M101 145H114.5M101 162H114M101 178H113.5M116.5 130C118 150 117 176 112.5 200M131.5 197C123 208 111 218 102.5 222M133.5 139L137.5 136M132.5 147L136.5 144.5M150.5 132C152.5 142 153.5 151 152.5 160M160.5 183C163.5 195 165.5 209 166.5 221M134 242C131.5 262 128.5 286 124.5 306M120.5 236C121.5 260 121.5 285 119.5 305M112 296C117.5 303 121.5 311 121 318M112.5 318C115 322 126 322 129 318M113 334C117 337 125 337 129 334M129 350C127 362 125 372 122.5 381M113.5 352C116.5 362 117.5 371 117 379M103.5 74L108 62M166 262V268M169.5 262V269M173 260V266",
     ombelico: [100, 186],
     a: { spalle: [100, 97, 60.5], petto: [100, 116, 42], braccio: [152.5, 141, 9.5], avamb: [158.5, 181, 9.5], vita: [100, 181, 32.5], fianchi: [100, 222, 38.5], coscia: [121.5, 268, 17.5], polp: [122, 362, 14.5] } },
   donna: {
@@ -3423,7 +3432,7 @@ const SAGOME = {
     capelli: "M100 4C80 4 73 20 75 40C76 56 73 72 67 84C78 88 90 84 93 72L95 58H105L107 72C110 84 122 88 133 84C127 72 124 56 125 40C127 20 120 4 100 4Z",
     frangia: "M82.5 30C84 18 91 11 100 11C109 11 116 18 117.5 30C110 26 104 20 100 14C96 20 90 26 82.5 30Z",
     muscoli: "M102.5 108C110 104 124 105 130.5 113C133 123 128 133 118 134C108 134.5 102.5 129 102.5 121ZM134 82C141 84 146 91 146.5 101C146.5 110 145.5 118 144 124C140 118 136 110 134.5 102C133 95 133 88 134 82ZM106 238C116 233 133 235 138 246C139 264 136.5 286 131.5 304C127.5 312 118 313 113 309C109 290 106 262 106 238ZM113 347C118.5 343 127.5 345 130 353C131.5 366 129.5 382 126.5 396L116 398C112 382 111 362 113 347Z",
-    linee: "M103 81C112 79.5 122 80 131 83M100 138V176M130 200C122 212 110 222 102.5 226M111.5 318C114 322 125 322 128 318M112 334C116 337 124 337 128 334M103 74L107 62M155 262V268M158.5 262V269M162 260V266",
+    linee: "M103 81C112 79.5 122 80 131 83M133 86C136 96 138.5 106 140.5 116M100 140V172M130 200C122 212 110 222 102.5 226M129 252C127 276 123.5 296 119 311M111.5 318C114 322 125 322 128 318M112 334C116 337 124 337 128 334M127 351C125 364 123 374 120.5 383M103 74L107 62M155 262V268M158.5 262V269M162 260V266",
     ombelico: [100, 180],
     a: { spalle: [100, 97, 50], petto: [100, 124, 36], braccio: [142.5, 141, 8.5], avamb: [148.5, 181, 9], vita: [100, 172, 26], fianchi: [100, 226, 43], coscia: [122, 270, 19], polp: [121, 362, 14] } },
 };
@@ -3459,13 +3468,18 @@ function figuraCorpo() {
     if (m[2] === "2") { anello(m, true, m[0], m[5]); anello(m, false, m[0] + "S", m[5] ? m[5] + "S" : null); }
     else anello(m, m[2] === "s", m[0], null);
   }
-  const meta = `<path class="pelle" d="${G.d}"/><path class="musc" d="${G.muscoli}"/><path class="segni" d="${G.linee}"/>`;
+  // v61: figura più curata. Le due metà stanno in un gruppo solo con un'ombra interna (cIn): niente cucitura al centro, volume dai bordi.
+  // I volumi dei muscoli (G.muscoli) sono sfumati (cSf), le linee di definizione sottili. Colori della palette: pelle chiara celeste→lilla.
+  const due = (cl, d) => `<path class="${cl}" d="${d}"/><path class="${cl}" transform="translate(200 0) scale(-1 1)" d="${d}"/>`;
   return `<svg class="corpo" viewBox="0 0 ${W} 436" role="img" aria-label="Figura del corpo con i punti dove si misura">
-    <defs><linearGradient id="corpoLuce" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".10"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>
+    <defs><linearGradient id="cG" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="436"><stop offset="0" stop-color="#F4F8FF"/><stop offset=".45" stop-color="#D5E0FB"/><stop offset="1" stop-color="#BDB5EE"/></linearGradient>
+      <filter id="cIn" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur in="SourceAlpha" stdDeviation="4.5" result="b"/>
+        <feComposite in="SourceAlpha" in2="b" operator="arithmetic" k2="1" k3="-1" result="bordo"/><feFlood flood-color="#2a3285" flood-opacity=".7"/>
+        <feComposite in2="bordo" operator="in" result="ombra"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="ombra"/></feMerge></filter>
+      <filter id="cSf" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.4"/></filter></defs>
     ${dietro}<g transform="translate(${OX} 0)">${G.capelli ? `<path class="capelli" d="${G.capelli}"/>` : ""}
-      <g>${meta}</g><g transform="translate(200 0) scale(-1 1)">${meta}</g>
-      <path class="luce" d="${G.d}"/><path class="luce" transform="translate(200 0) scale(-1 1)" d="${G.d}"/>
-      <ellipse class="pelle" cx="81.5" cy="36" rx="2.6" ry="5.5"/><ellipse class="pelle" cx="118.5" cy="36" rx="2.6" ry="5.5"/><path class="pelle" d="${G.testa}"/><path class="luce" d="${G.testa}"/>
+      <g filter="url(#cIn)">${due("pelle", G.d)}<ellipse class="pelle" cx="81.5" cy="36" rx="2.6" ry="5.5"/><ellipse class="pelle" cx="118.5" cy="36" rx="2.6" ry="5.5"/><path class="pelle" d="${G.testa}"/></g>
+      <g filter="url(#cSf)">${due("musc", G.muscoli)}</g>${due("segni", G.linee)}
       ${G.frangia ? `<path class="capelli" d="${G.frangia}"/>` : ""}<ellipse class="omb" cx="${G.ombelico[0]}" cy="${G.ombelico[1]}" rx="1.6" ry="2.4"/></g>
     ${davanti}${eti}</svg>`;
 }
