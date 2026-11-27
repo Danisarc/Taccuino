@@ -565,6 +565,25 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .g2.dove .cons{flex-basis:100%;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--verde);margin-top:-4px}
 .g2.dove button.pri .cons{color:#04130a}
 .famT{font-size:12px;margin:18px 4px 8px;color:var(--muto);text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
+/* v34: Personal (ciclo). Solo verde: ciclo pieno, previsto tratteggiato, finestra fertile in verde chiaro */
+.calCI { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:6px; }
+.calCI .gs { text-align:center; font-size:12px; color:var(--muto); padding:4px 0; }
+.calCI button { aspect-ratio:1; min-height:0; padding:0; border-radius:50%; background:transparent; border:1.5px solid transparent; position:relative; font-size:15px; font-variant-numeric:tabular-nums; }
+.calCI button.fe { background:var(--verde3); }
+.calCI button.ov { box-shadow:0 0 0 2px rgba(61,220,132,.55) inset; }
+.calCI button.pr { border:1.5px dashed var(--verde); background:transparent; }
+.calCI button.f { background:var(--verde); border-color:var(--verde); color:#06210f; font-weight:700; }
+.calCI button.oggi { outline:2px solid var(--testo); outline-offset:1px; font-weight:800; }
+.calCI button.dot::after { content:""; position:absolute; bottom:3px; left:50%; width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:var(--muto); }
+.calCI button.f.dot::after { background:#06210f; }
+.calCI button:disabled { opacity:.6; cursor:default; }
+.legCI { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12.5px; color:var(--muto); }
+.legCI span { display:flex; align-items:center; gap:6px; }
+.legCI i { width:14px; height:14px; border-radius:50%; display:inline-block; border:1.5px solid transparent; }
+.statoCI { text-align:center; }
+.statoCI .grande { font-family:var(--tit); font-size:34px; font-weight:800; line-height:1.1; }
+.statoCI p { margin:6px 0 0; color:var(--muto); }
+.cinque.umore button { font-size:24px; }
 </style>
 </head>
 <body>
@@ -850,7 +869,7 @@ function chiudi() {
    sub: schermata aperta dalla home · schedaSel: seduta scelta a mano nella scheda */
 let sub = null, schedaSel = null;
 function apriSub(s) { if (!s) { pastoAperto = undefined; giornoS = giornoC = null; } sub = s; schedaSel = null; disegna(); window.scrollTo(0, 0); }
-function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : sub === "spesa" ? vSpesa() : sub === "prep" ? vPrep() : sub === "integ" ? vInteg() : vHome(); }
+function vAllena() { return S.corso ? vSeduta() : sub === "scheda" ? vScheda() : sub === "cibo" ? vCibo() : sub === "spesa" ? vSpesa() : sub === "prep" ? vPrep() : sub === "integ" ? vInteg() : sub === "ciclo" ? vCiclo() : vHome(); }
 function quadro() {
   const d = oggi(), f = fase(d), lun = lunedi(d), domenica = meno(lun, -6);
   const fatte = {}; let sett = 0;       // sedute di pesi salvate questa settimana: è così che l'app sa se ti sei allenata
@@ -898,7 +917,7 @@ const prof = () => Object.assign({ nome: "", altezza: null }, S.profilo || {});
    Il peso non è in home (scelta di Rosa, 2026-11-24): si vede e si segna nel profilo. I passi si segnano da qui con un tocco: i passi li conta il telefono, l'app non può leggerli da sola. */
 const mila = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 const PASSI_MIN = 8000;
-function daInviare() { const da = S.inviatoFino || ""; return { s: S.sedute.filter((x) => x.data > da).length, g: Object.keys(S.diario).filter((d) => d > da).length }; }
+function daInviare() { const da = S.inviatoFino || ""; return { s: S.sedute.filter((x) => x.data > da).length, g: Object.keys(S.diario).filter((d) => d > da).length + cicli().ini.filter((d) => d > da).length }; }
 function mediaPassi(a) {
   const v = Object.keys(S.diario).filter((d) => d > meno(a, 7) && d <= a && S.diario[d].passi != null).map((d) => S.diario[d].passi);
   return v.length ? { m: v.reduce((x, y) => x + y, 0) / v.length, n: v.length } : null;
@@ -964,6 +983,7 @@ function profilo() {
     <h2>Il peso</h2><button class="dato" style="width:100%;min-height:0" onclick="segna('peso',null,1)"><span class="riga tra"><small>${R.peso != null ? "Peso di oggi" : m1 ? "Peso · media" : "Peso"}</small>${anello(pes7 / 4, V, Math.min(pes7, 4) + "/4")}</span>
         <b>${R.peso != null ? cnt(R.peso, it(R.peso), 1) : m1 ? cnt(m1.m.toFixed(1), it(m1.m.toFixed(1)), 1) : "–"} <u>kg</u></b>
         <em class="${R.peso == null ? "fai" : ""}">${R.peso == null ? "＋ Segna il peso" : ritmo(d).breve ? ritmo(d).breve : m1 && m0 ? (m1.m - m0.m >= 0 ? "+" : "") + it((m1.m - m0.m).toFixed(2)) + " kg in 7 giorni" : pes7 + (pes7 === 1 ? " pesata" : " pesate") + " su 4 in 7 giorni"}</em></button>${boxRitmo(d)}
+    <button class="blocco" onclick="chiudi();meseCI=null;apriSub('ciclo')"><i><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15.5" r="2"/></svg></i><span><b>Personal</b><small>${esc(statoCI(cicli()).breve)}</small></span><em>›</em></button>
     <h2>Il percorso</h2><div class="card spi">${r.map((x) => `<div><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div>`).join("")}</div>
     <p class="muto">Nome, altezza, pesate e tutto quello che segni restano su questo telefono.</p><button class="largo" onclick="chiudi()">Chiudi</button>`, true);
 }
@@ -2589,6 +2609,122 @@ function vCasa() {
     <p class="muto">Quando fai 20 ripetizioni pulite con RIR 2 anche così, servono manubri più pesanti. Una coppia regolabile fino a 10-12 kg basta a lungo.</p></div>`;
 }
 
+/* ============ PERSONAL: ciclo, sintomi, umore, rapporti (v34) ============
+   Si apre dal profilo, non dalla home. Tutto resta su questo telefono, in una memoria a parte (CHIAVE_CI):
+   nella copia di sicurezza entrano solo i giorni di ciclo, e al coach arriva solo il PRIMO GIORNO di ogni ciclo.
+   Rapporti, sintomi, umore e note non escono mai dal telefono.
+   CI.g[data] = { f: flusso 1 leggero · 2 medio · 3 abbondante, s: [sintomi], u: umore 1-5, r: "p" protetto | "n" non protetto, n: nota }
+   Un ciclo comincia dal primo giorno con flusso dopo almeno 2 giorni senza. Previsioni: media degli ultimi 6 cicli (15-60 giorni),
+   ovulazione stimata 14 giorni prima del ciclo dopo, finestra fertile dai 5 giorni prima al giorno dopo. È una stima indicativa. */
+const CHIAVE_CI = "taccuino-rosa-ciclo";
+let CI = { g: {} };
+try { const x = JSON.parse(localStorage.getItem(CHIAVE_CI)); if (x && x.g) CI = x; } catch (e) {}
+function salvaCI() { try { localStorage.setItem(CHIAVE_CI, JSON.stringify(CI)); } catch (e) { avvisa("Non riesco a salvare sul telefono"); } }
+const SINTOMI = ["Crampi", "Gonfiore", "Mal di testa", "Seno teso", "Acne", "Voglia di dolce", "Stanchezza", "Mal di schiena", "Nausea", "Perdite leggere", "Sbalzi di umore", "Insonnia"];
+const UMORI = ["😣", "🙁", "😐", "🙂", "😄"];
+const FLUSSO = ["Nessuno", "Leggero", "Medio", "Abbondante"];
+const MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+const piuG = (d, g) => meno(d, -g), diffG = (a, b) => giornoN(b) - giornoN(a);
+function cicli() {
+  const dd = Object.keys(CI.g).filter((d) => CI.g[d].f).sort(), ini = [], dur = []; let prec = null;
+  for (const d of dd) { if (prec && diffG(prec, d) <= 2) dur[dur.length - 1] = diffG(ini[ini.length - 1], d) + 1; else { ini.push(d); dur.push(1); } prec = d; }
+  const L = []; for (let i = 1; i < ini.length; i++) { const l = diffG(ini[i - 1], ini[i]); if (l >= 15 && l <= 60) L.push(l); }
+  const ul = L.slice(-6), media = ul.length ? Math.round(ul.reduce((a, b) => a + b, 0) / ul.length) : 28;
+  const chiusi = prec && diffG(prec, oggi()) <= 1 ? dur.slice(0, -1) : dur, dc = chiusi.slice(-6), durM = dc.length ? Math.round(dc.reduce((a, b) => a + b, 0) / dc.length) : 5;
+  const irreg = ul.length >= 3 && Math.max(...ul) - Math.min(...ul) > 7;
+  return { ini, dur, L, media, durM, irreg, stimata: !ul.length, ultimo: ini[ini.length - 1] || null, ultimoF: prec };
+}
+// giorni previsti: { data: "pr" ciclo previsto | "fe" fertile | "ov" ovulazione }, solo da oggi in avanti e dove non c'è ciclo segnato
+function previsti(C) {
+  const m = {}, d0 = oggi(); if (!C.ultimo) return m;
+  for (let k = 1; k <= 4; k++) {
+    const s = piuG(C.ultimo, C.media * k), ov = meno(s, 14);
+    for (let i = -5; i <= 1; i++) { const x = piuG(ov, i); if (x >= d0 && !(CI.g[x] || {}).f) m[x] = i === 0 ? "ov" : "fe"; }
+    for (let i = 0; i < C.durM; i++) { const x = piuG(s, i); if (x >= d0 && !(CI.g[x] || {}).f) m[x] = "pr"; }
+  }
+  return m;
+}
+// dove sei oggi: giorno del ciclo, prossimo ciclo, finestra fertile
+function statoCI(C) {
+  const d = oggi(); if (!C.ultimo) return { giorno: null, testo: "Segna il primo giorno del ciclo: da lì l'app conta i giorni e stima il prossimo.", breve: "Ciclo, sintomi e rapporti" };
+  const g = diffG(C.ultimo, d) + 1, prox = piuG(C.ultimo, C.media), tra = diffG(d, prox), ov = meno(prox, 14), fert = d >= meno(ov, 5) && d <= piuG(ov, 1);
+  const inCiclo = !!C.ultimoF && diffG(C.ultimoF, d) <= 1;
+  const p = inCiclo ? "Sei nei giorni del ciclo" : tra > 1 ? `Prossimo ciclo tra ${tra} giorni · ${nomeGiorno(prox)} ${dataIt(prox)}` : tra === 1 ? "Prossimo ciclo previsto domani" : tra === 0 ? "Ciclo previsto oggi" : `In ritardo di ${-tra} ${tra === -1 ? "giorno" : "giorni"} sulla stima`;
+  return { giorno: g, testo: p + (fert && !inCiclo ? " · oggi sei nella finestra fertile stimata" : ""), breve: `Giorno ${g} del ciclo · ` + (inCiclo ? "nei giorni del ciclo" : tra > 0 ? `prossimo tra ${tra} giorni` : tra === 0 ? "previsto oggi" : "in ritardo sulla stima") };
+}
+let meseCI = null;      // "AAAA-MM", null = mese di oggi
+function vCiclo() {
+  const C = cicli(), P = previsti(C), st = statoCI(C), d0 = oggi(), mm = meseCI || d0.slice(0, 7), [a, m] = mm.split("-").map(Number);
+  const nG = new Date(a, m, 0).getDate(), vuoti = (new Date(a, m - 1, 1).getDay() + 6) % 7;
+  const ieriF = (CI.g[meno(d0, 1)] || {}).f, oggiF = (CI.g[d0] || {}).f;
+  let h = `<div class="riga testata">${freccia("apriSub(null);profilo()")}<div><div class="sopra">Ciclo, sintomi e rapporti</div><h1>Personal</h1></div>
+      <button class="info" aria-label="Come funziona" onclick="infoCiclo()">i</button></div>
+    <div class="card statoCI">${st.giorno ? `<div class="sopra">Oggi</div><div class="grande">Giorno ${st.giorno}</div>` : ""}<p>${esc(st.testo)}</p>
+      ${!oggiF ? `<button class="pri largo" style="margin-top:12px" onclick="cicloOggi()">${ieriF ? "Ciclo anche oggi" : "Il ciclo è iniziato oggi"}</button>` : ""}</div>
+    <div class="card"><div class="riga tra"><button class="ico" aria-label="Mese prima" onclick="cambiaMeseCI(-1)">‹</button><b style="font-size:17px">${MESI[m - 1]} ${a}</b>
+      <button class="ico" aria-label="Mese dopo" onclick="cambiaMeseCI(1)">›</button></div><div class="calCI">` + ["L", "M", "M", "G", "V", "S", "D"].map((x) => `<div class="gs">${x}</div>`).join("") + "<div></div>".repeat(vuoti);
+  for (let i = 1; i <= nG; i++) {
+    const d = mm + "-" + String(i).padStart(2, "0"), r = CI.g[d] || {}, c = [];
+    if (r.f) c.push("f"); else if (P[d]) c.push(P[d] === "ov" ? "fe ov" : P[d]);
+    if (d === d0) c.push("oggi"); if ((r.s && r.s.length) || r.u || r.r || r.n) c.push("dot");
+    h += `<button class="${c.join(" ")}" ${d > d0 ? "disabled" : `onclick="giornoCI('${d}')"`} aria-label="${i} ${MESI[m - 1]}">${i}</button>`;
+  }
+  h += `</div><div class="legCI"><span><i style="background:var(--verde)"></i>ciclo</span><span><i style="border:1.5px dashed var(--verde)"></i>previsto</span>
+      <span><i style="background:var(--verde3)"></i>fertile (stima)</span><span><i style="background:var(--verde3);box-shadow:0 0 0 2px rgba(61,220,132,.55) inset"></i>ovulazione (stima)</span><span><i style="background:var(--muto);width:6px;height:6px"></i>hai segnato qualcosa</span></div>
+      <p class="muto" style="font-size:12.5px;margin:10px 0 0">I giorni fertili sono una <b>stima indicativa</b> fatta sul calendario: <b>non è un metodo contraccettivo</b>.</p></div>`;
+  if (C.irreg) h += `<div class="card consiglioCoach"><b>Cicli di durata diversa</b>Negli ultimi cicli la durata è cambiata di più di una settimana: le previsioni sono meno affidabili.</div>`;
+  h += `<h2>I tuoi cicli</h2>`;
+  if (!C.ini.length) h += `<div class="card vuoto"><b>Ancora nessun ciclo</b>Tocca un giorno nel calendario e scegli il flusso, oppure usa il tasto qui sopra il giorno in cui comincia.</div>`;
+  else {
+    h += `<div class="card spi"><div><b>Durata media del ciclo</b><span>${C.stimata ? "28 giorni (valore di partenza: serve un secondo ciclo per calcolarla)" : C.media + " giorni · su " + Math.min(C.L.length, 6) + (C.L.length === 1 ? " ciclo" : " cicli")}</span></div><div><b>Giorni di flusso</b><span>${C.durM} in media</span></div></div><div class="card spi">`;
+    for (let i = C.ini.length - 1; i >= Math.max(0, C.ini.length - 12); i--) {
+      const l = i < C.ini.length - 1 ? diffG(C.ini[i], C.ini[i + 1]) : null;
+      h += `<div><b>${nomeGiorno(C.ini[i])} ${dataIt(C.ini[i])}/${C.ini[i].slice(2, 4)}</b><span>${l ? "ciclo di " + l + " giorni" : "ciclo in corso · giorno " + (diffG(C.ini[i], oggi()) + 1)} · ${C.dur[i]} ${C.dur[i] === 1 ? "giorno" : "giorni"} di flusso</span></div>`;
+    }
+    h += `</div>`;
+  }
+  return h + `<p class="muto">Tutto quello che segni qui resta su questo telefono. Al coach arriva solo il primo giorno di ogni ciclo.</p>`;
+}
+function cambiaMeseCI(n) { const [a, m] = (meseCI || oggi().slice(0, 7)).split("-").map(Number), x = new Date(a, m - 1 + n, 1); meseCI = x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0"); tieni(disegna); }
+function rimandaCI(d) { if (S.inviatoFino && d <= S.inviatoFino) { S.inviatoFino = meno(d, 1); salva(); } }      // un ciclo segnato in un giorno già inviato torna da inviare
+function cicloOggi() { const d = oggi(), r = CI.g[d] || {}; r.f = r.f || 2; CI.g[d] = r; salvaCI(); vib(); tieni(disegna); avvisa("Segnato: flusso medio. Toccalo nel calendario per cambiarlo"); }
+let DC = null, dataCI = null;
+function giornoCI(d) {
+  dataCI = d; DC = JSON.parse(JSON.stringify(CI.g[d] || {})); if (!DC.s) DC.s = [];
+  const scelta = (k, v, t) => `<button class="chip ${DC[k] === v || (!DC[k] && v === 0) ? "ok" : ""}" onclick="sceltaCI(this,'${k}',${typeof v === "string" ? "'" + v + "'" : v})">${t}</button>`;
+  apri(testaFoglio(`${nomeGiorno(d)} ${dataIt(d)}`) +
+    `<div class="voce"><b>Ciclo</b><div class="chips">${FLUSSO.map((t, i) => scelta("f", i, t)).join("")}</div></div>
+    <div class="voce"><b>Sintomi</b><div class="chips">${SINTOMI.map((t, i) => `<button class="chip ${DC.s.includes(t) ? "ok" : ""}" onclick="sintomoCI(this,${i})">${esc(t)}</button>`).join("")}</div></div>
+    <div class="voce"><b>Umore</b><div class="cinque umore">${UMORI.map((t, i) => `<button class="${DC.u === i + 1 ? "on" : ""}" aria-label="Umore ${i + 1} su 5" onclick="sceltaCI(this,'u',${i + 1})">${t}</button>`).join("")}</div></div>
+    <div class="voce"><b>Rapporti</b><div class="chips">${scelta("r", 0, "Nessuno")}${scelta("r", "p", "Protetto")}${scelta("r", "n", "Non protetto")}</div></div>
+    <div class="voce"><b>Note</b><textarea id="ciNota" rows="2" placeholder="Quello che vuoi ricordare" oninput="DC.n=this.value">${esc(DC.n || "")}</textarea></div>
+    <button class="pri largo grosso" onclick="salvaGiornoCI()">Salva</button><button class="largo" onclick="chiudi()">Annulla</button>`);
+}
+// scelta singola: toccare di nuovo la voce scelta la toglie; 0 = nessuno. Nei chip "Nessuno" si accende quando non c'è niente.
+function sceltaCI(b, k, v) {
+  const togli = DC[k] === v || v === 0, box = b.parentNode, cl = box.classList.contains("cinque") ? "on" : "ok"; DC[k] = togli ? null : v;
+  for (const x of box.children) x.classList.remove(cl);
+  if (!togli) b.classList.add(cl); else if (cl === "ok") box.children[0].classList.add("ok");
+  vib();
+}
+function sintomoCI(b, i) { const t = SINTOMI[i], k = DC.s.indexOf(t); if (k < 0) DC.s.push(t); else DC.s.splice(k, 1); b.classList.toggle("ok", k < 0); vib(); }
+function salvaGiornoCI() {
+  const d = dataCI, r = {}, primaF = !!(CI.g[d] || {}).f;
+  if (DC.f) r.f = DC.f; if (DC.s.length) r.s = DC.s; if (DC.u) r.u = DC.u; if (DC.r) r.r = DC.r; if ((DC.n || "").trim()) r.n = DC.n.trim();
+  if (Object.keys(r).length) CI.g[d] = r; else delete CI.g[d];
+  if (!!r.f !== primaF) rimandaCI(d);
+  salvaCI(); vib(); chiudi(); tieni(disegna); avvisa("Salvato");
+}
+function infoCiclo() {
+  apri(testaFoglio("Come funziona") + `<div class="card"><ul>
+      <li><b>Tocca un giorno</b> del calendario per segnare ciclo, sintomi, umore, rapporti e una nota. I giorni futuri non si toccano.</li>
+      <li><b>Il primo giorno</b> di flusso dopo almeno due giorni senza è l'inizio di un ciclo nuovo. Il tasto in alto lo segna per oggi con un tocco.</li>
+      <li><b>Le previsioni</b> usano la durata media dei tuoi ultimi cicli (fino a 6). Finché non ce ne sono due si parte da 28 giorni.</li>
+      <li><b>Ovulazione e giorni fertili</b> sono stimati contando 14 giorni indietro dal ciclo previsto. Sono una stima indicativa: con cicli di durata diversa possono sbagliare di parecchi giorni. <b>Non è un metodo contraccettivo.</b></li>
+      <li><b>Privacy</b>: tutto resta su questo telefono, in una memoria a parte. Al coach arriva solo il primo giorno di ogni ciclo, perché serve a leggere peso e gonfiore. Nella copia di sicurezza entrano solo i giorni di ciclo.</li>
+    </ul></div><button class="largo" onclick="chiudi()">Chiudi</button>`);
+}
+
 /* ============ INVIO AL COACH ============ */
 function testoCoach(da) {
   let t = "";
@@ -2608,6 +2744,8 @@ function testoCoach(da) {
     t += "\nMisure del corpo in cm (data | " + cMis.map((c) => c[2]).join(" | ") + ")\n";
     for (const d of mm) t += d + " | " + cMis.map((c) => it(S.diario[d][c[0]])).join(" | ") + "\n";
   }
+  const ci = cicli().ini.filter((d) => d > da);      // dal Personal arriva solo il primo giorno del ciclo
+  if (ci.length) t += "\nCiclo, primo giorno: " + ci.join(", ") + "\n";
   const ff = (S.foto || []).filter((x) => x.d > da);
   if (ff.length) t += "\nFoto dei progressi scattate nell'app (te le mando a parte): " + ff.map((x) => x.d + " " + x.posa).join(", ") + "\n";
   const cc = Object.keys(S.cibo || {}).filter((d) => d > da).sort().filter((d) => totali(d)[0] > 0 || S.cibo[d].acqua);
@@ -2651,7 +2789,7 @@ async function condividi() { if (navigator.share) { try { await navigator.share(
 function segnaInviato() { S.inviatoFino = oggi(); salva(); periodo = "nuovi"; disegna(); avvisa("Segnato come inviato"); }
 function scarica() {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 1)], { type: "application/json" }));
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(Object.assign({}, S, { cicloFlusso: Object.fromEntries(Object.keys(CI.g).filter((d) => CI.g[d].f).map((d) => [d, CI.g[d].f])) }), null, 1)], { type: "application/json" }));
   a.download = "taccuino-rosa-" + oggi() + ".json"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 function ripristina(inp) {
@@ -2659,6 +2797,7 @@ function ripristina(inp) {
   const r = new FileReader();
   r.onload = () => { try { const x = JSON.parse(r.result); if (!x || !Array.isArray(x.sedute)) throw new Error("file non valido");
       if (!confirm("Sostituisco i dati di questo telefono con la copia (" + x.sedute.length + " sedute)?")) return;
+      const cf = x.cicloFlusso || {}; delete x.cicloFlusso; for (const d in cf) CI.g[d] = Object.assign(CI.g[d] || {}, { f: cf[d] }); salvaCI();
       S = Object.assign({ sedute: [], diario: {}, corso: null, inviatoFino: "" }, x); if (S.corso && !Array.isArray(S.corso.es)) S.corso = null; salva(); disegna(); avvisa("Copia ripristinata"); } catch (e) { avvisa("Copia non leggibile"); } };
   r.readAsText(f);
 }
@@ -3505,6 +3644,7 @@ function passoIndietro() {
   if (tab === "tecnica" && guida) { apriGuida(null); return true; }
   if (tab === "diario" && vistaFoto) { chiudiFoto(); return true; }
   if (tab !== "allena") { vai("allena"); return true; }
+  if (sub === "ciclo") { apriSub(null); profilo(); return true; }
   if (sub) { apriSub(sub === "spesa" || sub === "prep" || sub === "integ" ? "cibo" : null); return true; }
   return false;
 }
