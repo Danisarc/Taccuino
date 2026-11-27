@@ -607,6 +607,10 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .recapR .pR { width:14px; height:14px; }
 .recapR span { flex:1; min-width:0; } .recapR span b { display:block; font-size:15px; } .recapR small { color:var(--muto); font-size:13px; line-height:1.35; }
 .recapR em { flex:none; font-style:normal; font-family:var(--tit); font-weight:800; font-size:18px; font-variant-numeric:tabular-nums; }
+/* Fonti in fondo alle guide (dal 2026-11-27, richiesta di Daniele): cosa dice lo studio, quanto è provato, link */
+.fonti { padding:4px 16px 12px; } .fonti details { border-top:0; margin-top:0; }
+.fonti ul { margin:6px 0 0; padding-left:18px; } .fonti li { font-size:13px; line-height:1.4; margin:8px 0; color:var(--muto); }
+.fonti li b { color:var(--testo); } .fonti a { color:var(--verde); text-decoration:underline; word-break:break-word; }
 </style>
 </head>
 <body>
@@ -2629,8 +2633,11 @@ function vAddome() {
 }
 /* Guida Gonfiore: una PROPOSTA del coach, non ancora nel piano. Si decide insieme. Testo generale: niente riferimenti a condizioni di salute.
    Se viene accettata, diventa parte del piano alimentare e questa guida va riscritta di conseguenza. */
-/* v39: guida "Stare bene a tavola", copia in breve della sezione "Reflusso, intestino ed energia" e "Senza glutine" di atleti/rosa/piano/alimentazione.md.
+/* v39: guida "Stare bene a tavola", copia in breve delle sezioni su stomaco, intestino, energia e glutine del piano alimentare.
    Il sito è pubblico: niente nomi di disturbi né farmaci, si parla di bruciore, acidità, intestino, cali di energia. Se cambia il .md, aggiorna qui. */
+/* fontiGuida: le fonti in fondo a ogni guida, chiuse in un riquadro che si apre. Ogni voce: [argomento, cosa dicono e quanto è provato, [[testo del link, indirizzo]…]].
+   Regola (Daniele, 2026-11-27): tutto quello che si pubblica nelle app con un consiglio di salute o di alimentazione porta le sue fonti. */
+const fontiGuida = (v) => `<div class="card fonti"><details><summary>Fonti</summary><ul>${v.map((x) => `<li><b>${x[0]}</b>: ${x[1]}${(x[2] || []).map((l) => ` · <a href="${l[1]}" target="_blank" rel="noopener">${l[0]}</a>`).join("")}</li>`).join("")}</ul></details></div>`;
 function vTavola() {
   const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
   const tab = (t, r) => `<div class="card"><table><tr>${t.map((x) => `<th style="text-align:left">${x}</th>`).join("")}</tr>${r.map((x) => `<tr>${x.map((y, i) => `<td>${i ? y : "<b>" + y + "</b>"}</td>`).join("")}</tr>`).join("")}</table></div>`;
@@ -2666,7 +2673,16 @@ function vTavola() {
     "<b>Avena</b>: solo quella certificata. È il cereale che si contamina più spesso.",
     "<b>Attenzione a</b>: salse pronte, dadi e preparati per brodo, affettati e salsicce senza dicitura, spezie miste, birra, panature e fritture nello stesso olio di prodotti con glutine.",
     "<b>Fuori casa</b>: meglio i locali con il marchio Spiga Barrata per la ristorazione; la pizza solo dove la fanno senza glutine in un forno o uno spazio separato."]) +
-  `<p class="muto">Gli integratori da evitare sono nella pagina Integratori (Alimentazione, tre linee in alto a destra).</p>`;
+  `<p class="muto">Gli integratori da evitare sono nella pagina Integratori (Alimentazione, tre linee in alto a destra).</p>` + fontiGuida([
+    ["Stomaco leggero", "linea guida dell'American College of Gastroenterology (2022). Perdere il grasso in più: raccomandazione forte, prove moderate. Cena 2-3 ore prima, testata alzata, evitare i cibi che danno fastidio: consigliati, ma con prove deboli; i cibi cambiano da persona a persona. La tabella \"da preferire\" è pratica ragionevole, non provata da studi",
+      [["linea guida (PubMed)", "https://pubmed.ncbi.nlm.nih.gov/34807007/"], ["testo", "https://pmc.ncbi.nlm.nih.gov/articles/8754510"]]],
+    ["Kiwi", "studio controllato su 75 adulti con intestino pigro (2021): 2 kiwi al giorno per 4 settimane come 100 g di prugne secche o lo psillio, con meno gonfiore. Un secondo studio (2023) ha trovato i kiwi meglio dello psillio",
+      [["studio 2021", "https://gi.org/?p=55966"], ["registro dello studio", "https://clinicaltrials.gov/study/NCT03569527"], ["sintesi dei due studi", "https://monashfodmap.com/blog/research-update-kiwifruit-psyllium-and-prunes-which-one-better-constipation"]]],
+    ["Acqua, fibra graduale, passi", "pratica ragionevole: le prove sull'intestino sono limitate", []],
+    ["Cali di energia", "cosa fare durante un episodio: indicazione pratica, presa dalla regola usata per gli zuccheri bassi (15 g di zuccheri rapidi, poi si ricontrolla dopo 15 minuti). È scritta per chi ha il diabete: qui serve solo come primo aiuto, la causa la cerca il medico",
+      [["American Diabetes Association", "https://professional.diabetes.org/sites/dpro/files/2025-05/hypoglycemia-hcp-5-27-25.pdf"]]],
+    ["Senza glutine", "indicazioni dell'associazione italiana di riferimento: prodotti senza glutine sotto 20 parti per milione, alimenti a rischio contaminazione, avena solo se etichettata senza glutine (posizione del 2021, che consiglia di cominciarla sentito il medico)",
+      [["posizione sull'avena", "https://celiachia.it/assets/uploads/2021/09/posizione-avena-AIC-settembre-2021.pdf"], ["contaminazioni", "https://celiachia.it/assets/uploads/2022/02/A.05.Sito-Istituzionale-AIC-Supporto-editoriale-Contaminazioni.pdf"]]]]);
 }
 function vGonfiore() {
   const lista = (v) => `<div class="card"><ul>${v.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
