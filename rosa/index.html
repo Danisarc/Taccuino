@@ -590,6 +590,23 @@ button.giornoP { margin:12px 0 0; min-height:42px; font-size:14px; }
 .statoCI .grande { font-family:var(--tit); font-size:34px; font-weight:800; line-height:1.1; }
 .statoCI p { margin:6px 0 0; color:var(--muto); }
 .cinque.umore button { font-size:24px; }
+/* Resoconto del mese (Storico): ogni giorno è un cerchio in 4 spicchi, uno per obiettivo (palette viola) */
+.pR { display:inline-block; flex:none; width:10px; height:10px; border-radius:50%; }
+.pR.all { background:#C9C2E3; } .pR.pas { background:#8B7CC7; } .pR.cal { background:#5A3B8C; } .pR.acq { background:#7CC6F2; }
+.legR { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 10px; margin:12px 0 4px; font-size:13px; color:#C9C2E3; }
+.legR span { display:flex; align-items:center; gap:6px; }
+.calR { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:6px; }
+.calR .gs { text-align:center; font-size:12px; padding:4px 0; }
+.calR button { aspect-ratio:1; min-height:0; padding:0; border-radius:50%; background:transparent; border:0; position:relative; display:flex; align-items:center; justify-content:center; color:#F3F0FB; }
+.calR button svg { position:absolute; inset:0; width:100%; height:100%; }
+.calR button b { position:relative; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; text-shadow:0 1px 3px #0E0B1D; }
+.calR button.oggi::after { content:""; position:absolute; inset:-2px; border-radius:50%; border:2px solid #F3F0FB; }
+.calR button.fut { opacity:.35; cursor:default; }
+.recapR > div { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+.recapR > div:first-child { padding-top:0; } .recapR > div:last-child { border-bottom:0; padding-bottom:0; }
+.recapR .pR { width:14px; height:14px; }
+.recapR span { flex:1; min-width:0; } .recapR span b { display:block; font-size:15px; } .recapR small { color:var(--muto); font-size:13px; line-height:1.35; }
+.recapR em { flex:none; font-style:normal; font-family:var(--tit); font-weight:800; font-size:18px; font-variant-numeric:tabular-nums; }
 </style>
 </head>
 <body>
@@ -2415,8 +2432,70 @@ function salvaGiorno() {
 /* ============ STORICO ============ */
 const e1rm = (x) => (x.kg ? x.kg * (1 + x.rip / 30) : 0);
 const rirTesto = (e) => { const r = e.serie.map((x) => x.rir).filter((x) => x != null); return r.length ? " (RIR " + [...new Set(r)].map(it).join("-") + ")" : ""; };
+/* ============ RESOCONTO: il calendario del mese in cima allo Storico ============
+   v48 (Umberto v28, Rosa v38), scelte di Daniele: un colore per voce, un pallino sotto il giorno per ogni obiettivo raggiunto,
+   niente proteine, e sotto il calendario un recap chiaro. Unico posto dell'app con colori diversi dal verde (richiesta sua).
+   Obiettivi: allenamento = una seduta salvata quel giorno · passi ≥ PASSI_MIN · calorie entro il 10% del traguardo del giorno · acqua ≥ ACQUA_ML */
+const MESI_R = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+const VOCI_R = [["all", "Allenamento"], ["pas", "Passi"], ["cal", "Calorie"], ["acq", "Acqua"]];
+let meseR = null;      // "AAAA-MM", null = mese di oggi
+const tgCibo = (d) => (APP.onoff === false ? CIBO.on : CIBO[modoOn(d) ? "on" : "off"]);
+// per ogni voce: true raggiunto, false segnato ma non raggiunto, null non segnato
+function giornoR(d) {
+  const sed = S.sedute.filter((s) => s.data === d), t = totali(d), tg = tgCibo(d), x = S.diario[d] || {}, ac = (S.cibo[d] || {}).acqua || 0;
+  return { d, sed, t, tg, x, ac, ob: [sed.length > 0, x.passi != null ? x.passi >= PASSI_MIN : null, t[0] > 0 ? Math.abs(t[0] - tg.kcal) <= tg.kcal * 0.1 : null, ac ? ac >= ACQUA_ML : null],
+    pr: [sed.length ? 1 : 0, (x.passi || 0) / PASSI_MIN, t[0] / tg.kcal, ac / ACQUA_ML] };
+}
+const COL_R = ["#C9C2E3", "#8B7CC7", "#5A3B8C", "#7CC6F2"];
+// il giorno come cerchio in 4 spicchi (allenamento in alto a destra, poi in senso orario passi, calorie, acqua): pieno se raggiunto, appena accennato se no
+// v52: ogni spicchio si riempie man mano (pr = 0…1, in senso orario dentro lo spicchio); pieno quando l'obiettivo è raggiunto
+function spicchiR(pr) {
+  const r = 22, c = 24, pt = (a) => `${(c + r * Math.cos(a * Math.PI / 180)).toFixed(2)} ${(c + r * Math.sin(a * Math.PI / 180)).toFixed(2)}`;
+  const fetta = (a0, a1) => `M${c} ${c} L${pt(a0)} A${r} ${r} 0 0 1 ${pt(a1)} Z`;
+  return `<svg viewBox="0 0 48 48" aria-hidden="true">${pr.map((v, i) => { const a0 = -90 + i * 90 + 3, a1 = a0 + 84, q = Math.max(0, Math.min(1, v || 0));
+    return `<path d="${fetta(a0, a1)}" fill="rgba(201,194,227,.07)"/>` + (q > 0.01 ? `<path d="${fetta(a0, a0 + 84 * q)}" fill="${COL_R[i]}"/>` : ""); }).join("")}</svg>`;
+}
+const pallR = (k) => `<i class="pR ${k}"></i>`;
+function resoconto() {
+  const d0 = oggi(), mm = meseR || d0.slice(0, 7), [a, m] = mm.split("-").map(Number), nG = new Date(a, m, 0).getDate(), vuoti = (new Date(a, m - 1, 1).getDay() + 6) % 7;
+  const si = [0, 0, 0, 0], seg = [0, 0, 0, 0], passi = []; let nGiorni = 0;
+  let g = ["L", "M", "M", "G", "V", "S", "D"].map((x) => `<div class="gs">${x}</div>`).join("") + "<div></div>".repeat(vuoti);
+  for (let i = 1; i <= nG; i++) {
+    const d = mm + "-" + String(i).padStart(2, "0");
+    if (d > d0) { g += `<button disabled class="fut">${spicchiR([0, 0, 0, 0])}<b>${i}</b></button>`; continue; }
+    const R = giornoR(d); nGiorni++;
+    R.ob.forEach((v, k) => { if (v != null) seg[k]++; if (v) si[k]++; });
+    if (R.x.passi != null) passi.push(R.x.passi);
+    g += `<button class="${d === d0 ? "oggi" : ""}" onclick="giornoRes('${d}')" aria-label="${i} ${MESI_R[m - 1]}">${spicchiR(R.pr.map((v, k) => (R.ob[k] ? 1 : v)))}<b>${i}</b></button>`;
+  }
+  const gg = (n) => n + (n === 1 ? " giorno" : " giorni");
+  const recap = [
+    [`${si[0]} ${si[0] === 1 ? "seduta" : "sedute"}`, si[0] ? `in ${gg(nGiorni)}: circa ${it((si[0] / nGiorni * 7).toFixed(1))} a settimana, l'obiettivo è ${APP.nSett}` : "ancora nessuna seduta in questo mese"],
+    [`${si[1]} su ${seg[1]}`, seg[1] ? `giorni con almeno ${mila(PASSI_MIN)} passi · media ${mila(Math.round(passi.reduce((s, v) => s + v, 0) / passi.length))} al giorno` : "non hai ancora segnato i passi in questo mese"],
+    [`${si[2]} su ${seg[2]}`, seg[2] ? `giorni con le calorie in linea con il piano (entro il 10%)` : "non hai ancora segnato l'alimentazione in questo mese"],
+    [`${si[3]} su ${seg[3]}`, seg[3] ? `giorni in cui hai bevuto almeno ${litri(ACQUA_ML)} L` : "non hai ancora segnato l'acqua in questo mese"]];
+  return `<h2>Il mese</h2><div class="card viola"><div class="riga tra"><button class="ico" aria-label="Mese prima" onclick="cambiaMeseR(-1)">‹</button>
+      <b style="font-size:17px">${MESI_R[m - 1]} ${a}</b><button class="ico" aria-label="Mese dopo" onclick="cambiaMeseR(1)" ${mm >= d0.slice(0, 7) ? "disabled" : ""}>›</button></div>
+    <div class="legR">${VOCI_R.map((v) => `<span>${pallR(v[0])}${v[1]}</span>`).join("")}</div>
+    <div class="calR">${g}</div>
+    <p class="muto" style="font-size:12.5px;margin:10px 0 0">Ogni giorno ha quattro spicchi che si riempiono man mano: pieno = obiettivo raggiunto. Tocca un giorno per vedere i numeri.</p></div>
+    <h2>Com'è andato ${m === +d0.slice(5, 7) && a === +d0.slice(0, 4) ? "il mese finora" : MESI_R[m - 1]}</h2><div class="card recapR">` +
+    recap.map((r, k) => `<div>${pallR(VOCI_R[k][0])}<span><b>${VOCI_R[k][1]}</b><small>${r[1]}</small></span><em>${k && !seg[k] ? "–" : r[0]}</em></div>`).join("") + `</div>`;
+}
+function cambiaMeseR(n) { const [a, m] = (meseR || oggi().slice(0, 7)).split("-").map(Number), x = new Date(a, m - 1 + n, 1); meseR = x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0"); tieni(disegna); }
+function giornoRes(d) {
+  const R = giornoR(d);
+  const riga = (k, v) => `<div>${pallR(VOCI_R[k][0])}<span><b>${VOCI_R[k][1]}</b><small>${v}</small></span><em>${R.ob[k] ? "✓" : ""}</em></div>`;
+  apri(testaFoglio(`${nomeGiorno(d)} ${dataIt(d)}`) + `<div class="card recapR">` +
+    riga(0, R.sed.length ? R.sed.map((s) => esc(s.corto || s.nome) + ` · ${s.es.reduce((n, e) => n + e.serie.length, 0)} serie${s.minuti ? " · " + s.minuti + " min" : ""}`).join("<br>") : "riposo") +
+    riga(1, R.x.passi != null ? `${mila(R.x.passi)} su ${mila(PASSI_MIN)}` : "non segnati") +
+    riga(2, R.t[0] > 0 ? `${Math.round(R.t[0])} su ${R.tg.kcal} kcal` : "non segnate") +
+    riga(3, R.ac ? `${litri(R.ac)} su ${litri(ACQUA_ML)} L` : "non segnata") + `</div>` +
+    (R.x.sonno != null ? `<p class="muto">Sonno ${R.x.sonno} su 5</p>` : "") +      // Rosa: il peso qui non si mostra (si vede solo nel profilo) 
+    `<button class="largo" onclick="chiudi()">Chiudi</button>`);
+}
 function vStorico() {
-  let h = `<h1>Storico</h1>`;
+  let h = `<h1>Storico</h1>` + resoconto();
   if (!S.sedute.length) return h + `<div class="card vuoto"><b>Ancora nessuna seduta</b>Quando chiudi una seduta con "Fine" la trovi qui, con i progressi esercizio per esercizio.</div>`;
   const prog = {};
   for (const s of S.sedute) for (const e of s.es) {
