@@ -714,6 +714,28 @@ body[data-tema=scheda] .badge { background:rgba(255,224,178,.18); }
 .sedEroe .num b { display:inline; font-size:16px; margin-right:3px; }
 .sedEroe button.pri { margin-top:12px; min-height:50px; font-size:17px; }
 .sedEroe p.sedNota { margin:8px 2px 0; font-size:12.5px; line-height:1.35; color:var(--muto); opacity:1; }
+/* v60: la palette della Scheda vale in tutta l'app, tranne Spesa, frigo e dispensa (scelta di Daniele). Qui i colori che nel CSS erano scritti in verde. */
+body[data-tema=scheda] .eroe, body[data-tema=scheda] .conto { border-color:rgba(142,197,255,.4); background:linear-gradient(150deg,rgba(142,197,255,.24),rgba(217,180,255,.1) 60%,rgba(11,31,77,.3)); }
+body[data-tema=scheda] .avatar { background:linear-gradient(140deg,#8EC5FF,#D9B4FF); color:#0B1F4D; }
+body[data-tema=scheda] .dato .tondo.piu, body[data-tema=scheda] .altre button.qui i, body[data-tema=scheda] .pasto.fatto .ptesta .pillola,
+body[data-tema=scheda] .pazioni button.pri, body[data-tema=scheda] .giornoP.pri, body[data-tema=scheda] .g2.dove button.pri .cons,
+body[data-tema=scheda] .sp.on .chk::after { color:#0B1F4D; }
+body[data-tema=scheda] .interr.on, body[data-tema=scheda] .rep.piano, body[data-tema=scheda] .striscia > div, body[data-tema=scheda] .sett .ok { border-color:rgba(142,197,255,.5); }
+body[data-tema=scheda] .barra i { background:linear-gradient(90deg,#8EC5FF,#D9B4FF); }
+body[data-tema=scheda] .anello stop:first-child, body[data-tema=scheda] .giro stop:first-child { stop-color:#E8F2FF; }
+body[data-tema=scheda] .anello stop:last-child, body[data-tema=scheda] .giro stop:last-child { stop-color:#8EC5FF; }
+body[data-tema=scheda] .af { stroke:rgba(142,197,255,.2); } body[data-tema=scheda] .av { filter:drop-shadow(0 0 4px rgba(142,197,255,.7)); }
+body[data-tema=scheda] .anello.pieno .af, body[data-tema=scheda] .giro.pieno .af { fill:rgba(142,197,255,.18); }
+body[data-tema=scheda] .anello .aok { stroke:#E8F2FF; filter:drop-shadow(0 0 3px rgba(142,197,255,.8)); }
+body[data-tema=scheda] .tredot i.on { box-shadow:0 0 6px rgba(142,197,255,.85); }
+body[data-tema=scheda] .torta { filter:drop-shadow(0 0 5px rgba(142,197,255,.4)); }
+body[data-tema=scheda] .tg-p { background:#8EC5FF; } body[data-tema=scheda] .tg-c { background:#D9B4FF; } body[data-tema=scheda] .tg-g { background:#FFE0B2; }
+body[data-tema=scheda] svg .braccio { stroke:#8EC5FF; } body[data-tema=scheda] svg .mano { fill:#8EC5FF; } body[data-tema=scheda] svg.corpo .musc { fill:#8EC5FF; }
+body[data-tema=scheda] .foto::before { background:linear-gradient(180deg,rgba(11,31,77,.05) 25%,rgba(11,31,77,.9)); }
+body[data-tema=scheda] .hero { border-color:rgba(142,197,255,.4); } body[data-tema=scheda] .hero::before { background:linear-gradient(165deg,rgba(11,31,77,.45),rgba(11,31,77,.88) 62%,rgba(11,31,77,.95)); }
+body[data-tema=scheda] .ban .sopra { color:#E8F2FF; } body[data-tema=scheda] .ban .pillola { background:rgba(11,31,77,.62); }
+body[data-tema=scheda] .blocco i, body[data-tema=scheda] .voceH i { color:var(--verde); }
+body[data-tema=scheda] .mini, body[data-tema=scheda] .blocco i.th, body[data-tema=scheda] .foto, body[data-tema=scheda] .fotoTesta, body[data-tema=scheda] img.prog { background-color:#142a62; }
 </style>
 </head>
 <body>
@@ -935,7 +957,7 @@ function disegna() {
   muovi(v, prima); vistaPrima = { ch, pf, tab };
   const inSeduta = tab === "allena" && !!S.corso;
   document.body.classList.toggle("inseduta", inSeduta);
-  if (tab === "allena" && (S.corso || sub === "scheda")) document.body.dataset.tema = "scheda"; else delete document.body.dataset.tema;   // palette della scheda e della seduta
+  if (tab === "allena" && !S.corso && sub === "spesa") delete document.body.dataset.tema; else document.body.dataset.tema = "scheda";   // v60: palette della scheda in tutta l'app, tranne spesa, frigo e dispensa
   const di = daInviare(); $("nav").classList.toggle("nuovo", !!(di.s || di.g));      // pallino sulla voce Coach: c'è qualcosa da inviare
   if (tab === "diario" && vistaFoto) caricaFoto();
   $("pan").style.display = inSeduta && tInt ? "block" : "none";      // in basso resta solo il timer di recupero, quando gira
