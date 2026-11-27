@@ -675,6 +675,33 @@ h2 small.muto { font-family:inherit; font-size:14px; font-weight:600; margin-lef
 .statiC { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
 .statiC button { display:flex; align-items:center; justify-content:center; gap:7px; min-height:48px; padding:6px; border-radius:14px; font-size:14px; }
 .statiC button.qui { background:var(--verde3); border-color:var(--verde); color:var(--testo); font-weight:700; }
+/* v56: palette della Scheda e della seduta (scelta di Daniele, solo qui; body[data-tema=scheda] lo mette disegna): #0B1F4D #8EC5FF #FFE0B2 #D9B4FF */
+body[data-tema=scheda] { --bg:#0B1F4D; --solido:#142a62; --card:rgba(11,31,77,.45); --card2:rgba(142,197,255,.16); --linea:rgba(217,180,255,.26);
+  --testo:#F5F8FF; --muto:#BACBEF; --verde:#8EC5FF; --verde2:#D9B4FF; --verde3:rgba(142,197,255,.2); --arancio:#FFE0B2; --sopraAcc:#0B1F4D; --priBg:linear-gradient(135deg,#8EC5FF,#D9B4FF); }
+body[data-tema=scheda]::after { display:none; }
+body[data-tema=scheda]::before { background:radial-gradient(70% 45% at 100% 0%, rgba(142,197,255,.55), transparent 70%), radial-gradient(70% 45% at 0% 100%, rgba(255,224,178,.42), transparent 70%),
+  radial-gradient(70% 50% at 100% 100%, rgba(217,180,255,.6), transparent 70%), linear-gradient(160deg,#0B1F4D 0%,#1d3a86 45%,#5a5bb0 80%,#8f73c9 100%); }
+body[data-tema=scheda] button.pri { background:var(--priBg); color:var(--sopraAcc); box-shadow:0 6px 22px rgba(142,197,255,.35), inset 0 1px 0 rgba(255,255,255,.4); }
+body[data-tema=scheda] .barra i { background:linear-gradient(90deg,#8EC5FF,#D9B4FF); }
+body[data-tema=scheda] .card, body[data-tema=scheda] .serie, body[data-tema=scheda] .es, body[data-tema=scheda] .ex { -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+body[data-tema=scheda] .top { background:rgba(11,31,77,.72); }
+body[data-tema=scheda] #pan .dentro { background:rgba(11,31,77,.86); border-color:rgba(217,180,255,.3); }
+body[data-tema=scheda] #rec { border-color:rgba(142,197,255,.45); }
+body[data-tema=scheda] .adesso { border-color:rgba(142,197,255,.6); background:linear-gradient(150deg,rgba(142,197,255,.2),rgba(217,180,255,.1)); }
+body[data-tema=scheda] .ex.att, body[data-tema=scheda] .es.att { border-color:rgba(142,197,255,.6); background:linear-gradient(150deg,rgba(142,197,255,.2),rgba(217,180,255,.08)); }
+body[data-tema=scheda] .ex.att .n, body[data-tema=scheda] .es.att em, body[data-tema=scheda] .serie.ok i, body[data-tema=scheda] .tabSed button.qui,
+body[data-tema=scheda] .tabSed button.qui small { color:#0B1F4D; }
+body[data-tema=scheda] .sedEroe { border-color:rgba(142,197,255,.4); background:linear-gradient(150deg,rgba(142,197,255,.26),rgba(217,180,255,.1) 60%,rgba(11,31,77,.3)); }
+body[data-tema=scheda] .sett .ok, body[data-tema=scheda] .chip.ok, body[data-tema=scheda] .tess div.oro, body[data-tema=scheda] .settimane div.ok { border-color:rgba(142,197,255,.5); }
+body[data-tema=scheda] .demo, body[data-tema=scheda] .mini { background-color:#142a62; }
+body[data-tema=scheda] .consiglioCoach { border-color:rgba(255,224,178,.45); background:rgba(255,224,178,.12); }
+body[data-tema=scheda] .badge { background:rgba(255,224,178,.18); }
+/* v56: pagina dell'esercizio più leggibile: numeri in una riga piccola sotto il nome, foto più piccola, nota del coach sotto la foto */
+.metaEs { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px; }
+.metaEs span { padding:5px 11px; border-radius:20px; background:var(--card2); border:1px solid var(--linea); font-size:13px; color:var(--muto); }
+.metaEs b { color:var(--testo); font-variant-numeric:tabular-nums; }
+.demoEs .demo { aspect-ratio:16/9; width:84%; margin:12px auto 12px; }
+.demoEs + .consiglioCoach { margin-top:0; }
 </style>
 </head>
 <body>
@@ -897,6 +924,7 @@ function disegna() {
   muovi(v, prima); vistaPrima = { ch, pf, tab };
   const inSeduta = tab === "allena" && !!S.corso;
   document.body.classList.toggle("inseduta", inSeduta);
+  if (tab === "allena" && (S.corso || sub === "scheda")) document.body.dataset.tema = "scheda"; else delete document.body.dataset.tema;   // palette della scheda e della seduta
   const di = daInviare(); $("nav").classList.toggle("nuovo", !!(di.s || di.g));      // pallino sulla voce Coach: c'è qualcosa da inviare
   if (tab === "diario" && vistaFoto) caricaFoto();
   $("pan").style.display = inSeduta && tInt ? "block" : "none";      // in basso resta solo il timer di recupero, quando gira
@@ -2182,13 +2210,16 @@ function vEsercizio(i) {
   const tutto = e.sets.length && e.sets.every((r) => r.ok), un = e.u === "sec" ? "secondi" : e.u === "min" ? "minuti" : "ripetizioni";
   let h = `<div class="top"><div class="riga"><button class="ico dietro" aria-label="Torna all'elenco" onclick="chiudiEs()">‹</button>
     <div style="min-width:0;flex:1"><div class="tit">Esercizio ${i + 1} di ${c.es.length}</div><div class="muto">${esc(c.corto || c.nome)} · <span id="durata"></span></div></div>
-    <button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div></div>` + fotoEs(e.id, true) +
+    <button class="ico" aria-label="Opzioni" onclick="menuEs(${i})">⋯</button></div></div>` +
     `<div class="nome" style="font-size:23px;line-height:1.2">${esc(e.nome)}${daSalire(e, u) ? '<span class="badge">↑ sali di carico</span>' : ""}</div>` +
     (I ? `<div class="muto" style="margin-top:2px">${esc(I.m)}</div>` : "") +
-    `<div class="tess"><div><b>${e.sets.length}</b>serie</div><div><b>${esc(e.rip)}${unita(e)}</b>${un}</div><div><b>${e.norir ? "–" : rirSeduta(e)}</b>RIR</div><div><b>${REC[e.t] ? REC[e.t] + '"' : "–"}</b>recupero</div></div>
-    <p class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "è la prima volta"}</p>` +
+    // v56: serie, ripetizioni, RIR e recupero in una riga piccola (prima erano quattro riquadri grandi)
+    `<div class="metaEs"><span><b>${e.sets.length}</b> serie</span><span><b>${esc(e.rip)}${unita(e)}</b> ${un === "ripetizioni" ? "rip" : un}</span>${e.norir ? "" : `<span>RIR <b>${rirSeduta(e)}</b></span>`}${REC[e.t] ? `<span><b>${REC[e.t]}"</b> recupero</span>` : ""}</div>` +
+    `<div class="demoEs">${fotoEs(e.id, true)}</div>` +
+    (e.nota ? `<div class="card consiglioCoach"><b>Nota del coach</b>${esc(e.nota)}</div>` : "") +
+    `<p class="muto">Ultima volta: ${u ? dataIt(u.data) + " · " + esc(testoSerie(e, u.serie)) : "è la prima volta"}</p>` +
     (comp ? `<p class="muto">Superserie con <b style="color:var(--testo)">${esc(comp.nome)}</b>: una serie di questo, subito una dell'altro, poi 60" di pausa. L'app passa da sola dall'uno all'altro.</p>` : "") +
-    (e.nota ? `<div class="card consiglioCoach"><b>Nota del coach</b>${esc(e.nota)}</div>` : "") + `<h2>Le serie</h2>`;
+    `<h2>Le serie</h2>`;
   e.sets.forEach((r, s) => {
     if (c.cur && c.cur.e === i && c.cur.s === s) { h += adesso(e, r, s); return; }
     const o = r.ok ? null : obiettivo(e, s);
