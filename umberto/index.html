@@ -702,6 +702,18 @@ body[data-tema=scheda] .badge { background:rgba(255,224,178,.18); }
 .metaEs b { color:var(--testo); font-variant-numeric:tabular-nums; }
 .demoEs .demo { aspect-ratio:16/9; width:84%; margin:12px auto 12px; }
 .demoEs + .consiglioCoach { margin-top:0; }
+/* v57: riquadro della seduta compatto (a Daniele sembrava enorme): foto piccola a sinistra, nome e numeri su una riga, tasto normale, regola della fase in piccolo */
+.sedEroe { padding:12px; }
+.sedRiga { display:flex; gap:12px; align-items:center; }
+.sedFoto { flex:none; width:76px; height:76px; border-radius:16px; background:var(--card2) center/cover no-repeat; }
+.sedTesto { flex:1; min-width:0; }
+.sedEroe .eti { font-size:11px; }
+.sedEroe .grande { font-size:22px; margin:2px 0 3px; }
+.sedEroe .num { gap:12px; margin:0; flex-wrap:wrap; }
+.sedEroe .num div { font-size:12.5px; opacity:.85; }
+.sedEroe .num b { display:inline; font-size:16px; margin-right:3px; }
+.sedEroe button.pri { margin-top:12px; min-height:50px; font-size:17px; }
+.sedEroe p.sedNota { margin:8px 2px 0; font-size:12.5px; line-height:1.35; color:var(--muto); opacity:1; }
 </style>
 </head>
 <body>
@@ -1115,12 +1127,12 @@ function vScheda() {
     const sotto = fatte[x] ? "✓ " + nomeGiorno(fatte[x].data).slice(0, 3) : x === pross ? "prossima" : SEDUTE[x].corto.split(" · ")[1] || "";
     h += `<button class="${x === k ? "qui" : ""} ${fatte[x] ? "fatta" : ""}" onclick="vediSeduta('${x}')"><b>${x}</b><small>${esc(sotto)}</small></button>`;
   }
-  h += `</div><div class="card sedEroe ${foto ? "confoto" : ""}" ${foto ? `style="--f:url(${foto})"` : ""}>
+  h += `</div><div class="card sedEroe"><div class="sedRiga">${foto ? `<i class="sedFoto" style="background-image:url(${foto})"></i>` : ""}<div class="sedTesto">
       <div class="eti">${gia ? "Già fatta " + nomeGiorno(gia.data) : k === pross ? "Prossima consigliata" : "Seduta di pesi"}</div>
       <div class="grande">${esc(se.nome)}</div>
-      <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div></div>
-      <p>${esc(f.testo)}</p>
-      <button class="pri largo grosso" onclick="inizia('${k}')">${dS() < oggi() ? "Segna la seduta di " + nomeGiorno(dS()) + " " + dataIt(dS()) : "Inizia la seduta"}</button></div>
+      <div class="num"><div><b>${se.es.length}</b>esercizi</div><div><b>${nSerie}</b>serie</div><div><b>RIR ${esc(f.rir({ t: "m" }))}</b>sforzo</div></div></div></div>
+      <button class="pri largo" onclick="inizia('${k}')">${dS() < oggi() ? "Segna la seduta di " + nomeGiorno(dS()) + " " + dataIt(dS()) : "Inizia la seduta"}</button>
+      <p class="sedNota">${esc(f.testo)}</p></div>
     <h2>Gli esercizi</h2><div class="card lista"><ol class="piano esLista">`;
   for (const e of se.es) h += `<li onclick="infoEs('${e.id}')">${miniEs(e.id, "p")}<span>${esc(e.nome)}${e.ss ? `<small>superserie</small>` : ""}</span><b>${f.serie(e)} × ${esc(e.rip)}${unita(e)}</b><button class="info" aria-label="Spiegazione dell'esercizio">i</button></li>`;
   h += `</ol></div><button class="largo libera" onclick="inizia('L')">+ Seduta libera · scegli tu gli esercizi</button>`;
